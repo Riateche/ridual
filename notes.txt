@@ -8,3 +8,7 @@
 - loading indicator
 - display count of selected items, total space used by them, free space on current volume
 - copy, move, make sort/hard links, rename, remove, move to trash
+
+
+Benefits:
+- Using system color theme, no crazy colors.

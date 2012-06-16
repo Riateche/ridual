@@ -31,6 +31,8 @@ private:
 private slots:
   void save_settings();
 
+  void on_action_hotkeys_triggered();
+
 signals:
   void active_pane_changed();
 };

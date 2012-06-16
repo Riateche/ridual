@@ -3,6 +3,7 @@
 #include <QKeyEvent>
 #include <QSystemLocale>
 #include <QDebug>
+#include "Hotkey_editor.h"
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -61,3 +62,11 @@ void Main_window::save_settings() {
   s.endGroup();
 }
 
+
+void Main_window::on_action_hotkeys_triggered() {
+  QList<Hotkey> hotkeys;
+  hotkeys << Hotkey("Parent directory", "Backspace") <<
+             Hotkey("Switch between panes", "Tab");
+  Hotkey_editor* e = new Hotkey_editor(hotkeys, "hotkeys");
+  e->show();
+}
