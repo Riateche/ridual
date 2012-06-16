@@ -11,8 +11,13 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        Main_window.cpp
+        Main_window.cpp \
+    Pane.cpp \
+    Read_directory_thread.cpp
 
-HEADERS  += Main_window.h
+HEADERS  += Main_window.h \
+    Pane.h \
+    Read_directory_thread.h
 
-FORMS    += Main_window.ui
+FORMS    += Main_window.ui \
+    Pane.ui
