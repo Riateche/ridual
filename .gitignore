@@ -1,3 +1,10 @@
+#Qt Creator
+*.pro.user
+
+#Backup files
+*.swp
+*~
+
 # Compiled Object files
 *.slo
 *.lo
