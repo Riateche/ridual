@@ -23,3 +23,6 @@ HEADERS  += Main_window.h \
 
 FORMS    += Main_window.ui \
     Pane.ui
+
+TRANSLATIONS += translations/ru.ts
+

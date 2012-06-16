@@ -1,6 +1,8 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 #include <QKeyEvent>
+#include <QSystemLocale>
+#include <QDebug>
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -10,6 +12,9 @@ Main_window::Main_window(QWidget *parent) :
   ui->setupUi(this);
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
+
+  //QLocale::Language language = QLocale::system().language();
+  //qDebug() << "language: " << QLocale::languageToString(language);
 
   QApplication::setApplicationName("ridual");
   QApplication::setOrganizationName("riateche");
