@@ -1,0 +1,10 @@
+- add reporting about problems with reading a dir
+- translations
+- adjustable shortcuts
+- gvfs networking support
+- bookmarks support
+- retrieve icons exactly as in nautilus
+- copy (details mode / fast mode)
+- loading indicator
+- display count of selected items, total space used by them, free space on current volume
+- copy, move, make sort/hard links, rename, remove, move to trash
