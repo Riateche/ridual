@@ -4,6 +4,8 @@
 #include <QSystemLocale>
 #include <QDebug>
 #include "Hotkey_editor.h"
+#include <QShortcut>
+
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -33,6 +35,10 @@ Main_window::Main_window(QWidget *parent) :
   save_settings_timer.start();
 
   set_active_pane(ui->left_pane);
+
+  QShortcut* shortcut = new QShortcut(QKeySequence(Hotkey_editor::get_hotkey("Switch between panes")), this);
+  shortcut->setContext(Qt::ApplicationShortcut);
+  connect(shortcut, SIGNAL(activated()), this, SLOT(switch_active_pane()));
 
 }
 
@@ -67,6 +73,6 @@ void Main_window::on_action_hotkeys_triggered() {
   QList<Hotkey> hotkeys;
   hotkeys << Hotkey("Parent directory", "Backspace") <<
              Hotkey("Switch between panes", "Tab");
-  Hotkey_editor* e = new Hotkey_editor(hotkeys, "hotkeys");
+  Hotkey_editor* e = new Hotkey_editor(hotkeys);
   e->show();
 }

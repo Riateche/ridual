@@ -11,7 +11,6 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane)
   ui->list->installEventFilter(this);
   ready = true;
   main_window = 0;
-
 }
 
 Pane::~Pane() {
@@ -46,10 +45,10 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
         }
       }
 
-      if (key_event->key() == Qt::Key_Tab && key_event->modifiers() == Qt::NoModifier) {
+      /*if (key_event->key() == Qt::Key_Tab && key_event->modifiers() == Qt::NoModifier) {
         if (main_window) main_window->switch_active_pane();
         return true;
-      }
+      }*/
     }
   }
   return false;

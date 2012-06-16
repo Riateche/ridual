@@ -10,17 +10,15 @@ namespace Ui {
 
 class Pane;
 
-class Main_window : public QMainWindow
-{
+class Main_window : public QMainWindow {
   Q_OBJECT
   
 public:
   explicit Main_window(QWidget *parent = 0);
   ~Main_window();
   void set_active_pane(Pane* pane);
-  void switch_active_pane();
   inline Pane* get_active_pane() { return active_pane; }
-  
+
 private:
   Ui::Main_window *ui;
 
@@ -30,8 +28,10 @@ private:
 
 private slots:
   void save_settings();
-
   void on_action_hotkeys_triggered();
+
+public slots:
+  void switch_active_pane();
 
 signals:
   void active_pane_changed();
