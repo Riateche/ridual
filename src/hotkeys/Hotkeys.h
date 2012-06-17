@@ -1,27 +1,25 @@
-#ifndef HOTKEY_EDITOR_MODEL_H
-#define HOTKEY_EDITOR_MODEL_H
+#ifndef HOTKEYS_H
+#define HOTKEYS_H
 
-/*
 #include <QAbstractTableModel>
+#include "Hotkey.h"
 #include <QSettings>
 
-
-
-class Hotkey_editor_model : public QAbstractTableModel {
+class Hotkeys : public QAbstractTableModel {
   Q_OBJECT
 public:
-  explicit Hotkey_editor_model(QList<Hotkey> commands, QString settings_group);
-  ~Hotkey_editor_model();
-
-  
-signals:
-  
-public slots:
-
+  explicit Hotkeys(QWidget *parent = 0);
+  ~Hotkeys();
+  void add(QString name, QString default_value, QObject* receiver, const char* slot);
+  void set_group_name(QString n);
+  void save();
+  void open_editor();
 
 private:
-  QList<Hotkey> hotkeys;
-  QSettings settings;
+  QWidget* parent_widget;
+  QList<Hotkey*> hotkeys;
+  QString group_name;
+
   static const int column_name = 0;
   static const int column_value = 1;
 
@@ -33,5 +31,5 @@ private:
   QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 };
-*/
-#endif // HOTKEY_EDITOR_MODEL_H
+
+#endif // HOTKEYS_H

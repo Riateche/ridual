@@ -67,6 +67,12 @@ bool Pane::is_active() const {
   return main_window->get_active_pane() == this;
 }
 
+void Pane::go_parent() {
+  QDir dir(directory);
+  dir.cdUp(); //fixme: this can cause a freeze
+  set_directory(dir.absolutePath());
+}
+
 void Pane::on_go_clicked() {
   set_directory(ui->address->text());
 }

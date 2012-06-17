@@ -2,23 +2,18 @@
 #define HOTKEY_EDITOR_H
 
 #include <QDialog>
-#include "Hotkey_editor_model.h"
-#include <QItemEditorFactory>
-#include <QItemDelegate>
 
 namespace Ui {
   class Hotkey_editor;
 }
 
+class Hotkeys;
 
-
-
-
-class Hotkey_editor : public QDialog, public QItemEditorFactory {
+class Hotkey_editor : public QDialog {
   Q_OBJECT
   
 public:
-  explicit Hotkey_editor(QList<Hotkey> hotkeys);
+  explicit Hotkey_editor(Hotkeys* parent);
   ~Hotkey_editor();
   static QKeySequence get_hotkey(QString name);
 
@@ -27,9 +22,8 @@ private slots:
 
 private:
   Ui::Hotkey_editor *ui;
-  Hotkey_editor_model model;
   static QString settings_group() { return "hotkeys"; }
-
+  Hotkeys* hotkeys;
 
 };
 

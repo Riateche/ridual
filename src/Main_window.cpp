@@ -3,13 +3,13 @@
 #include <QKeyEvent>
 #include <QSystemLocale>
 #include <QDebug>
-#include "Hotkey_editor.h"
 #include <QShortcut>
 
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
-  ui(new Ui::Main_window)
+  ui(new Ui::Main_window),
+  hotkeys(this)
 {
   qRegisterMetaType<QFileInfoList>("QFileInfoList");
   ui->setupUi(this);
@@ -36,10 +36,8 @@ Main_window::Main_window(QWidget *parent) :
 
   set_active_pane(ui->left_pane);
 
-  QShortcut* shortcut = new QShortcut(QKeySequence(Hotkey_editor::get_hotkey("Switch between panes")), this);
-  shortcut->setContext(Qt::ApplicationShortcut);
-  connect(shortcut, SIGNAL(activated()), this, SLOT(switch_active_pane()));
-
+  hotkeys.add("Switch between panes", "Tab", this, SLOT(switch_active_pane()));
+  hotkeys.add("Parent directory", "Alt+Up", this, SLOT(go_parent()));
 }
 
 Main_window::~Main_window() {
@@ -70,9 +68,14 @@ void Main_window::save_settings() {
 
 
 void Main_window::on_action_hotkeys_triggered() {
-  QList<Hotkey> hotkeys;
+  hotkeys.open_editor();
+/*  QList<Hotkey> hotkeys;
   hotkeys << Hotkey("Parent directory", "Backspace") <<
              Hotkey("Switch between panes", "Tab");
   Hotkey_editor* e = new Hotkey_editor(hotkeys);
-  e->show();
+  e->show(); */
+}
+
+void Main_window::go_parent() {
+  active_pane->go_parent();
 }

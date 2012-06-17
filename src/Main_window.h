@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include "hotkeys/Hotkeys.h"
 
 namespace Ui {
   class Main_window;
@@ -24,11 +25,13 @@ private:
 
   QTimer save_settings_timer;
   Pane* active_pane;
+  Hotkeys hotkeys;
 
 
 private slots:
   void save_settings();
   void on_action_hotkeys_triggered();
+  void go_parent();
 
 public slots:
   void switch_active_pane();

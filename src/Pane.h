@@ -28,6 +28,8 @@ public:
 
   bool is_active() const;
 
+  void go_parent();
+
 private slots:
   void on_go_clicked();
   void directory_readed(QFileInfoList files);

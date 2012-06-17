@@ -18,7 +18,9 @@ SOURCES += main.cpp\
     hotkeys/Hotkey_editor.cpp \
     hotkeys/Hotkey_editor_model.cpp \
     hotkeys/Hotkey_text_edit.cpp \
-    hotkeys/Hotkey_item_delegate.cpp
+    hotkeys/Hotkey_item_delegate.cpp \
+    hotkeys/Hotkeys.cpp \
+    hotkeys/Hotkey.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -27,7 +29,9 @@ HEADERS  += Main_window.h \
     hotkeys/Hotkey_editor.h \
     hotkeys/Hotkey_editor_model.h \
     hotkeys/Hotkey_text_edit.h \
-    hotkeys/Hotkey_item_delegate.h
+    hotkeys/Hotkey_item_delegate.h \
+    hotkeys/Hotkeys.h \
+    hotkeys/Hotkey.h
 
 FORMS    += Main_window.ui \
     Pane.ui \
