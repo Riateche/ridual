@@ -7,19 +7,34 @@ Bugs:
 - correct work with "~" in directory name
 
 Todo:
+- open archives on the fly (or maybe mount them using gio)
 - ability to display file data in table, column settings
 - option "list folders before files"
 - hotkey to focus address line
 - add reporting about problems with reading a dir
-- translations
-- adjustable shortcuts
-- gvfs networking support
+- gvfs networking support (store passwords in wallet)
 - bookmarks support
-- retrieve icons exactly as in nautilus
-- copy (details mode / fast mode)
-- loading indicator
+- drives list support
 - display count of selected items, total space used by them, free space on current volume
-- copy, move, make sort/hard links, rename, remove, move to trash
+- copy (details mode / fast mode), move, make sort/hard links, rename, remove, move to trash
+- select all, unselect all, invert selection, select/unselect by regexp
+- resizeable splitter between panes; saving state of splitter
+- progress in unity taskbar
+
+
+gio:
+- don't deal with drives
+- listen for volumes (there can be unmounted volumes)
+- listen for mounts (there can be network mounts without volumes)
+- main list is list of all volumes and all non-volume mounts
+- be careful, don't forget g_object_unref etc
+- managing volumes (not sure if it's ok):
+  - mount volume
+  - unmount volume
+  - stop drive
+  - eject (?)
+http://developer.gnome.org/gio/stable/
+
 
 
 Benefits:

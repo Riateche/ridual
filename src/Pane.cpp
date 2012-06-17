@@ -3,6 +3,7 @@
 #include "Read_directory_thread.h"
 #include <QKeyEvent>
 #include "Main_window.h"
+#include <QMovie>
 
 Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane)
 {
@@ -14,6 +15,11 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane)
   main_window = 0;
   connect(ui->address, SIGNAL(returnPressed()), this, SLOT(on_go_clicked()));
   connect(ui->list, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(open_current()));
+
+  ui->loading_indicator->hide();
+  QMovie* loading_movie = new QMovie(":/loading.gif", QByteArray(), ui->loading_indicator);
+  ui->loading_indicator->setMovie(loading_movie);
+  loading_movie->start();
 }
 
 Pane::~Pane() {
@@ -25,13 +31,17 @@ void Pane::set_main_window(Main_window *p_main_window) {
   connect(main_window, SIGNAL(active_pane_changed()), this, SLOT(active_pane_changed()));
 }
 
-void Pane::set_directory(QString dir) {
-  directory = dir;
-  ui->address->setText(dir);
+void Pane::set_directory(QString new_directory) {
+  if (new_directory.startsWith("~")) {
+    new_directory = QDir::homePath() + new_directory.mid(1);
+  }
+  directory = new_directory;
+  ui->address->setText(directory);
   ready = false;
-  Read_directory_thread* t = new Read_directory_thread(dir);
+  Read_directory_thread* t = new Read_directory_thread(directory);
   connect(t, SIGNAL(ready(QList<File_info>)), this, SLOT(directory_readed(QList<File_info>)));
   t->start();
+  ui->loading_indicator->show();
 }
 
 bool Pane::eventFilter(QObject *object, QEvent *event) {
@@ -98,6 +108,7 @@ void Pane::open_current() {
 
 void Pane::focus_address_line() {
   ui->address->setFocus();
+  ui->address->selectAll();
 }
 
 void Pane::on_go_clicked() {
@@ -107,6 +118,11 @@ void Pane::on_go_clicked() {
 void Pane::directory_readed(QList<File_info> files) {
   file_list_model.set_data(files);
   ui->list->setFocus();
+  if (file_list_model.rowCount() > 0) {
+    ui->list->setCurrentIndex(file_list_model.index(0, 0));
+  }
+  ui->list->clearSelection();
+  ui->loading_indicator->hide();
 }
 
 void Pane::active_pane_changed() {

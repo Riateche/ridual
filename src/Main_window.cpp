@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QShortcut>
 #include "File_info.h"
+#include "Gio.h"
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -30,6 +31,9 @@ Main_window::Main_window(QWidget *parent) :
   ui->right_pane->load_state(&s);
   s.endGroup();
 
+  restoreState(s.value("main_window/state").toByteArray());
+  restoreGeometry(s.value("main_window/geometry").toByteArray());
+
   save_settings_timer.setInterval(10000); //ms
   connect(&save_settings_timer, SIGNAL(timeout()), this, SLOT(save_settings()));
   save_settings_timer.start();
@@ -39,6 +43,10 @@ Main_window::Main_window(QWidget *parent) :
   hotkeys.add("Switch between panes", "Tab",      this, SLOT(switch_active_pane()));
   hotkeys.add("Parent directory",     "Alt+Up",   this, SLOT(go_parent()));
   hotkeys.add("Focus address bar",    "Ctrl+L",   this, SLOT(focus_address_line()));
+
+
+  Gio* gio = new Gio();
+  gio->start();
 }
 
 Main_window::~Main_window() {
@@ -65,6 +73,8 @@ void Main_window::save_settings() {
   s.beginGroup("right_pane");
   ui->right_pane->save_state(&s);
   s.endGroup();
+  s.setValue("main_window/state", saveState());
+  s.setValue("main_window/geometry", saveGeometry());
 }
 
 

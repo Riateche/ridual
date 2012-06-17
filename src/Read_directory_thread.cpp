@@ -11,7 +11,6 @@ void Read_directory_thread::run() {
   foreach (QFileInfo info, list) {
     File_info item;
     item.i = info;
-    item.mime_type = get_mime_type(info.absoluteFilePath());
     result << item;
   }
   emit ready(result);
