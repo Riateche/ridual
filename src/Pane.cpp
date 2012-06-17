@@ -37,6 +37,11 @@ void Pane::set_directory(QString new_directory) {
   }
   directory = new_directory;
   ui->address->setText(directory);
+  if (directory == "gio://") {
+    directory_readed(main_window->get_gio_mounts());
+    return;
+  }
+
   ready = false;
   Read_directory_thread* t = new Read_directory_thread(directory);
   connect(t, SIGNAL(ready(QList<File_info>)), this, SLOT(directory_readed(QList<File_info>)));

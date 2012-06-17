@@ -10,6 +10,7 @@ void Read_directory_thread::run() {
   QList<File_info> result;
   foreach (QFileInfo info, list) {
     File_info item;
+    item.type = File_info::type_file;
     item.i = info;
     result << item;
   }

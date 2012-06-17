@@ -7,6 +7,8 @@ Bugs:
 - correct work with "~" in directory name
 
 Todo:
+- refresh on file system change
+- refresh gio mount list if it's displayed while changing
 - open archives on the fly (or maybe mount them using gio)
 - ability to display file data in table, column settings
 - option "list folders before files"
@@ -20,6 +22,7 @@ Todo:
 - select all, unselect all, invert selection, select/unselect by regexp
 - resizeable splitter between panes; saving state of splitter
 - progress in unity taskbar
+- get icon using libnautilus-private/nautilus-icon-info.c
 
 
 gio:

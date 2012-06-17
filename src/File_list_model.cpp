@@ -19,15 +19,24 @@ int File_list_model::rowCount(const QModelIndex &parent) const {
 
 QVariant File_list_model::data(const QModelIndex &index, int role) const {
   if (index.row() < 0 || index.row() >= list.count()) return QVariant();
-  if (role == Qt::DisplayRole) {
-    return list.at(index.row()).i.fileName();
-  }
-  if (role == Qt::DecorationRole) {
-    /*QImage image(5, 5, QImage::Format_ARGB32);
-    image.fill(Qt::green);
-    image.setPixel(2, 2, Qt::white);
-    return QPixmap::fromImage(image); */
-    return icon_provider.icon(list.at(index.row()).i);
+  File_info file_info = list.at(index.row());
+  if (file_info.type == File_info::type_file) {
+    if (role == Qt::DisplayRole) {
+      return file_info.i.fileName();
+    }
+    if (role == Qt::DecorationRole) {
+      /*QImage image(5, 5, QImage::Format_ARGB32);
+      image.fill(Qt::green);
+      image.setPixel(2, 2, Qt::white);
+      return QPixmap::fromImage(image); */
+      return icon_provider.icon(file_info.i);
+    }
+  } else if (file_info.type == File_info::type_mount) {
+    if (role == Qt::DisplayRole) {
+      QString name = file_info.mount_name;
+      if (!file_info.mount_ready) name += tr(" (not mounted)");
+      return name;
+    }
   }
   return QVariant();
 }

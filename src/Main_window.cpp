@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QShortcut>
 #include "File_info.h"
-#include "Gio.h"
+#include "gio/Gio_main.h"
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -45,7 +45,9 @@ Main_window::Main_window(QWidget *parent) :
   hotkeys.add("Focus address bar",    "Ctrl+L",   this, SLOT(focus_address_line()));
 
 
-  Gio* gio = new Gio();
+  Gio_main* gio = new Gio_main();
+  connect(gio,    SIGNAL(list_changed(QList<gio::Volume>,QList<gio::Mount>)),
+          this, SLOT(gio_list_changed(QList<gio::Volume>,QList<gio::Mount>)));
   gio->start();
 }
 
@@ -58,6 +60,27 @@ void Main_window::set_active_pane(Pane *pane) {
   if (active_pane == pane) return;
   active_pane = pane;
   emit active_pane_changed();
+}
+
+QList<File_info> Main_window::get_gio_mounts() {
+  QList<File_info> r;
+  foreach (gio::Mount m, mounts) {
+    File_info i;
+    i.type = File_info::type_mount;
+    i.mount_name = m.name;
+    i.mount_ready = true;
+    r << i;
+  }
+  foreach (gio::Volume v, volumes) {
+    if (!v.mounted) {
+      File_info i;
+      i.type = File_info::type_mount;
+      i.mount_name = v.name;
+      i.mount_ready = false;
+      r << i;
+    }
+  }
+  return r;
 }
 
 void Main_window::switch_active_pane() {
@@ -97,4 +120,9 @@ void Main_window::open_current() {
 
 void Main_window::focus_address_line() {
   active_pane->focus_address_line();
+}
+
+void Main_window::gio_list_changed(QList<gio::Volume> p_volumes, QList<gio::Mount> p_mounts) {
+  volumes = p_volumes;
+  mounts = p_mounts;
 }

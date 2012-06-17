@@ -22,7 +22,9 @@ SOURCES += main.cpp\
     hotkeys/Hotkey.cpp \
     utils.cpp \
     File_info.cpp \
-    Gio.cpp
+    gio/Gio_main.cpp \
+    gio/Volume.cpp \
+    gio/Mount.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -35,7 +37,9 @@ HEADERS  += Main_window.h \
     hotkeys/Hotkey.h \
     utils.h \
     File_info.h \
-    Gio.h
+    gio/Gio_main.h \
+    gio/Volume.h \
+    gio/Mount.h
 
 FORMS    += Main_window.ui \
     Pane.ui \
