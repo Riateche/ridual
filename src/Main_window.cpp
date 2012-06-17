@@ -125,4 +125,10 @@ void Main_window::focus_address_line() {
 void Main_window::gio_list_changed(QList<gio::Volume> p_volumes, QList<gio::Mount> p_mounts) {
   volumes = p_volumes;
   mounts = p_mounts;
+  if (ui->left_pane->get_address() == "gio://") {
+    ui->left_pane->refresh();
+  }
+  if (ui->right_pane->get_address() == "gio://") {
+    ui->right_pane->refresh();
+  }
 }

@@ -7,12 +7,12 @@ Bugs:
 - correct work with "~" in directory name
 
 Todo:
+- abstraction of directory (including gio://, ftp:// and watches)
 - refresh on file system change
 - refresh gio mount list if it's displayed while changing
 - open archives on the fly (or maybe mount them using gio)
 - ability to display file data in table, column settings
 - option "list folders before files"
-- hotkey to focus address line
 - add reporting about problems with reading a dir
 - gvfs networking support (store passwords in wallet)
 - bookmarks support
@@ -23,6 +23,7 @@ Todo:
 - resizeable splitter between panes; saving state of splitter
 - progress in unity taskbar
 - get icon using libnautilus-private/nautilus-icon-info.c
+- after cdup activate the item where are we from
 
 
 gio:

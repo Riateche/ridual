@@ -4,9 +4,14 @@
 #include <QKeyEvent>
 #include "Main_window.h"
 #include <QMovie>
+#include <QDebug>
 
 Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane)
 {
+  filesystem_watcher = 0;
+  last_launched_thread = 0;
+  old_state_stored = false;
+  //  setFocusPolicy(Qt::StrongFocus);
   ui->setupUi(this);
   ui->list->setModel(&file_list_model);
   ui->list->installEventFilter(this);
@@ -24,6 +29,7 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane)
 
 Pane::~Pane() {
   delete ui;
+  if (filesystem_watcher) delete filesystem_watcher;
 }
 
 void Pane::set_main_window(Main_window *p_main_window) {
@@ -38,15 +44,19 @@ void Pane::set_directory(QString new_directory) {
   directory = new_directory;
   ui->address->setText(directory);
   if (directory == "gio://") {
-    directory_readed(main_window->get_gio_mounts());
+    directory_ready(main_window->get_gio_mounts());
     return;
   }
 
   ready = false;
   Read_directory_thread* t = new Read_directory_thread(directory);
-  connect(t, SIGNAL(ready(QList<File_info>)), this, SLOT(directory_readed(QList<File_info>)));
+  connect(t, SIGNAL(ready(QList<File_info>)), this, SLOT(read_thread_finished(QList<File_info>)));
+  last_launched_thread = t;
   t->start();
-  ui->loading_indicator->show();
+
+  QTimer* timer = new QTimer();
+  timer->singleShot(300, this, SLOT(show_loading_indicator()));
+
 }
 
 bool Pane::eventFilter(QObject *object, QEvent *event) {
@@ -69,6 +79,8 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
         open_current();
         return true;
       }
+    } else if (event->type() == QEvent::FocusIn) {
+      if (main_window) main_window->set_active_pane(this);
     }
   }
   if (object == ui->address) {
@@ -116,11 +128,18 @@ void Pane::focus_address_line() {
   ui->address->selectAll();
 }
 
+void Pane::refresh() {
+  old_state_stored = true;
+  old_current_index = ui->list->currentIndex();
+  old_selection = ui->list->selectionModel()->selection();
+  set_directory(directory);
+}
+
 void Pane::on_go_clicked() {
   set_directory(ui->address->text());
 }
 
-void Pane::directory_readed(QList<File_info> files) {
+void Pane::directory_ready(QList<File_info> files) {
   file_list_model.set_data(files);
   ui->list->setFocus();
   if (file_list_model.rowCount() > 0) {
@@ -128,6 +147,19 @@ void Pane::directory_readed(QList<File_info> files) {
   }
   ui->list->clearSelection();
   ui->loading_indicator->hide();
+
+  //fixme: this can cause freeze
+  if (QDir(directory).exists()) {
+    if (filesystem_watcher) delete filesystem_watcher;
+    filesystem_watcher = new QFileSystemWatcher(); //remove old bindings
+    filesystem_watcher->addPath(directory);
+    connect(filesystem_watcher, SIGNAL(directoryChanged(QString)), this, SLOT(refresh()));
+  }
+  if (old_state_stored) {
+    old_state_stored = false;
+    ui->list->setCurrentIndex(old_current_index);
+    ui->list->selectionModel()->select(old_selection, QItemSelectionModel::SelectCurrent);
+  }
 }
 
 void Pane::active_pane_changed() {
@@ -139,7 +171,21 @@ void Pane::active_pane_changed() {
   }
 }
 
-void Pane::focusInEvent(QFocusEvent *) {
-  if (main_window) main_window->set_active_pane(this);
+void Pane::show_loading_indicator() {
+  sender()->deleteLater();
+  if (last_launched_thread) {
+    ui->loading_indicator->show();
+  }
 }
+
+void Pane::read_thread_finished(QList<File_info> files) {
+  if (sender() != last_launched_thread) {
+    qDebug() << "Pane::read_thread_finished: old thread finished, ignoring";
+    return;
+  } else {
+    last_launched_thread = 0;
+  }
+  directory_ready(files);
+}
+
 
