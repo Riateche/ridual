@@ -11,6 +11,8 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane)
   ui->list->installEventFilter(this);
   ready = true;
   main_window = 0;
+  connect(ui->address, SIGNAL(returnPressed()), this, SLOT(on_go_clicked()));
+  connect(ui->list, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(open_current()));
 }
 
 Pane::~Pane() {
@@ -71,6 +73,13 @@ void Pane::go_parent() {
   QDir dir(directory);
   dir.cdUp(); //fixme: this can cause a freeze
   set_directory(dir.absolutePath());
+}
+
+void Pane::open_current() {
+  QFileInfo info = file_list_model.info(ui->list->currentIndex());
+  if (info.isDir()) {
+    set_directory(info.absoluteFilePath());
+  }
 }
 
 void Pane::on_go_clicked() {

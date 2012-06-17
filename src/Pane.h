@@ -28,7 +28,9 @@ public:
 
   bool is_active() const;
 
+public slots:
   void go_parent();
+  void open_current();
 
 private slots:
   void on_go_clicked();

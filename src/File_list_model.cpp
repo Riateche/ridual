@@ -28,3 +28,7 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
   }
   return QVariant();
 }
+
+QFileInfo File_list_model::info(const QModelIndex &index) {
+  return list[index.row()];
+}

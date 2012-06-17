@@ -32,6 +32,7 @@ private slots:
   void save_settings();
   void on_action_hotkeys_triggered();
   void go_parent();
+  void open_current();
 
 public slots:
   void switch_active_pane();

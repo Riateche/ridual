@@ -14,6 +14,8 @@ public:
 
   QVariant data(const QModelIndex &index, int role) const;
 
+  QFileInfo info(const QModelIndex &index);
+
 private:
   QFileInfoList list;
 };

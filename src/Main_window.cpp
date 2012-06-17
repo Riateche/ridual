@@ -36,8 +36,9 @@ Main_window::Main_window(QWidget *parent) :
 
   set_active_pane(ui->left_pane);
 
-  hotkeys.add("Switch between panes", "Tab", this, SLOT(switch_active_pane()));
-  hotkeys.add("Parent directory", "Alt+Up", this, SLOT(go_parent()));
+  hotkeys.add("Switch between panes", "Tab",      this, SLOT(switch_active_pane()));
+  hotkeys.add("Parent directory",     "Alt+Up",   this, SLOT(go_parent()));
+  hotkeys.add("Open current",         "Return",   this, SLOT(open_current()));
 }
 
 Main_window::~Main_window() {
@@ -78,4 +79,8 @@ void Main_window::on_action_hotkeys_triggered() {
 
 void Main_window::go_parent() {
   active_pane->go_parent();
+}
+
+void Main_window::open_current() {
+  active_pane->open_current();
 }
