@@ -31,10 +31,11 @@ public:
 public slots:
   void go_parent();
   void open_current();
+  void focus_address_line();
 
 private slots:
   void on_go_clicked();
-  void directory_readed(QFileInfoList files);
+  void directory_readed(QList<File_info> files);
   void active_pane_changed();
 
 private:

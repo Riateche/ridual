@@ -4,14 +4,14 @@
 #include <QSystemLocale>
 #include <QDebug>
 #include <QShortcut>
-
+#include "File_info.h"
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::Main_window),
   hotkeys(this)
 {
-  qRegisterMetaType<QFileInfoList>("QFileInfoList");
+  qRegisterMetaType< QList<File_info> >("QList<File_info>");
   ui->setupUi(this);
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
@@ -38,7 +38,7 @@ Main_window::Main_window(QWidget *parent) :
 
   hotkeys.add("Switch between panes", "Tab",      this, SLOT(switch_active_pane()));
   hotkeys.add("Parent directory",     "Alt+Up",   this, SLOT(go_parent()));
-  hotkeys.add("Open current",         "Return",   this, SLOT(open_current()));
+  hotkeys.add("Focus address bar",    "Ctrl+L",   this, SLOT(focus_address_line()));
 }
 
 Main_window::~Main_window() {
@@ -83,4 +83,8 @@ void Main_window::go_parent() {
 
 void Main_window::open_current() {
   active_pane->open_current();
+}
+
+void Main_window::focus_address_line() {
+  active_pane->focus_address_line();
 }

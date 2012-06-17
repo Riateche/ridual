@@ -14,17 +14,16 @@ Hotkeys::~Hotkeys() {
   }
 }
 
-void Hotkeys::add(QString name,
+QShortcut *Hotkeys::add(QString name,
                          QString default_value,
                          QObject* receiver,
                          const char* slot) {
   QSettings settings;
   settings.beginGroup(group_name);
-
   hotkeys << new Hotkey(name, settings.value(name, default_value).toString(), parent_widget);
   connect(hotkeys.last()->get_shortcut(), SIGNAL(activated()), receiver, slot);
-
   settings.endGroup();
+  return hotkeys.last()->get_shortcut();
 }
 
 void Hotkeys::set_group_name(QString n) {

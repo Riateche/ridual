@@ -9,6 +9,7 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane)
   ui->setupUi(this);
   ui->list->setModel(&file_list_model);
   ui->list->installEventFilter(this);
+  ui->address->installEventFilter(this);
   ready = true;
   main_window = 0;
   connect(ui->address, SIGNAL(returnPressed()), this, SLOT(on_go_clicked()));
@@ -29,28 +30,41 @@ void Pane::set_directory(QString dir) {
   ui->address->setText(dir);
   ready = false;
   Read_directory_thread* t = new Read_directory_thread(dir);
-  connect(t, SIGNAL(ready(QFileInfoList)), this, SLOT(directory_readed(QFileInfoList)));
+  connect(t, SIGNAL(ready(QList<File_info>)), this, SLOT(directory_readed(QList<File_info>)));
   t->start();
 }
 
 bool Pane::eventFilter(QObject *object, QEvent *event) {
+  //by default using navigation keys sets selection to current row;
+  //we need to change active row (dotted border usually) using navigation keys
+  //without changing selection. It's the hormal behaviour for ctrl+nav.keys,
+  //so we're going to emulate Ctrl pressing.
+  QList<int> nav_keys;
+  nav_keys << Qt::Key_Down << Qt::Key_Up << Qt::Key_Space <<
+              Qt::Key_PageDown << Qt::Key_PageUp << Qt::Key_Home << Qt::Key_End;
   if (object == ui->list) {
     if (event->type() == QEvent::KeyPress) {
       QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event);
       Q_ASSERT(key_event != 0);
       if (!key_event) return false;
-      if (key_event->key() == Qt::Key_Down ||
-          key_event->key() == Qt::Key_Up ||
-          key_event->key() == Qt::Key_Space) {
-        if (key_event->modifiers() == Qt::NoModifier) {
-          key_event->setModifiers(Qt::ControlModifier);
-        }
+      if (nav_keys.contains(key_event->key()) && key_event->modifiers() == Qt::NoModifier) {
+        key_event->setModifiers(Qt::ControlModifier);
       }
-
-      /*if (key_event->key() == Qt::Key_Tab && key_event->modifiers() == Qt::NoModifier) {
-        if (main_window) main_window->switch_active_pane();
+      if (key_event->key() == Qt::Key_Return && key_event->modifiers() == Qt::NoModifier) {
+        open_current();
         return true;
-      }*/
+      }
+    }
+  }
+  if (object == ui->address) {
+    if (event->type() == QEvent::KeyPress) {
+      QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event);
+      Q_ASSERT(key_event != 0);
+      if (!key_event) return false;
+      if (key_event->key() == Qt::Key_Escape && key_event->modifiers() == Qt::NoModifier) {
+        ui->list->setFocus();
+        return true;
+      }
     }
   }
   return false;
@@ -76,18 +90,23 @@ void Pane::go_parent() {
 }
 
 void Pane::open_current() {
-  QFileInfo info = file_list_model.info(ui->list->currentIndex());
-  if (info.isDir()) {
-    set_directory(info.absoluteFilePath());
+  File_info info = file_list_model.info(ui->list->currentIndex());
+  if (info.i.isDir()) {
+    set_directory(info.i.absoluteFilePath());
   }
+}
+
+void Pane::focus_address_line() {
+  ui->address->setFocus();
 }
 
 void Pane::on_go_clicked() {
   set_directory(ui->address->text());
 }
 
-void Pane::directory_readed(QFileInfoList files) {
+void Pane::directory_readed(QList<File_info> files) {
   file_list_model.set_data(files);
+  ui->list->setFocus();
 }
 
 void Pane::active_pane_changed() {

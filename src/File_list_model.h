@@ -2,22 +2,25 @@
 #define FILE_LIST_MODEL_H
 
 #include <QAbstractListModel>
-#include <QFileInfo>
 #include <QDir>
+#include "File_info.h"
+#include <QFileIconProvider>
+
 
 class File_list_model : public QAbstractListModel {
 public:
   File_list_model();
-  void set_data(QFileInfoList list);
+  void set_data(QList<File_info> list);
 
   int rowCount(const QModelIndex &parent) const;
 
   QVariant data(const QModelIndex &index, int role) const;
 
-  QFileInfo info(const QModelIndex &index);
+  File_info info(const QModelIndex &index);
 
 private:
-  QFileInfoList list;
+  QList<File_info> list;
+  QFileIconProvider icon_provider;
 };
 
 #endif // FILE_LIST_MODEL_H

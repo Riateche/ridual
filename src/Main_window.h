@@ -33,6 +33,7 @@ private slots:
   void on_action_hotkeys_triggered();
   void go_parent();
   void open_current();
+  void focus_address_line();
 
 public slots:
   void switch_active_pane();

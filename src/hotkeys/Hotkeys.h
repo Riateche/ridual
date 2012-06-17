@@ -10,7 +10,7 @@ class Hotkeys : public QAbstractTableModel {
 public:
   explicit Hotkeys(QWidget *parent = 0);
   ~Hotkeys();
-  void add(QString name, QString default_value, QObject* receiver, const char* slot);
+  QShortcut* add(QString name, QString default_value, QObject* receiver, const char* slot);
   void set_group_name(QString n);
   void save();
   void open_editor();

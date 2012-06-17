@@ -1,8 +1,14 @@
 Bugs:
+- display loading state!
 - ability to disable shortcut
-
+- save window position
+- show text "Directory is empty" when it's empty
+- options in main menu for: go parent
+- correct work with "~" in directory name
 
 Todo:
+- ability to display file data in table, column settings
+- option "list folders before files"
 - hotkey to focus address line
 - add reporting about problems with reading a dir
 - translations
@@ -17,4 +23,7 @@ Todo:
 
 
 Benefits:
-- Using system color theme, no crazy colors.
+- Use system color theme, no crazy colors.
+- Allow to use and change a hotkey for everything.
+- Display file icons from system theme.
+

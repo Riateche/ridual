@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     hotkeys/Hotkey_text_edit.cpp \
     hotkeys/Hotkey_item_delegate.cpp \
     hotkeys/Hotkeys.cpp \
-    hotkeys/Hotkey.cpp
+    hotkeys/Hotkey.cpp \
+    utils.cpp \
+    File_info.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -29,7 +31,9 @@ HEADERS  += Main_window.h \
     hotkeys/Hotkey_text_edit.h \
     hotkeys/Hotkey_item_delegate.h \
     hotkeys/Hotkeys.h \
-    hotkeys/Hotkey.h
+    hotkeys/Hotkey.h \
+    utils.h \
+    File_info.h
 
 FORMS    += Main_window.ui \
     Pane.ui \
@@ -37,3 +41,4 @@ FORMS    += Main_window.ui \
 
 TRANSLATIONS += translations/ru.ts
 
+LIBS += -lmagic
