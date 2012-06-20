@@ -20,7 +20,7 @@ public:
 
 private:
   QList<File_info> list;
-  QFileIconProvider icon_provider;
+
 };
 
 #endif // FILE_LIST_MODEL_H

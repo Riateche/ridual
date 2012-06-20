@@ -1,22 +1,16 @@
 Bugs:
-- display loading state!
 - ability to disable shortcut
-- save window position
 - show text "Directory is empty" when it's empty
 - options in main menu for: go parent
-- correct work with "~" in directory name
 
 Todo:
-- abstraction of directory (including gio://, ftp:// and watches)
-- refresh on file system change
-- refresh gio mount list if it's displayed while changing
 - open archives on the fly (or maybe mount them using gio)
-- ability to display file data in table, column settings
+- files list as table (date, owner, mode etc), adjustable columns
 - option "list folders before files"
 - add reporting about problems with reading a dir
 - gvfs networking support (store passwords in wallet)
-- bookmarks support
-- drives list support
+- bookmarks support (use and edit)
+- unix drives list
 - display count of selected items, total space used by them, free space on current volume
 - copy (details mode / fast mode), move, make sort/hard links, rename, remove, move to trash
 - select all, unselect all, invert selection, select/unselect by regexp
@@ -24,6 +18,12 @@ Todo:
 - progress in unity taskbar
 - get icon using libnautilus-private/nautilus-icon-info.c
 - after cdup activate the item where are we from
+- buttons for smart path switcher
+  - first button: special buttons for root, home, and any matched bookmark, drive or network resource
+- copy selected file names to clipboard
+- display mime-type as is / human readable name
+- run tasks in the same time / in queue
+- icons for "places" menu
 
 
 gio:
@@ -45,4 +45,4 @@ Benefits:
 - Use system color theme, no crazy colors.
 - Allow to use and change a hotkey for everything.
 - Display file icons from system theme.
-
+- All filesystem operations are executed in separate thread.

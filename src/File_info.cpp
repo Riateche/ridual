@@ -1,6 +1,10 @@
 #include "File_info.h"
 #include "utils.h"
 
-QString File_info::mime_type() {
-  return get_mime_type(i.absoluteFilePath());
+File_info::File_info():
+  is_file(false),
+  permissions(-1)
+{
 }
+
+

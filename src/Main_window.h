@@ -7,6 +7,7 @@
 #include "gio/Mount.h"
 #include "gio/Volume.h"
 #include "File_info.h"
+#include "Task.h"
 
 namespace Ui {
   class Main_window;
@@ -14,6 +15,7 @@ namespace Ui {
 
 class Pane;
 
+class Tasks_thread;
 
 
 class Main_window : public QMainWindow {
@@ -24,8 +26,10 @@ public:
   ~Main_window();
   void set_active_pane(Pane* pane);
   inline Pane* get_active_pane() { return active_pane; }
+  void add_task(Task task);
 
   QList<File_info> get_gio_mounts();
+
 
 private:
   Ui::Main_window *ui;
@@ -36,6 +40,7 @@ private:
 
   QList<gio::Volume> volumes;
   QList<gio::Mount> mounts;
+  Tasks_thread* tasks_thread;
 
 
 private slots:
@@ -53,6 +58,8 @@ public slots:
 
 signals:
   void active_pane_changed();
+  void signal_add_task(Task task);
+  void gio_mounts_changed();
 };
 
 #endif // MAIN_WINDOW_H

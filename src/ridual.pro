@@ -13,7 +13,6 @@ TEMPLATE = app
 SOURCES += main.cpp\
     Main_window.cpp \
     Pane.cpp \
-    Read_directory_thread.cpp \
     File_list_model.cpp \
     hotkeys/Hotkey_editor.cpp \
     hotkeys/Hotkey_text_edit.cpp \
@@ -24,11 +23,13 @@ SOURCES += main.cpp\
     File_info.cpp \
     gio/Gio_main.cpp \
     gio/Volume.cpp \
-    gio/Mount.cpp
+    gio/Mount.cpp \
+    Directory.cpp \
+    Tasks_thread.cpp \
+    Task.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
-    Read_directory_thread.h \
     File_list_model.h \
     hotkeys/Hotkey_editor.h \
     hotkeys/Hotkey_text_edit.h \
@@ -39,7 +40,10 @@ HEADERS  += Main_window.h \
     File_info.h \
     gio/Gio_main.h \
     gio/Volume.h \
-    gio/Mount.h
+    gio/Mount.h \
+    Directory.h \
+    Tasks_thread.h \
+    Task.h
 
 FORMS    += Main_window.ui \
     Pane.ui \

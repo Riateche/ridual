@@ -6,12 +6,16 @@
 #include <QShortcut>
 #include "File_info.h"
 #include "gio/Gio_main.h"
+#include "Tasks_thread.h"
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::Main_window),
   hotkeys(this)
 {
+  tasks_thread = new Tasks_thread(this);
+  connect(this, SIGNAL(signal_add_task(Task)), tasks_thread, SLOT(add_task(Task)));
+  tasks_thread->start();
   qRegisterMetaType< QList<File_info> >("QList<File_info>");
   ui->setupUi(this);
   ui->left_pane->set_main_window(this);
@@ -53,6 +57,7 @@ Main_window::Main_window(QWidget *parent) :
 
 Main_window::~Main_window() {
   save_settings();
+  delete tasks_thread; //todo: graceful quit
   delete ui;
 }
 
@@ -62,21 +67,23 @@ void Main_window::set_active_pane(Pane *pane) {
   emit active_pane_changed();
 }
 
+void Main_window::add_task(Task task) {
+  emit signal_add_task(task);
+}
+
 QList<File_info> Main_window::get_gio_mounts() {
   QList<File_info> r;
   foreach (gio::Mount m, mounts) {
     File_info i;
-    i.type = File_info::type_mount;
-    i.mount_name = m.name;
-    i.mount_ready = true;
+    i.caption = m.name;
+    i.uri = m.default_location;
     r << i;
   }
   foreach (gio::Volume v, volumes) {
     if (!v.mounted) {
       File_info i;
-      i.type = File_info::type_mount;
-      i.mount_name = v.name;
-      i.mount_ready = false;
+      i.caption = v.name + tr(" (unmounted)");
+      //todo: i.uri = ???
       r << i;
     }
   }
@@ -125,10 +132,5 @@ void Main_window::focus_address_line() {
 void Main_window::gio_list_changed(QList<gio::Volume> p_volumes, QList<gio::Mount> p_mounts) {
   volumes = p_volumes;
   mounts = p_mounts;
-  if (ui->left_pane->get_address() == "gio://") {
-    ui->left_pane->refresh();
-  }
-  if (ui->right_pane->get_address() == "gio://") {
-    ui->right_pane->refresh();
-  }
+  emit gio_mounts_changed();
 }

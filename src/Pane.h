@@ -13,7 +13,7 @@ namespace Ui {
 }
 
 class Main_window;
-class Read_directory_thread;
+class Directory;
 
 class Pane : public QWidget {
   Q_OBJECT
@@ -31,7 +31,7 @@ public:
 
   bool is_active() const;
 
-  inline QString get_address() const { return directory; }
+  QString get_uri();
 
 public slots:
   void go_parent();
@@ -41,7 +41,6 @@ public slots:
 
 private slots:
   void on_go_clicked();
-  void directory_ready(QList<File_info> files);
   void active_pane_changed();
   void show_loading_indicator();
   void read_thread_finished(QList<File_info> files);
@@ -49,16 +48,10 @@ private slots:
 
 private:
   Ui::Pane *ui;
-  QString directory;
   bool ready;
   File_list_model file_list_model;
   Main_window* main_window;
-  QFileSystemWatcher* filesystem_watcher;
-  Read_directory_thread* last_launched_thread;
-
-  bool old_state_stored;
-  QModelIndex old_current_index;
-  QItemSelection old_selection;
+  Directory* directory, *pending_directory;
 
 };
 
