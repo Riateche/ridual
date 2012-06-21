@@ -5,6 +5,12 @@
 Tasks_thread::Tasks_thread(QObject *parent) :
   QThread(parent)
 {
+  stopping = false;
+}
+
+void Tasks_thread::interrupt() {
+  stopping = true;
+  wait();
 }
 
 void Tasks_thread::add_task(Task task) {
@@ -12,7 +18,7 @@ void Tasks_thread::add_task(Task task) {
 }
 
 void Tasks_thread::run() {
-  while(true) {
+  while(!stopping) {
     if (queue.isEmpty()) {
       msleep(50);
       continue;
@@ -35,6 +41,7 @@ void Tasks_thread::run() {
             File_info item;
             item.caption = info.fileName();
             item.file_path = info.absoluteFilePath();
+            item.is_file = info.isFile();
             r << item;
           }
           result = QVariant::fromValue< QList<File_info> >(r);

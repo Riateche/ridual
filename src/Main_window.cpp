@@ -7,6 +7,9 @@
 #include "File_info.h"
 #include "gio/Gio_main.h"
 #include "Tasks_thread.h"
+#include <QToolButton>
+#include <QLabel>
+#include "Path_button.h"
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -53,11 +56,19 @@ Main_window::Main_window(QWidget *parent) :
   connect(gio,    SIGNAL(list_changed(QList<gio::Volume>,QList<gio::Mount>)),
           this, SLOT(gio_list_changed(QList<gio::Volume>,QList<gio::Mount>)));
   gio->start();
+
+  connect(ui->left_pane,  SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
+  connect(ui->right_pane, SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
+  connect(this, SIGNAL(active_pane_changed()),   this, SLOT(refresh_path_toolbar()));
+  refresh_path_toolbar();
+
+  //qDebug() << "styles" << QStyleFactory::keys();
 }
 
 Main_window::~Main_window() {
   save_settings();
-  delete tasks_thread; //todo: graceful quit
+  tasks_thread->interrupt();
+  delete tasks_thread;
   delete ui;
 }
 
@@ -71,23 +82,8 @@ void Main_window::add_task(Task task) {
   emit signal_add_task(task);
 }
 
-QList<File_info> Main_window::get_gio_mounts() {
-  QList<File_info> r;
-  foreach (gio::Mount m, mounts) {
-    File_info i;
-    i.caption = m.name;
-    i.uri = m.default_location;
-    r << i;
-  }
-  foreach (gio::Volume v, volumes) {
-    if (!v.mounted) {
-      File_info i;
-      i.caption = v.name + tr(" (unmounted)");
-      //todo: i.uri = ???
-      r << i;
-    }
-  }
-  return r;
+QList<gio::Mount> Main_window::get_gio_mounts() {
+  return mounts;
 }
 
 void Main_window::switch_active_pane() {
@@ -133,4 +129,25 @@ void Main_window::gio_list_changed(QList<gio::Volume> p_volumes, QList<gio::Moun
   volumes = p_volumes;
   mounts = p_mounts;
   emit gio_mounts_changed();
+}
+
+
+
+void Main_window::refresh_path_toolbar() {
+  ui->path_toolbar->clear();
+  QString path = active_pane->get_uri();
+  if (path.startsWith("/")) {
+    QStringList parts = path.split("/");
+    if (parts.last().isEmpty()) parts.removeLast(); //happens for path="/"
+    parts[0] = "/"; //parts[0] was empty before this
+    for(int i = 0; i < parts.count(); i++) {
+      QString caption = parts[i];
+      if (i > 0 && i < parts.count() - 1) {
+        caption += "/";
+      }
+      QString uri = QString("/") + QStringList(parts.mid(1, i)).join("/");
+      Path_button* b = new Path_button(this, caption, uri);
+      ui->path_toolbar->addWidget(b);
+    }
+  }
 }

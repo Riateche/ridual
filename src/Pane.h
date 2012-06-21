@@ -33,6 +33,9 @@ public:
 
   QString get_uri();
 
+signals:
+  void uri_changed();
+
 public slots:
   void go_parent();
   void open_current();

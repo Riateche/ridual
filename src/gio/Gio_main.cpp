@@ -39,6 +39,25 @@ Gio_main::Gio_main(QObject *parent) :
   qRegisterMetaType< QList<gio::Mount> >("QList<gio::Mount>");
 }
 
+void async_result(GObject *source_object, GAsyncResult *res, gpointer user_data) {
+  qDebug() << "async result";
+  GError* error = 0;
+  g_file_mount_enclosing_volume_finish( (GFile*) source_object, res, &error);
+  if (error) {
+    qDebug() << "error: " << error->message;
+  } else {
+    qDebug() << "no error";
+  }
+
+  GMount* mount = g_file_find_enclosing_mount( (GFile*) source_object, 0, 0);
+  if (mount) {
+    GFile* f = g_mount_get_root(mount);
+    qDebug() << "mount" << mount << g_file_get_path(f);
+  } else {
+    qDebug() << "mount: NULL";
+  }
+}
+
 void Gio_main::run() {
   int argc = QApplication::argc();
   char** argv = QApplication::argv();
@@ -57,8 +76,15 @@ void Gio_main::run() {
   g_signal_connect(monitor, "mount-removed",
                    G_CALLBACK(gio_main_universal_callback), this);
   fetch_all();
+
+  GFile* file = g_file_new_for_uri("...");
+  GMountOperation* mount_operation = g_mount_operation_new();
+  g_file_mount_enclosing_volume(file, GMountMountFlags(), mount_operation, 0, async_result, 0);
+
   gtk_main();
 }
+
+
 
 void Gio_main::fetch_all() {
   volumes.clear();
@@ -79,5 +105,6 @@ void Gio_main::fetch_all() {
     g_object_unref(mount);
   }
   g_free(list);
+
   emit list_changed(volumes, mounts);
 }

@@ -9,6 +9,7 @@ class Tasks_thread : public QThread {
   Q_OBJECT
 public:
   explicit Tasks_thread(QObject *parent = 0);
+  void interrupt();
   
 signals:
   void ready(QVariant data);
@@ -19,6 +20,7 @@ public slots:
 private:
   QList<Task> queue;
   void run();
+  bool stopping;
   
 };
 

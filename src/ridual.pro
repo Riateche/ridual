@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     gio/Mount.cpp \
     Directory.cpp \
     Tasks_thread.cpp \
-    Task.cpp
+    Task.cpp \
+    Path_button.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -43,7 +44,8 @@ HEADERS  += Main_window.h \
     gio/Mount.h \
     Directory.h \
     Tasks_thread.h \
-    Task.h
+    Task.h \
+    Path_button.h
 
 FORMS    += Main_window.ui \
     Pane.ui \
@@ -60,6 +62,14 @@ PKGCONFIG += gobject-2.0 gio-2.0 gtk+-2.0
 #LIBS += `pkg-config --libs gobject-2.0`
 #QMAKE_CXXFLAGS += `pkg-config --libs glib-2.0 gio-2.0 gtk+-2.0`
 #LIBS += -lgio-2.0 -lgobject-2.0 -lgtk+-2.0
+
+enable_profiler { # gprof profiler
+  QMAKE_CFLAGS+=-pg
+  QMAKE_CXXFLAGS+=-pg
+  QMAKE_LFLAGS+=-pg
+}
+
+
 
 RESOURCES += \
     resources/1.qrc

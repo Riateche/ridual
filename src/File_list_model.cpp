@@ -19,7 +19,7 @@ int File_list_model::rowCount(const QModelIndex &parent) const {
 
 QVariant File_list_model::data(const QModelIndex &index, int role) const {
   if (index.row() < 0 || index.row() >= list.count()) return QVariant();
-  File_info file_info = list.at(index.row());
+  const File_info& file_info = list.at(index.row());
   if (role == Qt::DisplayRole) {
     return file_info.caption;
   }

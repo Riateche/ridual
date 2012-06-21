@@ -28,7 +28,8 @@ public:
   inline Pane* get_active_pane() { return active_pane; }
   void add_task(Task task);
 
-  QList<File_info> get_gio_mounts();
+  QList<gio::Mount> get_gio_mounts();
+  QList<gio::Volume> get_gio_volumes() { return volumes; }
 
 
 private:
@@ -49,8 +50,9 @@ private slots:
   void go_parent();
   void open_current();
   void focus_address_line();
-
   void gio_list_changed(QList<gio::Volume> volumes, QList<gio::Mount> mounts);
+
+  void refresh_path_toolbar();
 
 
 public slots:

@@ -4,6 +4,7 @@ Bugs:
 - options in main menu for: go parent
 
 Todo:
+- menu switch between real path / uri in address bar
 - open archives on the fly (or maybe mount them using gio)
 - files list as table (date, owner, mode etc), adjustable columns
 - option "list folders before files"

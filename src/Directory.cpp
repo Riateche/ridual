@@ -35,11 +35,22 @@ QString Directory::get_parent_uri() {
 }
 
 void Directory::refresh() {
+  if (uri.isEmpty()) {
+    uri = "places";
+  }
   if (uri.startsWith("/")) {
     // regular directory
     Task task(this, SLOT(thread_ready(QVariant)), task_directory_list, uri);
     main_window->add_task(task);
     return;
+  }
+  foreach(gio::Mount mount, main_window->get_gio_mounts()) {
+    if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
+      QString real_dir = mount.path + "/" + uri.mid(mount.uri.length());
+      Task task(this, SLOT(thread_ready(QVariant)), task_directory_list, real_dir);
+      main_window->add_task(task);
+      return;
+    }
   }
   if (uri == "places") {
     QList<File_info> r;
@@ -57,9 +68,25 @@ void Directory::refresh() {
     return;
   }
   if (uri == "places/mounts") {
-    emit ready(main_window->get_gio_mounts());
+    QList<File_info> r;
+    foreach (gio::Mount m, main_window->get_gio_mounts()) {
+      File_info i;
+      i.caption = m.name;
+      i.uri = m.default_location;
+      r << i;
+    }
+    foreach (gio::Volume v, main_window->get_gio_volumes()) {
+      if (!v.mounted) {
+        File_info i;
+        i.caption = v.name + tr(" (unmounted)");
+        i.uri = "/"; //todo: change it
+        r << i;
+      }
+    }
+    emit ready(r);
     return;
   }
+  qDebug() << "unknown uri: " << uri;
   //todo: error: unknown uri
 }
 
@@ -75,7 +102,7 @@ void Directory::thread_ready(QVariant result) {
   for(int i = 0; i < r.count(); i++) {
     r[i].uri = r[i].file_path; //todo: it will be different for GIO folders
     //can't get icons in non-gui thread
-    r[i].icon = icon_provider.icon(QFileInfo(r[i].file_path));
+    //r[i].icon = icon_provider.icon(QFileInfo(r[i].file_path));
   }
   emit ready(r);
 }

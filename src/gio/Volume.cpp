@@ -13,7 +13,9 @@ Volume::Volume(GVolume *src) {
   g_free(p_name);
   GMount* mount = g_volume_get_mount(src);
   mounted = mount != 0;
-  g_object_unref(mount);
+  if (mount) {
+    g_object_unref(mount);
+  }
 
   //GIcon* gicon = g_volume_get_icon(src);
   //g_object_unref(gicon);

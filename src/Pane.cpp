@@ -156,6 +156,7 @@ void Pane::read_thread_finished(QList<File_info> files) {
 
   if (sender() == pending_directory) {
     directory = pending_directory;
+    emit uri_changed();
     pending_directory = 0;
     ui->address->setText(directory->get_uri());
   } else if (sender() == directory) {
