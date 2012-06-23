@@ -43,7 +43,16 @@
     </property>
     <addaction name="action_hotkeys"/>
    </widget>
+   <widget class="QMenu" name="menu_go">
+    <property name="title">
+     <string>Go</string>
+    </property>
+    <addaction name="action_go_parent_directory"/>
+    <addaction name="action_go_places"/>
+    <addaction name="action_go_root"/>
+   </widget>
    <addaction name="menu_file"/>
+   <addaction name="menu_go"/>
    <addaction name="menu_settings"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -61,6 +70,21 @@
   <action name="action_hotkeys">
    <property name="text">
     <string>Hotkeys</string>
+   </property>
+  </action>
+  <action name="action_go_parent_directory">
+   <property name="text">
+    <string>Parent directory</string>
+   </property>
+  </action>
+  <action name="action_go_places">
+   <property name="text">
+    <string>Places</string>
+   </property>
+  </action>
+  <action name="action_go_root">
+   <property name="text">
+    <string>Root filesystem</string>
    </property>
   </action>
  </widget>

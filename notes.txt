@@ -1,30 +1,39 @@
 Bugs:
+- don't update more than 1 time per second
+- path buttons must not be uncheckable by user
+- file icons slow for network fs
 - ability to disable shortcut
-- show text "Directory is empty" when it's empty
-- options in main menu for: go parent
+- options in main menu for: menu "go"
+- move watcher to separate thread
+- path buttons: head button for home, any bookmark
 
 Todo:
+- try without gtk_main
+- (!) add reporting about problems with reading a dir
+- mount unmounted folder from mount list
+- try to mount uri specified by user if it's not already mounted
+- mount uri "archive://encoded_archive_uri/" when user goes into an archive; unmount on cdup
 - menu switch between real path / uri in address bar
-- open archives on the fly (or maybe mount them using gio)
 - files list as table (date, owner, mode etc), adjustable columns
 - option "list folders before files"
-- add reporting about problems with reading a dir
 - gvfs networking support (store passwords in wallet)
 - bookmarks support (use and edit)
 - unix drives list
 - display count of selected items, total space used by them, free space on current volume
 - copy (details mode / fast mode), move, make sort/hard links, rename, remove, move to trash
+- ask overwrite and error settings before starting operation
 - select all, unselect all, invert selection, select/unselect by regexp
-- resizeable splitter between panes; saving state of splitter
 - progress in unity taskbar
 - get icon using libnautilus-private/nautilus-icon-info.c
-- after cdup activate the item where are we from
 - buttons for smart path switcher
-  - first button: special buttons for root, home, and any matched bookmark, drive or network resource
 - copy selected file names to clipboard
 - display mime-type as is / human readable name
 - run tasks in the same time / in queue
 - icons for "places" menu
+- file search
+- resizeable splitter between panes; saving state of splitter
+- ctrl+x/c/v
+- drag and drop
 
 
 gio:

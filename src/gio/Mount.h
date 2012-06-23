@@ -13,7 +13,8 @@ namespace gio {
     Mount(GMount* src);
     QString name; //human-readable name
     QString path; //actual root path in file system
-    QString uri;  //root uri (starting with 'ftp://', 'file:///' etc)
+    QString uri;  //root uri (starting with 'ftp://', 'smb://' etc)
+                  //or actual root path (for non-network mounts)
     QString default_location; //uri where should we start browsing
   };  
 } // namespace gio

@@ -5,6 +5,7 @@
 #include <QMovie>
 #include <QDebug>
 #include "Directory.h"
+#include <QMessageBox>
 
 Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   directory = 0;
@@ -34,14 +35,17 @@ void Pane::set_main_window(Main_window *p_main_window) {
   connect(main_window, SIGNAL(active_pane_changed()), this, SLOT(active_pane_changed()));
 }
 
-void Pane::set_directory(QString new_directory) {
+void Pane::set_uri(QString new_directory) {
   if (directory && new_directory == directory->get_uri()) {
     directory->refresh();
     return;
   }
   if (pending_directory) delete pending_directory;
   pending_directory = new Directory(main_window, new_directory);
-  connect(pending_directory, SIGNAL(ready(QList<File_info>)), this, SLOT(read_thread_finished(QList<File_info>)));
+  connect(pending_directory, SIGNAL(ready(QList<File_info>)),
+          this, SLOT(directory_ready(QList<File_info>)));
+  connect(pending_directory, SIGNAL(error(QString)),
+          this, SLOT(directory_error(QString)));
   pending_directory->refresh();
   //ui->address->setText(directory);
 
@@ -90,7 +94,7 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
 }
 
 void Pane::load_state(QSettings *s) {
-  set_directory(s->value("path", QDir::current().absolutePath()).toString());
+  set_uri(s->value("path", QDir::current().absolutePath()).toString());
 }
 
 void Pane::save_state(QSettings *s) {
@@ -107,13 +111,13 @@ QString Pane::get_uri() {
 }
 
 void Pane::go_parent() {
-  set_directory(directory->get_parent_uri());
+  set_uri(directory->get_parent_uri());
 }
 
 void Pane::open_current() {
   File_info info = file_list_model.info(ui->list->currentIndex());
   if (info.is_folder()) {
-    set_directory(info.uri);
+    set_uri(info.uri);
   } else {
     //use info.file_path
   }
@@ -129,7 +133,8 @@ void Pane::refresh() {
 }
 
 void Pane::on_go_clicked() {
-  set_directory(ui->address->text());
+  ui->list->setFocus();
+  set_uri(ui->address->text());
 }
 
 
@@ -149,12 +154,18 @@ void Pane::show_loading_indicator() {
   }
 }
 
-void Pane::read_thread_finished(QList<File_info> files) {
+void Pane::directory_ready(QList<File_info> files) {
   bool old_state_stored = false;
+  QString new_current_uri;
   QModelIndex old_current_index;
   QItemSelection old_selection;
 
   if (sender() == pending_directory) {
+    if (pending_directory && directory &&
+        pending_directory->get_uri() == directory->get_parent_uri()) {
+      new_current_uri = directory->get_uri();
+    }
+    if (directory) delete directory;
     directory = pending_directory;
     emit uri_changed();
     pending_directory = 0;
@@ -170,7 +181,6 @@ void Pane::read_thread_finished(QList<File_info> files) {
   }
 
   file_list_model.set_data(files);
-  ui->list->setFocus();
   if (file_list_model.rowCount() > 0) {
     ui->list->setCurrentIndex(file_list_model.index(0, 0));
   }
@@ -181,6 +191,24 @@ void Pane::read_thread_finished(QList<File_info> files) {
     ui->list->setCurrentIndex(old_current_index);
     ui->list->selectionModel()->select(old_selection, QItemSelectionModel::SelectCurrent);
   }
+  if (!new_current_uri.isEmpty()) {
+    ui->list->selectionModel()->setCurrentIndex(file_list_model.index_for_uri(new_current_uri),
+                              QItemSelectionModel::NoUpdate);
+  }
+}
+
+void Pane::directory_error(QString message) {
+  if (sender() == pending_directory) {
+    pending_directory->deleteLater();
+    pending_directory = 0;
+  } else if (sender() == directory) {
+
+  } else {
+    qWarning("Unknown sender");
+    return;
+  }
+  //todo: async messages
+  QMessageBox::critical(0, tr("Failed to get file list"), message);
 }
 
 

@@ -51,6 +51,10 @@ Main_window::Main_window(QWidget *parent) :
   hotkeys.add("Parent directory",     "Alt+Up",   this, SLOT(go_parent()));
   hotkeys.add("Focus address bar",    "Ctrl+L",   this, SLOT(focus_address_line()));
 
+  ui->action_go_parent_directory->setShortcut(hotkeys.get("Parent directory"));
+  ui->action_go_parent_directory->setShortcutContext(Qt::WidgetShortcut); //we don't need this shortcut to work
+  connect(ui->action_go_parent_directory, SIGNAL(triggered()),
+          this, SLOT(go_parent()));
 
   Gio_main* gio = new Gio_main();
   connect(gio,    SIGNAL(list_changed(QList<gio::Volume>,QList<gio::Mount>)),
@@ -135,19 +139,85 @@ void Main_window::gio_list_changed(QList<gio::Volume> p_volumes, QList<gio::Moun
 
 void Main_window::refresh_path_toolbar() {
   ui->path_toolbar->clear();
-  QString path = active_pane->get_uri();
-  if (path.startsWith("/")) {
-    QStringList parts = path.split("/");
-    if (parts.last().isEmpty()) parts.removeLast(); //happens for path="/"
-    parts[0] = "/"; //parts[0] was empty before this
-    for(int i = 0; i < parts.count(); i++) {
-      QString caption = parts[i];
-      if (i > 0 && i < parts.count() - 1) {
-        caption += "/";
+  QList<File_info> path_items;
+  QString real_path = active_pane->get_uri();
+  if (real_path == "places") {
+    File_info file_info;
+    file_info.uri = "places";
+    file_info.caption = tr("Places");
+    path_items << file_info;
+  } else {
+    QString headless_path;
+    bool root_found = false;
+    foreach(gio::Mount mount, mounts) {
+      QString mount_path = mount.path;
+      if (!mount_path.isEmpty() && real_path.startsWith(mount_path)) {
+        File_info file_info;
+        file_info.uri = mount_path;
+        file_info.caption = mount.name;
+        path_items << file_info;
+        if (!mount_path.endsWith("/")) {
+          mount_path += "/";
+        }
+        headless_path = real_path.mid(mount_path.count());
+        root_found = true;
       }
-      QString uri = QString("/") + QStringList(parts.mid(1, i)).join("/");
-      Path_button* b = new Path_button(this, caption, uri);
-      ui->path_toolbar->addWidget(b);
     }
+    if (!root_found && real_path.startsWith("/")) {
+      File_info file_info;
+      file_info.uri = "/";
+      file_info.caption = tr("Root");
+      path_items << file_info;
+      headless_path = real_path.mid(1);
+      root_found = true;
+    }
+    if (!root_found) {
+      return;
+    }
+    if (!headless_path.isEmpty()) {
+      QStringList parts = headless_path.split("/");
+      for(int i = 0; i < parts.count(); i++) {
+        File_info file_info;
+        file_info.caption = parts[i];
+        file_info.uri = path_items.last().uri;
+        if (!file_info.uri.endsWith("/")) {
+          file_info.uri += "/";
+        }
+        file_info.uri += parts[i];
+        path_items << file_info;
+      }
+    } /*else {
+      File_info file_info;
+      file_info.caption = tr("Invalid location");
+      file_info.uri = "places";
+      path_items << file_info;
+    }*/
+
+    for(int i = 0; i < old_path_items.count(); i++) {
+      if (i < path_items.count() &&
+          old_path_items[i].uri != path_items[i].uri) break;
+      if (i >= path_items.count()) {
+        path_items << old_path_items[i];
+      }
+    }
+    old_path_items = path_items;
   }
+
+  for(int i = 0; i < path_items.count(); i++) {
+    QString caption = path_items[i].caption;
+    if (i < path_items.count() - 1) {
+      caption += tr(" ‣");
+    }
+    Path_button* b = new Path_button(this, caption, path_items[i].uri);
+    if (i == 0) {
+      b->set_go_parent_visible(true);
+    }
+    b->setChecked(path_items[i].uri == real_path);
+    connect(b, SIGNAL(go_to(QString)), this, SLOT(go_to(QString)));
+    ui->path_toolbar->addWidget(b);
+  }
+}
+
+void Main_window::go_to(QString uri) {
+  active_pane->set_uri(uri);
 }

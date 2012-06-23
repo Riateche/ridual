@@ -22,7 +22,7 @@ public:
   explicit Pane(QWidget* parent);
   ~Pane();
   void set_main_window(Main_window* main_window);
-  void set_directory(QString dir);
+  void set_uri(QString dir);
 
   bool eventFilter(QObject* object, QEvent* event);
 
@@ -46,7 +46,8 @@ private slots:
   void on_go_clicked();
   void active_pane_changed();
   void show_loading_indicator();
-  void read_thread_finished(QList<File_info> files);
+  void directory_ready(QList<File_info> files);
+  void directory_error(QString message);
 
 
 private:

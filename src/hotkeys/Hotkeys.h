@@ -14,6 +14,7 @@ public:
   void set_group_name(QString n);
   void save();
   void open_editor();
+  QKeySequence get(QString name);
 
 private:
   QWidget* parent_widget;

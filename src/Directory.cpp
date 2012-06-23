@@ -13,7 +13,7 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   }
 
   if (uri.startsWith("/")) {
-    watcher.addPath(uri);
+    watcher.addPath(uri); //todo: move watcher to separate thread
   }
   connect(&watcher, SIGNAL(directoryChanged(QString)), this, SLOT(refresh()));
 
@@ -45,7 +45,9 @@ void Directory::refresh() {
     return;
   }
   foreach(gio::Mount mount, main_window->get_gio_mounts()) {
-    if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
+    if (!mount.uri.isEmpty() &&
+         uri.startsWith(mount.uri) &&
+        !uri.startsWith("file://")) {
       QString real_dir = mount.path + "/" + uri.mid(mount.uri.length());
       Task task(this, SLOT(thread_ready(QVariant)), task_directory_list, real_dir);
       main_window->add_task(task);
@@ -87,13 +89,13 @@ void Directory::refresh() {
     return;
   }
   qDebug() << "unknown uri: " << uri;
-  //todo: error: unknown uri
+  emit error(tr("Address not recognized"));
 }
 
 void Directory::thread_ready(QVariant result) {
   if (result.canConvert<Task_error>()) {
-    Task_error error = result.value<Task_error>();
-    qDebug() << "task error received: " << error.message;
+    Task_error e = result.value<Task_error>();
+    emit error(e.message);
     return;
   }
   Q_ASSERT(result.canConvert< QList<File_info> >());
@@ -102,7 +104,8 @@ void Directory::thread_ready(QVariant result) {
   for(int i = 0; i < r.count(); i++) {
     r[i].uri = r[i].file_path; //todo: it will be different for GIO folders
     //can't get icons in non-gui thread
-    //r[i].icon = icon_provider.icon(QFileInfo(r[i].file_path));
+    r[i].icon = icon_provider.icon(QFileInfo(r[i].file_path));
+    //todo: this is slow for network fs
   }
   emit ready(r);
 }

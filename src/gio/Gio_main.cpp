@@ -10,22 +10,6 @@
 #include "gtk/gtk.h"
 
 
-/*
-static void on_drive_changed(GVolumeMonitor *volume_monitor, GDrive *drive, void* unused) {
-  qDebug() << "Drive changed:";
-  print_drive_info(drive);
-}
-
-static void on_drive_connected(GVolumeMonitor *volume_monitor, GDrive *drive, void* unused) {
-  qDebug() << "Drive connected:";
-  print_drive_info(drive);
-}
-
-static void on_drive_disconnected(GVolumeMonitor *volume_monitor, GDrive *drive, void* unused) {
-  qDebug() << "Drive disconnected:";
-  print_drive_info(drive);
-}
-*/
 
 static void gio_main_universal_callback(GVolumeMonitor *volume_monitor, GDrive *drive, Gio_main* parent) {
   parent->fetch_all();
@@ -77,10 +61,10 @@ void Gio_main::run() {
                    G_CALLBACK(gio_main_universal_callback), this);
   fetch_all();
 
-  GFile* file = g_file_new_for_uri("...");
+/*  GFile* file = g_file_new_for_uri("...");
   GMountOperation* mount_operation = g_mount_operation_new();
   g_file_mount_enclosing_volume(file, GMountMountFlags(), mount_operation, 0, async_result, 0);
-
+*/
   gtk_main();
 }
 

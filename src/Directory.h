@@ -19,6 +19,7 @@ public:
   
 signals:
   void ready(QList<File_info> files);
+  void error(QString message);
 
   
 public slots:

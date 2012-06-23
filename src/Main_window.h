@@ -43,6 +43,8 @@ private:
   QList<gio::Mount> mounts;
   Tasks_thread* tasks_thread;
 
+  QList<File_info> old_path_items;
+
 
 private slots:
   void save_settings();
@@ -51,8 +53,8 @@ private slots:
   void open_current();
   void focus_address_line();
   void gio_list_changed(QList<gio::Volume> volumes, QList<gio::Mount> mounts);
-
   void refresh_path_toolbar();
+  void go_to(QString uri);
 
 
 public slots:

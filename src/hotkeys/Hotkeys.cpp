@@ -89,3 +89,13 @@ void Hotkeys::open_editor() {
   Hotkey_editor* editor = new Hotkey_editor(this);
   editor->show();
 }
+
+QKeySequence Hotkeys::get(QString name) {
+  foreach (Hotkey* h, hotkeys) {
+    if (h->get_name() == name) {
+      return h->get_shortcut()->key();
+    }
+  }
+  qWarning("Hotkeys::get: unknown name");
+  return QKeySequence();
+}

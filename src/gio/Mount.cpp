@@ -21,6 +21,9 @@ Mount::Mount(GMount *src) {
   char* p_uri = g_file_get_uri(file);
   if (p_uri) {
     uri = QString::fromLocal8Bit(p_uri);
+    if (uri.startsWith("file://")) {
+      uri.remove(0, 7);
+    }
     g_free(p_uri);
   }
   g_object_unref(file);
@@ -29,6 +32,9 @@ Mount::Mount(GMount *src) {
   char* p_dl = g_file_get_uri(file);
   if (p_dl) {
     default_location = QString::fromLocal8Bit(p_dl);
+    if (default_location.startsWith("file://")) {
+      default_location.remove(0, 7);
+    }
     g_free(p_dl);
   }
   qDebug() << "path" << path;
