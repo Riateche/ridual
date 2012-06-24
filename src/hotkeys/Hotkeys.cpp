@@ -54,7 +54,6 @@ QVariant Hotkeys::data(const QModelIndex &index, int role) const {
       return hotkeys[index.row()]->editor_value;
     }
   }
-//  return QString("undefined %1").arg(role);
   return QVariant();
 }
 
@@ -92,6 +91,8 @@ void Hotkeys::save() {
 
 void Hotkeys::open_editor() {
   foreach (Hotkey* h, hotkeys) {
+    //set editor value to current value (it's important if user changes something,
+    //closes the dialog without saving and opens it again).
     h->editor_value = h->get_value();
   }
   Hotkey_editor* editor = new Hotkey_editor(this);

@@ -33,6 +33,8 @@ Mount::Mount(GMount *src) {
   if (p_dl) {
     default_location = QString::fromLocal8Bit(p_dl);
     if (default_location.startsWith("file://")) {
+      //modify uri accordingly to our 'uri rules':
+      //local files are represented by their normal paths without 'file://'
       default_location.remove(0, 7);
     }
     g_free(p_dl);

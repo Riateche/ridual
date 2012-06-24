@@ -8,14 +8,41 @@ struct _GMount;
 typedef _GMount GMount;
 
 namespace gio { 
+
+  /*!
+    This class holds information about one GMount.
+    It gets all information in constructor.
+    It doesn't keep a pointer to GMount.
+    */
   class Mount {
   public:
     Mount(GMount* src);
-    QString name; //human-readable name
-    QString path; //actual root path in file system
-    QString uri;  //root uri (starting with 'ftp://', 'smb://' etc)
-                  //or actual root path (for non-network mounts)
-    QString default_location; //uri where should we start browsing
+
+    //! Human-readable name of mount.
+    QString name;
+
+    /*! Actual root path in file system. Some common examples:
+      - /media/disc_uuid
+      - /home/username/.gvfs/FTP as username on servername
+      */
+    QString path;
+
+    /*! Root uri (starting with 'ftp://', 'smb://' etc)
+      or actual root path (for non-network mounts).
+      See 'uri rules' for more information.
+    */
+    QString uri;
+
+    /*! Uri where should we start browsing. It's often the same as Mount::uri,
+      but it can be sub-folder of uri. For example, for SFTP mount
+      uri points to root folder and default_location points to home folder.
+
+      Examples:
+      - /media/disc_uuid
+      - ftp://username@servername/
+      - sftp://username@servername/home/username
+    */
+    QString default_location;
   };  
 } // namespace gio
 

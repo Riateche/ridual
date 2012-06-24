@@ -17,17 +17,23 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   }
 
   QRegExp network_root("^[^\\:]*\\://[^/]*/$");
-  if (network_root.indexIn(uri) < 0 && uri.endsWith("/")) {
+  if (network_root.indexIn(uri) < 0 && uri.endsWith("/") && uri != "/") {
+    // remove trailing slash
     uri = uri.left(uri.length() - 1);
   }
   if (network_root.indexIn(uri + "/") == 0) {
+    //add required slash
     uri += "/";
   }
 
-  if (uri.startsWith("/")) {
+  if (uri.startsWith("file://")) {
+    uri = uri.mid(7);
+  }
+
+  connect(&watcher, SIGNAL(directoryChanged(QString)), this, SLOT(refresh()));
+  if (uri.startsWith("/")) { //todo: watch for network fs
     watcher.addPath(uri); //todo: move watcher to separate thread
   }
-  connect(&watcher, SIGNAL(directoryChanged(QString)), this, SLOT(refresh()));
 
   if (uri == "places/mounts") {
     connect(main_window, SIGNAL(gio_mounts_changed()), this, SLOT(refresh()));
@@ -37,6 +43,7 @@ Directory::Directory(Main_window* mw, QString p_uri) :
 QString Directory::get_parent_uri() {
   QRegExp network_root("^[^\\:]*\\://[^/]*/$");
   if (network_root.indexIn(uri) == 0) {
+    //we are in network root such as "ftp://user@host/"
     return "places/mounts";
   }
   if (uri == "/" || uri == "places") {
@@ -44,9 +51,11 @@ QString Directory::get_parent_uri() {
   }
   QStringList m = uri.split("/"); //uri separator must always be "/"
   if (!m.isEmpty()) m.removeLast();
-  if (m.count() == 1 && m.first().isEmpty()) return "/"; //root
+  if (m.count() == 1 && m.first().isEmpty()) return "/";
   QString s = m.join("/");
   if (network_root.indexIn(s + "/") == 0) {
+    //we are near network root, e.g. "ftp://user@host/one_folder"
+    //we must get "ftp://user@host/" instead of "ftp://user@host"
     s += "/";
   }
   return s;
@@ -54,7 +63,8 @@ QString Directory::get_parent_uri() {
 
 void Directory::refresh() {
   if (uri.isEmpty()) {
-    uri = "places";
+    emit error(tr("Address is empty"));
+    return;
   }
   if (uri.startsWith("/")) {
     // regular directory
@@ -63,16 +73,16 @@ void Directory::refresh() {
     return;
   }
   foreach(gio::Mount* mount, main_window->get_gio_mounts()) {
-    if (!mount->uri.isEmpty() &&
-        uri.startsWith(mount->uri) &&
-        !uri.startsWith("file://")) {
+    if (!mount->uri.isEmpty() && uri.startsWith(mount->uri)) {
+      //convert uri e.g. "ftp://user@host/path"
+      //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"
       QString real_dir = mount->path + "/" + uri.mid(mount->uri.length());
       Task task(this, SLOT(thread_ready(QVariant)), task_directory_list, real_dir);
       main_window->add_task(task);
       return;
     }
   }
-  if (uri == "places") {
+  if (uri == "places") { //the root of our virtual directory tree
     QList<File_info> r;
     File_info fi;
     fi.caption = tr("Filesystem root");
@@ -87,7 +97,7 @@ void Directory::refresh() {
     emit ready(r);
     return;
   }
-  if (uri == "places/mounts") {
+  if (uri == "places/mounts") { // list of mounts
     QList<File_info> r;
     foreach (gio::Mount* m, main_window->get_gio_mounts()) {
       File_info i;
@@ -97,10 +107,12 @@ void Directory::refresh() {
     }
     int id = 0;
     foreach (gio::Volume* v, main_window->get_gio_volumes()) {
+      //we must show only unmounted volumes because
+      //mounted volumes have been listed as gio::Mount's
       if (!v->mounted) {
         File_info i;
         i.caption = v->name + tr(" (unmounted)");
-        i.uri = QString("places/mounts/%1").arg(id);
+        i.uri = QString("places/mounts/%1").arg(id); //use number of volume in list as id
         r << i;
       }
       id++;
@@ -109,8 +121,8 @@ void Directory::refresh() {
     return;
   }
 
-  if (uri.startsWith("places/mounts/")) {
-    int id = uri.mid(14).toInt();
+  if (uri.startsWith("places/mounts/")) { //mounting of unmounted volume was requested
+    int id = uri.mid(14).toInt(); //uri is something like "places/mounts/42"
     if (id < 0 || id >= main_window->get_gio_volumes().count()) {
       emit error(tr("Invalid volume id"));
       return;
@@ -121,16 +133,10 @@ void Directory::refresh() {
     return;
   }
 
-
   //address not recognized. try to pass it to gio
-  qDebug() << "trying to mount" << uri;
   GFile* file = g_file_new_for_uri(uri.toLocal8Bit());
-  //GMountOperation* mount_operation = g_mount_operation_new();
   async_result_type = async_result_mount_location;
   g_file_mount_enclosing_volume(file, GMountMountFlags(), 0, 0, async_result, this);
-
-  //qDebug() << "unknown uri: " << uri;
-  //emit error(tr("Address not recognized"));
 }
 
 void Directory::thread_ready(QVariant result) {
@@ -145,7 +151,9 @@ void Directory::thread_ready(QVariant result) {
   QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
   for(int i = 0; i < r.count(); i++) {
     r[i].uri = uri_prefix + QFileInfo(r[i].file_path).fileName();
-    //can't get icons in non-gui thread
+    //we can't get icons in non-gui thread, because QFileIconProvider uses QPixmap
+    //and it produces warning. We must do it in gui thread, it's bad because
+    //it causes GUI to freeze.
     r[i].icon = icon_provider.icon(QFileInfo(r[i].file_path));
     //todo: this is slow for network fs
   }
@@ -192,5 +200,7 @@ void Directory::async_result(GObject *source_object, GAsyncResult *res, gpointer
     g_object_unref(mount);
   }
   _this->async_result_type = _this->async_result_unexpected;
+
+  //todo: g_unref, g_free and error reporting
 
 }

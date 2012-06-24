@@ -187,7 +187,7 @@ void Main_window::refresh_path_toolbar() {
   ui->path_toolbar->clear();
   QList<File_info> path_items;
   QString real_path = active_pane->get_uri();
-  if (real_path.endsWith("/")) real_path = real_path.left(real_path.length() - 1);
+  //if (real_path != "/" && real_path.endsWith("/")) real_path = real_path.left(real_path.length() - 1);
   if (real_path == "places") {
     File_info file_info;
     file_info.uri = "places";

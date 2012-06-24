@@ -5,11 +5,10 @@
 Hotkey_text_edit::Hotkey_text_edit(QWidget *parent) :
   QTextEdit(parent)
 {
-
 }
 
 void Hotkey_text_edit::keyPressEvent(QKeyEvent *e) {
-
+  //converting QKeyEvent to QKeySequence is not trivial; we use solution from StackOverflow
   int keyInt = e->key();
   Qt::Key key = static_cast<Qt::Key>(keyInt);
   if(key == Qt::Key_unknown){
@@ -46,10 +45,4 @@ void Hotkey_text_edit::keyPressEvent(QKeyEvent *e) {
   setText(QKeySequence(keyInt).toString(QKeySequence::NativeText));
 }
 
-bool Hotkey_text_edit::eventFilter(QObject* o, QEvent* e) {
-  if (e->type() == QEvent::KeyPress) {
-    keyPressEvent(dynamic_cast<QKeyEvent*>(e));
-    return true;
-  }
-  return false;
-}
+

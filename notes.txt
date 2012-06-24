@@ -3,25 +3,23 @@ Bugs:
 - path buttons must not be uncheckable by user
 - file icons slow for network fs
 - ability to disable shortcut
-- options in main menu for: menu "go"
 - move watcher to separate thread
 - path buttons: head button for home, any bookmark
+- add unref's and free's to gtk code
+- path toolbar for "places/mounts"
 
 Todo:
+- watch for changes in network fs
 - undo
 - back/forward
 - possibility to interrupt current task
 - async message box
 - view/edit file, adjustable commands
-- find out error->code for async mount result
-- remove useless signals/slots from Gio_main (it's not separate thread anymore)
-- mount unmounted folder from mount list
-- try to mount uri specified by user if it's not already mounted
+- unmount, eject, safely remove
 - mount uri "archive://encoded_archive_uri/" when user goes into an archive; unmount on cdup
-- menu switch between real path / uri in address bar
 - files list as table (date, owner, mode etc), adjustable columns
 - option "list folders before files"
-- gvfs networking support (store passwords in wallet)
+- gvfs mount with password and other questions
 - bookmarks support (use and edit)
 - unix drives list
 - display count of selected items, total space used by them, free space on current volume
@@ -30,34 +28,21 @@ Todo:
 - select all, unselect all, invert selection, select/unselect by regexp
 - progress in unity taskbar
 - get icon using libnautilus-private/nautilus-icon-info.c
-- buttons for smart path switcher
 - copy selected file names to clipboard (only filename, full path, full network path)
 - display mime-type as is / human readable name
 - run tasks in the same time / in queue
-- icons for "places" menu
+- set max copy speed
+- icons for "places" menus
 - file search
 - resizeable splitter between panes; saving state of splitter
 - ctrl+x/c/v
 - drag and drop
 
 
-gio:
-- don't deal with drives
-- listen for volumes (there can be unmounted volumes)
-- listen for mounts (there can be network mounts without volumes)
-- main list is list of all volumes and all non-volume mounts
-- be careful, don't forget g_object_unref etc
-- managing volumes (not sure if it's ok):
-  - mount volume
-  - unmount volume
-  - stop drive
-  - eject (?)
-http://developer.gnome.org/gio/stable/
-
-
 
 Benefits:
 - Use system color theme, no crazy colors.
-- Allow to use and change a hotkey for everything.
+- Allow to use and change hotkeys for everything.
 - Display file icons from system theme.
 - All filesystem operations are executed in separate thread.
+- Featured integration with GIO/GVFS (network filesystems, external drives, archives etc).

@@ -9,20 +9,19 @@ namespace Ui {
 
 class Hotkeys;
 
+/*! Widget for hotkey editing. It should be constructed using
+  Hotkeys::open_editor.
+
+  */
 class Hotkey_editor : public QDialog {
   Q_OBJECT
   
 public:
   explicit Hotkey_editor(Hotkeys* parent);
   ~Hotkey_editor();
-  static QKeySequence get_hotkey(QString name);
-
-private slots:
-  void on_buttonBox_accepted();
 
 private:
   Ui::Hotkey_editor *ui;
-  static QString settings_group() { return "hotkeys"; }
   Hotkeys* hotkeys;
 
 };
