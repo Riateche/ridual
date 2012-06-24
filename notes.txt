@@ -8,8 +8,13 @@ Bugs:
 - path buttons: head button for home, any bookmark
 
 Todo:
-- try without gtk_main
-- (!) add reporting about problems with reading a dir
+- undo
+- back/forward
+- possibility to interrupt current task
+- async message box
+- view/edit file, adjustable commands
+- find out error->code for async mount result
+- remove useless signals/slots from Gio_main (it's not separate thread anymore)
 - mount unmounted folder from mount list
 - try to mount uri specified by user if it's not already mounted
 - mount uri "archive://encoded_archive_uri/" when user goes into an archive; unmount on cdup
@@ -26,7 +31,7 @@ Todo:
 - progress in unity taskbar
 - get icon using libnautilus-private/nautilus-icon-info.c
 - buttons for smart path switcher
-- copy selected file names to clipboard
+- copy selected file names to clipboard (only filename, full path, full network path)
 - display mime-type as is / human readable name
 - run tasks in the same time / in queue
 - icons for "places" menu

@@ -21,7 +21,6 @@ SOURCES += main.cpp\
     hotkeys/Hotkey.cpp \
     utils.cpp \
     File_info.cpp \
-    gio/Gio_main.cpp \
     gio/Volume.cpp \
     gio/Mount.cpp \
     Directory.cpp \
@@ -39,13 +38,13 @@ HEADERS  += Main_window.h \
     hotkeys/Hotkey.h \
     utils.h \
     File_info.h \
-    gio/Gio_main.h \
     gio/Volume.h \
     gio/Mount.h \
     Directory.h \
     Tasks_thread.h \
     Task.h \
-    Path_button.h
+    Path_button.h \
+    qt_gtk.h
 
 FORMS    += Main_window.ui \
     Pane.ui \

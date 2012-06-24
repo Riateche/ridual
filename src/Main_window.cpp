@@ -5,17 +5,23 @@
 #include <QDebug>
 #include <QShortcut>
 #include "File_info.h"
-#include "gio/Gio_main.h"
 #include "Tasks_thread.h"
 #include <QToolButton>
 #include <QLabel>
 #include "Path_button.h"
+
+#include "qt_gtk.h"
+#include "gio/gio.h"
+
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::Main_window),
   hotkeys(this)
 {
+  init_gio_connects();
+  fetch_gio_mounts();
+
   tasks_thread = new Tasks_thread(this);
   connect(this, SIGNAL(signal_add_task(Task)), tasks_thread, SLOT(add_task(Task)));
   tasks_thread->start();
@@ -47,19 +53,15 @@ Main_window::Main_window(QWidget *parent) :
 
   set_active_pane(ui->left_pane);
 
-  hotkeys.add("Switch between panes", "Tab",      this, SLOT(switch_active_pane()));
-  hotkeys.add("Parent directory",     "Alt+Up",   this, SLOT(go_parent()));
-  hotkeys.add("Focus address bar",    "Ctrl+L",   this, SLOT(focus_address_line()));
+  hotkeys.add("Switch between panes",  "Tab",       this, SLOT(switch_active_pane()));
+  hotkeys.add("Parent directory",      "Backspace", ui->action_go_parent_directory);
+  hotkeys.add("Focus address bar",     "Ctrl+L",    this, SLOT(focus_address_line()));
+  hotkeys.add("Go to filesystem root", "Ctrl+2",    ui->action_go_root);
+  hotkeys.add("Go to places",          "Ctrl+1",    ui->action_go_places);
 
-  ui->action_go_parent_directory->setShortcut(hotkeys.get("Parent directory"));
-  ui->action_go_parent_directory->setShortcutContext(Qt::WidgetShortcut); //we don't need this shortcut to work
   connect(ui->action_go_parent_directory, SIGNAL(triggered()),
           this, SLOT(go_parent()));
 
-  Gio_main* gio = new Gio_main();
-  connect(gio,    SIGNAL(list_changed(QList<gio::Volume>,QList<gio::Mount>)),
-          this, SLOT(gio_list_changed(QList<gio::Volume>,QList<gio::Mount>)));
-  gio->start();
 
   connect(ui->left_pane,  SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
   connect(ui->right_pane, SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
@@ -86,13 +88,62 @@ void Main_window::add_task(Task task) {
   emit signal_add_task(task);
 }
 
-QList<gio::Mount> Main_window::get_gio_mounts() {
+QList<gio::Mount *> Main_window::get_gio_mounts() {
   return mounts;
+}
+
+void Main_window::init_gio_connects() {
+  //qRegisterMetaType< QList<gio::Volume> >("QList<gio::Volume>");
+  //qRegisterMetaType< QList<gio::Mount> >("QList<gio::Mount>");
+
+  int argc = QApplication::argc();
+  char** argv = QApplication::argv();
+  gtk_init(&argc, &argv);
+  volume_monitor = g_volume_monitor_get();
+  g_signal_connect(volume_monitor, "volume-added",
+                   G_CALLBACK(gio_mount_changed), this);
+  g_signal_connect(volume_monitor, "volume-changed",
+                   G_CALLBACK(gio_mount_changed), this);
+  g_signal_connect(volume_monitor, "volume-removed",
+                   G_CALLBACK(gio_mount_changed), this);
+  g_signal_connect(volume_monitor, "mount-added",
+                   G_CALLBACK(gio_mount_changed), this);
+  g_signal_connect(volume_monitor, "mount-changed",
+                   G_CALLBACK(gio_mount_changed), this);
+  g_signal_connect(volume_monitor, "mount-removed",
+                   G_CALLBACK(gio_mount_changed), this);
+}
+
+void Main_window::fetch_gio_mounts() {
+  foreach (gio::Mount* m, mounts) delete m;
+  foreach (gio::Volume* m, volumes) delete m;
+  volumes.clear();
+  mounts.clear();
+
+  GList* list = g_volume_monitor_get_volumes(volume_monitor);
+  for(; list; list = list->next) {
+    GVolume* volume = static_cast<GVolume*>(list->data);
+    volumes << new gio::Volume(volume);
+    g_object_unref(volume);
+  }
+  g_free(list);
+
+  list = g_volume_monitor_get_mounts(volume_monitor);
+  for(; list; list = list->next) {
+    GMount* mount = static_cast<GMount*>(list->data);
+    mounts << new gio::Mount(mount);
+    g_object_unref(mount);
+  }
+  g_free(list);
+  emit gio_mounts_changed();
+}
+
+void Main_window::gio_mount_changed(GVolumeMonitor*, GDrive*, Main_window* _this) {
+  _this->fetch_gio_mounts();
 }
 
 void Main_window::switch_active_pane() {
   set_active_pane(ui->left_pane == active_pane? ui->right_pane: ui->left_pane);
-
 }
 
 void Main_window::save_settings() {
@@ -129,11 +180,6 @@ void Main_window::focus_address_line() {
   active_pane->focus_address_line();
 }
 
-void Main_window::gio_list_changed(QList<gio::Volume> p_volumes, QList<gio::Mount> p_mounts) {
-  volumes = p_volumes;
-  mounts = p_mounts;
-  emit gio_mounts_changed();
-}
 
 
 
@@ -149,17 +195,17 @@ void Main_window::refresh_path_toolbar() {
   } else {
     QString headless_path;
     bool root_found = false;
-    foreach(gio::Mount mount, mounts) {
-      QString mount_path = mount.path;
-      if (!mount_path.isEmpty() && real_path.startsWith(mount_path)) {
+    foreach(gio::Mount* mount, mounts) {
+      QString uri_prefix = mount->uri;
+      if (!uri_prefix.isEmpty() && real_path.startsWith(uri_prefix)) {
         File_info file_info;
-        file_info.uri = mount_path;
-        file_info.caption = mount.name;
+        file_info.uri = uri_prefix;
+        file_info.caption = mount->name;
         path_items << file_info;
-        if (!mount_path.endsWith("/")) {
-          mount_path += "/";
+        if (!uri_prefix.endsWith("/")) {
+          uri_prefix += "/";
         }
-        headless_path = real_path.mid(mount_path.count());
+        headless_path = real_path.mid(uri_prefix.count());
         root_found = true;
       }
     }
@@ -220,4 +266,12 @@ void Main_window::refresh_path_toolbar() {
 
 void Main_window::go_to(QString uri) {
   active_pane->set_uri(uri);
+}
+
+void Main_window::on_action_go_places_triggered() {
+  go_to("places");
+}
+
+void Main_window::on_action_go_root_triggered() {
+  go_to("/");
 }

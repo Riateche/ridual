@@ -45,6 +45,9 @@ void Path_button::directory_ready(QList<File_info> files) {
   foreach(File_info i, files) {
     if (i.is_folder()) {
       QAction* a = menu->addAction(i.caption, this, SLOT(menu_action_triggered()));
+      if (i.uri == path) {
+        a->setEnabled(false);
+      }
       a->setData(i.uri);
       menu->addAction(a);
     }

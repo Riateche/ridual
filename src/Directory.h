@@ -6,6 +6,11 @@
 #include "File_info.h"
 #include <QFileIconProvider>
 
+typedef struct _GObject GObject;
+typedef struct _GAsyncResult GAsyncResult;
+typedef void* gpointer;
+
+
 
 class Main_window;
 
@@ -33,6 +38,16 @@ private:
   QString uri;
   QFileSystemWatcher watcher;
   QFileIconProvider icon_provider;
+
+  enum Async_result_type {
+    async_result_unexpected,
+    async_result_mount_location,
+    async_result_mount_volume
+  };
+
+  Async_result_type async_result_type;
+
+  static void async_result(GObject *source_object, GAsyncResult *res, gpointer _this);
   
 };
 

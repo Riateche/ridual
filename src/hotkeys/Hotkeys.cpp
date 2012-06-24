@@ -26,6 +26,14 @@ QShortcut *Hotkeys::add(QString name,
   return hotkeys.last()->get_shortcut();
 }
 
+void Hotkeys::add(QString name, QString default_value, QAction* action) {
+  QSettings settings;
+  settings.beginGroup(group_name);
+  hotkeys << new Hotkey(name, settings.value(name, default_value).toString(), action);
+  settings.endGroup();
+}
+
+
 void Hotkeys::set_group_name(QString n) {
   group_name = n;
 }
@@ -90,12 +98,4 @@ void Hotkeys::open_editor() {
   editor->show();
 }
 
-QKeySequence Hotkeys::get(QString name) {
-  foreach (Hotkey* h, hotkeys) {
-    if (h->get_name() == name) {
-      return h->get_shortcut()->key();
-    }
-  }
-  qWarning("Hotkeys::get: unknown name");
-  return QKeySequence();
-}
+

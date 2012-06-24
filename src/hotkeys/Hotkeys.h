@@ -11,10 +11,10 @@ public:
   explicit Hotkeys(QWidget *parent = 0);
   ~Hotkeys();
   QShortcut* add(QString name, QString default_value, QObject* receiver, const char* slot);
+  void add(QString name, QString default_value, QAction* action);
   void set_group_name(QString n);
   void save();
   void open_editor();
-  QKeySequence get(QString name);
 
 private:
   QWidget* parent_widget;

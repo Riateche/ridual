@@ -1,13 +1,18 @@
 #include "Volume.h"
 
-#include <QtCore/QCoreApplication>
-#undef signals // Collides with GTK symbols
+#include "qt_gtk.h"
 #include "gio/gio.h"
+
 
 using namespace gio;
 
+Volume::~Volume() {
+  g_object_unref(gvolume);
+}
 
-Volume::Volume(GVolume *src) {
+
+Volume::Volume(GVolume *src): gvolume(src) {
+  g_object_ref(gvolume);
   char* p_name = g_volume_get_name(src);
   name = QString::fromLocal8Bit(p_name);
   g_free(p_name);

@@ -1,9 +1,9 @@
 #include "Mount.h"
 #include <QDebug>
 
-#include <QtCore/QCoreApplication>
-#undef signals // Collides with GTK symbols
+#include "qt_gtk.h"
 #include "gio/gio.h"
+
 
 using namespace gio;
 
@@ -36,6 +36,12 @@ Mount::Mount(GMount *src) {
       default_location.remove(0, 7);
     }
     g_free(p_dl);
+  }
+  GVolume* volume = g_mount_get_volume(src);
+  if (volume) {
+    g_object_unref(volume);
+    default_location = path;
+    uri = path;
   }
   qDebug() << "path" << path;
   qDebug() << "default_location" << default_location;

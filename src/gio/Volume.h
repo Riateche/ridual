@@ -11,8 +11,15 @@ namespace gio {
   class Volume {
   public:
     Volume(GVolume* src);
+    ~Volume();
     QString name;
     bool mounted;
+
+    GVolume* get_gvolume() { return gvolume; }
+
+  private:
+    GVolume* gvolume;
+    Q_DISABLE_COPY(Volume)
   };
   
 } // namespace gio

@@ -7,9 +7,10 @@
 class Hotkey {
 public:
   Hotkey(QString p_name, QString p_value, QWidget* parent);
+  Hotkey(QString p_name, QString p_value, QAction* action);
   inline QString get_name() const { return name; }
   inline QString get_value() const { return value; }
-  inline QShortcut* get_shortcut() { return &shortcut; }
+  inline QShortcut* get_shortcut() { return shortcut; }
   void set_value(QString new_value);
   QString get_translated_name() const;
 
@@ -18,7 +19,8 @@ public:
 private:
   QString name;
   QString value;
-  QShortcut shortcut;
+  QShortcut* shortcut;
+  QAction* action;
 };
 
 #endif // HOTKEY_H
