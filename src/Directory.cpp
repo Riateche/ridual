@@ -16,6 +16,14 @@ Directory::Directory(Main_window* mw, QString p_uri) :
     uri = QDir::homePath() + uri.mid(1);
   }
 
+  QRegExp network_root("^[^\\:]*\\://[^/]*/$");
+  if (network_root.indexIn(uri) < 0 && uri.endsWith("/")) {
+    uri = uri.left(uri.length() - 1);
+  }
+  if (network_root.indexIn(uri + "/") == 0) {
+    uri += "/";
+  }
+
   if (uri.startsWith("/")) {
     watcher.addPath(uri); //todo: move watcher to separate thread
   }
@@ -28,9 +36,6 @@ Directory::Directory(Main_window* mw, QString p_uri) :
 
 QString Directory::get_parent_uri() {
   QRegExp network_root("^[^\\:]*\\://[^/]*/$");
-  if (!network_root.isValid()) {
-    qDebug() << "regexp error" << network_root.errorString();
-  }
   if (network_root.indexIn(uri) == 0) {
     return "places/mounts";
   }
