@@ -2,6 +2,7 @@
 #define HOTKEY_EDITOR_H
 
 #include <QDialog>
+#include <QModelIndex>
 
 namespace Ui {
   class Hotkey_editor;
@@ -20,9 +21,15 @@ public:
   explicit Hotkey_editor(Hotkeys* parent);
   ~Hotkey_editor();
 
+private slots:
+  void on_table_customContextMenuRequested(const QPoint &pos);
+  void set_default_value();
+  void disable_shortcut();
+
 private:
   Ui::Hotkey_editor *ui;
   Hotkeys* hotkeys;
+  QModelIndex menu_index;
 
 };
 

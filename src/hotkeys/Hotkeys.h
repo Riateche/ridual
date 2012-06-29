@@ -48,6 +48,9 @@ public:
     */
   void set_group_name(QString n);
 
+  void set_default_value(QModelIndex index);
+  void disable_shortcut(QModelIndex index);
+
   /*!
     Create and show editor dialog.
     */

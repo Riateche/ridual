@@ -6,6 +6,8 @@
 #include <QDebug>
 #include "Hotkey_item_delegate.h"
 #include "Hotkeys.h"
+#include <QMenu>
+
 
 #include <QPushButton> //debug
 Hotkey_editor::Hotkey_editor(Hotkeys *p_parent) :
@@ -23,4 +25,20 @@ Hotkey_editor::Hotkey_editor(Hotkeys *p_parent) :
 
 Hotkey_editor::~Hotkey_editor() {
   delete ui;
+}
+
+void Hotkey_editor::on_table_customContextMenuRequested(const QPoint &pos) {
+  menu_index = ui->table->indexAt(pos);
+  QMenu* menu = new QMenu(this);
+  menu->addAction(tr("Set default value"), this, SLOT(set_default_value()));
+  menu->addAction(tr("Disable shortcut"), this, SLOT(disable_shortcut()));
+  menu->exec(ui->table->mapToGlobal(pos));
+}
+
+void Hotkey_editor::set_default_value() {
+  hotkeys->set_default_value(menu_index);
+}
+
+void Hotkey_editor::disable_shortcut() {
+  hotkeys->disable_shortcut(menu_index);
 }

@@ -18,16 +18,17 @@ public:
     \param p_value String representation of shortcut as returned from QKeySequence::toString
     \param parent QShortcut's parent
   */
-  Hotkey(QString p_name, QString p_value, QWidget* parent);
+  Hotkey(QString p_name, QString p_value, QString default_value, QWidget* parent);
 
   /*! Constructs a hotkey based on QAction.
     \param p_name Displayed name of hotkey
     \param p_value String representation of shortcut as returned from QKeySequence::toString
     \param action Action to set up.
   */
-  Hotkey(QString p_name, QString p_value, QAction* action);
+  Hotkey(QString p_name, QString p_value, QString default_value, QAction* action);
   inline QString get_name() const { return name; }
   inline QString get_value() const { return value; }
+  inline QString get_default_value() const { return default_value; }
 
   /*! Returns pointer to QShortcut or 0 if hotkey is based on QAction.
     */
@@ -48,6 +49,7 @@ public:
 private:
   QString name;
   QString value;
+  QString default_value;
   QShortcut* shortcut;
   QAction* action;
 };

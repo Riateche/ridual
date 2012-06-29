@@ -20,7 +20,7 @@ QShortcut *Hotkeys::add(QString name,
                          const char* slot) {
   QSettings settings;
   settings.beginGroup(group_name);
-  hotkeys << new Hotkey(name, settings.value(name, default_value).toString(), parent_widget);
+  hotkeys << new Hotkey(name, settings.value(name, default_value).toString(), default_value, parent_widget);
   connect(hotkeys.last()->get_shortcut(), SIGNAL(activated()), receiver, slot);
   settings.endGroup();
   return hotkeys.last()->get_shortcut();
@@ -29,13 +29,27 @@ QShortcut *Hotkeys::add(QString name,
 void Hotkeys::add(QString name, QString default_value, QAction* action) {
   QSettings settings;
   settings.beginGroup(group_name);
-  hotkeys << new Hotkey(name, settings.value(name, default_value).toString(), action);
+  hotkeys << new Hotkey(name, settings.value(name, default_value).toString(), default_value, action);
   settings.endGroup();
 }
 
 
 void Hotkeys::set_group_name(QString n) {
   group_name = n;
+}
+
+void Hotkeys::set_default_value(QModelIndex i) {
+  int row = i.row();
+  if (row < 0 || row >= hotkeys.count()) return;
+  hotkeys[row]->editor_value = hotkeys[row]->get_default_value();
+  emit dataChanged(index(row, 0), index(row, 1));
+}
+
+void Hotkeys::disable_shortcut(QModelIndex i) {
+  int row = i.row();
+  if (row < 0 || row >= hotkeys.count()) return;
+  hotkeys[row]->editor_value = "";
+  emit dataChanged(index(row, 0), index(row, 1));
 }
 
 int Hotkeys::columnCount(const QModelIndex &) const {
