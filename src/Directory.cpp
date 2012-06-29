@@ -1,8 +1,9 @@
 #include "Directory.h"
 #include <QDir>
-#include "Task.h"
 #include <QDebug>
 #include "Main_window.h"
+#include "Directory_list_task.h"
+#include "Directory_watch_task.h"
 
 #include "qt_gtk.h"
 #include "gio/gio.h"
@@ -13,6 +14,7 @@ Directory::Directory(Main_window* mw, QString p_uri) :
 {
   async_result_type = async_result_unexpected;
   need_update = false;
+  watcher_created = false;
 
   if (uri.startsWith("~")) {
     uri = QDir::homePath() + uri.mid(1);
@@ -30,11 +32,6 @@ Directory::Directory(Main_window* mw, QString p_uri) :
 
   if (uri.startsWith("file://")) {
     uri = uri.mid(7);
-  }
-
-  connect(&watcher, SIGNAL(directoryChanged(QString)), this, SLOT(watcher_event()));
-  if (uri.startsWith("/")) { //todo: watch for network fs
-    watcher.addPath(uri); //todo: move watcher to separate thread
   }
 
   if (uri == "places/mounts") {
@@ -75,8 +72,8 @@ void Directory::refresh() {
   }
   if (uri.startsWith("/")) {
     // regular directory
-    Task task(this, SLOT(thread_ready(QVariant)), task_directory_list, uri);
-    main_window->add_task(task);
+    //Task task(this, SLOT(thread_ready(QVariant)), task_directory_list, uri);
+    create_task(uri);
     return;
   }
   foreach(gio::Mount* mount, main_window->get_gio_mounts()) {
@@ -84,8 +81,7 @@ void Directory::refresh() {
       //convert uri e.g. "ftp://user@host/path"
       //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"
       QString real_dir = mount->path + "/" + uri.mid(mount->uri.length());
-      Task task(this, SLOT(thread_ready(QVariant)), task_directory_list, real_dir);
-      main_window->add_task(task);
+      create_task(real_dir);
       return;
     }
   }
@@ -146,15 +142,11 @@ void Directory::refresh() {
   g_file_mount_enclosing_volume(file, GMountMountFlags(), 0, 0, async_result, this);
 }
 
-void Directory::thread_ready(QVariant result) {
-  if (result.canConvert<Task_error>()) {
-    Task_error e = result.value<Task_error>();
-    emit error(e.message);
-    return;
-  }
-  Q_ASSERT(result.canConvert< QList<File_info> >());
+//void Directory::test(QString m) {
+//  emit error(m);
+//}
 
-  QList<File_info> r = result.value< QList<File_info> >();
+void Directory::task_ready(QList<File_info> r) {
   QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
   for(int i = 0; i < r.count(); i++) {
     r[i].uri = uri_prefix + QFileInfo(r[i].file_path).fileName();
@@ -175,6 +167,21 @@ void Directory::refresh_timeout() {
   if (!need_update) return;
   need_update = false;
   refresh();
+}
+
+void Directory::create_task(QString path) {
+  Directory_list_task* task = new Directory_list_task(this, path);
+  connect(task, SIGNAL(ready(QList<File_info>)), this, SLOT(task_ready(QList<File_info>)));
+  connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
+  //connect(task, SIGNAL(error(QString)), this, SLOT(test(QString)));
+  main_window->add_task(task);
+
+  if (!watcher_created) {
+    Directory_watch_task* task2 = new Directory_watch_task(this, path);
+    connect(task2, SIGNAL(changed()), this, SLOT(watcher_event()));
+    main_window->add_task(task2);
+    watcher_created = true;
+  }
 }
 
 

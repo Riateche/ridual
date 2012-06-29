@@ -3,6 +3,7 @@
 
 #include <QVariant>
 
+/*
 enum Task_type {
   task_directory_list
 };
@@ -28,5 +29,15 @@ public:
 };
 
 Q_DECLARE_METATYPE(Task_error)
+*/
+
+class Task: public QObject {
+  Q_OBJECT
+public:
+  Task(QObject* parent);
+  virtual ~Task() {}
+  virtual void exec() = 0;
+};
+
 
 #endif // TASK_H

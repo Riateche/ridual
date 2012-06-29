@@ -1,6 +1,5 @@
 Bugs:
 - file icons slow for network fs
-- ability to disable shortcut
 - move watcher to separate thread
 - path buttons: head button for home, any bookmark
 - add unref's and free's to gtk code

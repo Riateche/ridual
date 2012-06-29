@@ -26,7 +26,9 @@ SOURCES += main.cpp\
     Directory.cpp \
     Tasks_thread.cpp \
     Task.cpp \
-    Path_button.cpp
+    Path_button.cpp \
+    Directory_list_task.cpp \
+    Directory_watch_task.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -44,7 +46,9 @@ HEADERS  += Main_window.h \
     Tasks_thread.h \
     Task.h \
     Path_button.h \
-    qt_gtk.h
+    qt_gtk.h \
+    Directory_list_task.h \
+    Directory_watch_task.h
 
 FORMS    += Main_window.ui \
     Pane.ui \

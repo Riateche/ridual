@@ -27,7 +27,7 @@ public:
   ~Main_window();
   void set_active_pane(Pane* pane);
   inline Pane* get_active_pane() { return active_pane; }
-  void add_task(Task task);
+  void add_task(Task* task);
 
   QList<gio::Mount*> get_gio_mounts();
   QList<gio::Volume*> get_gio_volumes() { return volumes; }
@@ -71,7 +71,7 @@ public slots:
 
 signals:
   void active_pane_changed();
-  void signal_add_task(Task task);
+  //void signal_add_task(Task task);
   void gio_mounts_changed();
 };
 

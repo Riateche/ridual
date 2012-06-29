@@ -169,6 +169,7 @@ void Pane::directory_ready(QList<File_info> files) {
     directory = pending_directory;
     emit uri_changed();
     pending_directory = 0;
+    ui->loading_indicator->hide();
     ui->address->setText(directory->get_uri());
   } else if (sender() == directory) {
     //it's a refresh, we need to store selection state
@@ -201,6 +202,8 @@ void Pane::directory_error(QString message) {
   if (sender() == pending_directory) {
     pending_directory->deleteLater();
     pending_directory = 0;
+    ui->loading_indicator->hide();
+
   } else if (sender() == directory) {
 
   } else {

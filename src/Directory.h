@@ -2,7 +2,6 @@
 #define DIRECTORY_H
 
 #include <QObject>
-#include <QFileSystemWatcher>
 #include "File_info.h"
 #include <QFileIconProvider>
 
@@ -97,20 +96,24 @@ public slots:
   */
   void refresh();
 
+  //void test(QString m);
+
 private slots:
-  void thread_ready(QVariant result);
+  void task_ready(QList<File_info> result);
   void watcher_event();
   void refresh_timeout();
 
 private:
   Main_window* main_window;
   QString uri;
-  QFileSystemWatcher watcher;
   QFileIconProvider icon_provider;
+
+  void create_task(QString path);
 
   static const int watcher_refresh_timeout = 1000; //ms
 
   bool need_update;
+  bool watcher_created;
 
   enum Async_result_type {
     async_result_unexpected,

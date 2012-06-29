@@ -23,7 +23,7 @@ Main_window::Main_window(QWidget *parent) :
   fetch_gio_mounts();
 
   tasks_thread = new Tasks_thread(this);
-  connect(this, SIGNAL(signal_add_task(Task)), tasks_thread, SLOT(add_task(Task)));
+  //connect(this, SIGNAL(signal_add_task(Task)), tasks_thread, SLOT(add_task(Task)));
   tasks_thread->start();
   qRegisterMetaType< QList<File_info> >("QList<File_info>");
   ui->setupUi(this);
@@ -84,8 +84,8 @@ void Main_window::set_active_pane(Pane *pane) {
   emit active_pane_changed();
 }
 
-void Main_window::add_task(Task task) {
-  emit signal_add_task(task);
+void Main_window::add_task(Task* task) {
+  tasks_thread->add_task(task);
 }
 
 QList<gio::Mount *> Main_window::get_gio_mounts() {
