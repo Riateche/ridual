@@ -188,77 +188,73 @@ void Main_window::refresh_path_toolbar() {
   QList<File_info> path_items;
   QString real_path = active_pane->get_uri();
   //if (real_path != "/" && real_path.endsWith("/")) real_path = real_path.left(real_path.length() - 1);
-  if (real_path == "places") {
+  /*if (real_path == "places") {
     File_info file_info;
     file_info.uri = "places";
     file_info.caption = tr("Places");
     path_items << file_info;
-  } else {
-    QString headless_path;
-    bool root_found = false;
-    foreach(gio::Mount* mount, mounts) {
-      QString uri_prefix = mount->uri;
-      if (!uri_prefix.isEmpty() && real_path.startsWith(uri_prefix)) {
-        File_info file_info;
-        file_info.uri = uri_prefix;
-        file_info.caption = mount->name;
-        path_items << file_info;
-        if (!uri_prefix.endsWith("/")) {
-          uri_prefix += "/";
-        }
-        headless_path = real_path.mid(uri_prefix.count());
-        root_found = true;
-      }
-    }
-    if (!root_found && real_path.startsWith("/")) {
+  } else {*/
+  QString headless_path;
+  bool root_found = false;
+  foreach(gio::Mount* mount, mounts) {
+    QString uri_prefix = mount->uri;
+    if (!uri_prefix.isEmpty() && real_path.startsWith(uri_prefix)) {
       File_info file_info;
-      file_info.uri = "/";
-      file_info.caption = tr("Root");
+      file_info.uri = uri_prefix;
+      file_info.caption = mount->name;
       path_items << file_info;
-      headless_path = real_path.mid(1);
+      if (!uri_prefix.endsWith("/")) {
+        uri_prefix += "/";
+      }
+      headless_path = real_path.mid(uri_prefix.count());
       root_found = true;
     }
-    if (!root_found) {
-      return;
-    }
-    if (!headless_path.isEmpty()) {
-      QStringList parts = headless_path.split("/");
-      for(int i = 0; i < parts.count(); i++) {
-        File_info file_info;
-        file_info.caption = parts[i];
-        file_info.uri = path_items.last().uri;
-        if (!file_info.uri.endsWith("/")) {
-          file_info.uri += "/";
-        }
-        file_info.uri += parts[i];
-        path_items << file_info;
-      }
-    } /*else {
+  }
+  if (!root_found && real_path.startsWith("/")) {
+    File_info file_info;
+    file_info.uri = "/";
+    file_info.caption = tr("Root");
+    path_items << file_info;
+    headless_path = real_path.mid(1);
+    root_found = true;
+  }
+  if (root_found && !headless_path.isEmpty()) {
+    QStringList parts = headless_path.split("/");
+    for(int i = 0; i < parts.count(); i++) {
       File_info file_info;
-      file_info.caption = tr("Invalid location");
-      file_info.uri = "places";
-      path_items << file_info;
-    }*/
-
-    for(int i = 0; i < old_path_items.count(); i++) {
-      if (i < path_items.count() &&
-          old_path_items[i].uri != path_items[i].uri) break;
-      if (i >= path_items.count()) {
-        path_items << old_path_items[i];
+      file_info.caption = parts[i];
+      file_info.uri = path_items.last().uri;
+      if (!file_info.uri.endsWith("/")) {
+        file_info.uri += "/";
       }
+      file_info.uri += parts[i];
+      path_items << file_info;
     }
-    old_path_items = path_items;
   }
 
+  for(int i = 0; i < old_path_items.count(); i++) {
+    if (i < path_items.count() &&
+        old_path_items[i].uri != path_items[i].uri) break;
+    if (i >= path_items.count()) {
+      path_items << old_path_items[i];
+    }
+  }
+  old_path_items = path_items;
+//  }
+
+  File_info places;
+  places.caption = tr("Places");
+  places.uri = "places";
+  path_items.prepend(places);
   for(int i = 0; i < path_items.count(); i++) {
     QString caption = path_items[i].caption;
     if (i < path_items.count() - 1) {
       caption += tr(" ‣");
     }
     Path_button* b = new Path_button(this, caption, path_items[i].uri);
-    if (i == 0) {
-      b->set_go_parent_visible(true);
-    }
+    //if (i == 0) {
+    //  b->set_go_parent_visible(true);
+    //}
     b->setChecked(path_items[i].uri == real_path);
     connect(b, SIGNAL(go_to(QString)), this, SLOT(go_to(QString)));
     ui->path_toolbar->addWidget(b);
@@ -266,6 +262,7 @@ void Main_window::refresh_path_toolbar() {
 }
 
 void Main_window::go_to(QString uri) {
+  refresh_path_toolbar();
   active_pane->set_uri(uri);
 }
 

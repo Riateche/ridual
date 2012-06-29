@@ -1,5 +1,4 @@
 Bugs:
-- path buttons must not be uncheckable by user
 - file icons slow for network fs
 - ability to disable shortcut
 - move watcher to separate thread
