@@ -10,6 +10,7 @@
 #include <QLabel>
 #include "Path_button.h"
 #include <QSpacerItem>
+#include "Special_uri.h"
 
 #include "qt_gtk.h"
 #include "gio/gio.h"
@@ -69,7 +70,6 @@ Main_window::Main_window(QWidget *parent) :
   connect(this, SIGNAL(active_pane_changed()),   this, SLOT(refresh_path_toolbar()));
   refresh_path_toolbar();
 
-  //qDebug() << "styles" << QStyleFactory::keys();
 }
 
 Main_window::~Main_window() {
@@ -92,6 +92,7 @@ void Main_window::add_task(Task* task) {
 QList<gio::Mount *> Main_window::get_gio_mounts() {
   return mounts;
 }
+
 
 void Main_window::init_gio_connects() {
   //qRegisterMetaType< QList<gio::Volume> >("QList<gio::Volume>");
@@ -193,6 +194,23 @@ void Main_window::refresh_path_toolbar() {
   QString real_path = active_pane->get_uri();
   QString headless_path;
   bool root_found = false;
+  QList<Special_uri> special_uris;
+  special_uris << Special_uri(Special_uri::mounts) <<
+                  Special_uri(Special_uri::bookmarks) <<
+                  Special_uri(Special_uri::userdirs);
+  foreach(Special_uri u, special_uris) {
+    if (real_path.startsWith(u.uri())) {
+      File_info f;
+      f.uri = u.uri();
+      f.caption = u.caption();
+      path_items << f;
+      break;
+    }
+  }
+
+
+
+
   foreach(gio::Mount* mount, mounts) {
     QString uri_prefix = mount->uri;
     if (!uri_prefix.isEmpty() && real_path.startsWith(uri_prefix)) {
@@ -239,8 +257,8 @@ void Main_window::refresh_path_toolbar() {
   old_path_items = path_items;
 
   File_info places;
-  places.caption = tr("Places");
-  places.uri = "places";
+  places.caption = Special_uri(Special_uri::places).caption();
+  places.uri = Special_uri(Special_uri::places).uri();
   path_items.prepend(places);
   QList<Path_button*> buttons;
   for(int i = 0; i < path_items.count(); i++) {
@@ -262,7 +280,7 @@ void Main_window::go_to(QString uri) {
 }
 
 void Main_window::on_action_go_places_triggered() {
-  go_to("places");
+  go_to(Special_uri(Special_uri::places).uri());
 }
 
 void Main_window::on_action_go_root_triggered() {

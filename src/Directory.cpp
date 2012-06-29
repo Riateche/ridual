@@ -4,6 +4,7 @@
 #include "Main_window.h"
 #include "Directory_list_task.h"
 #include "Directory_watch_task.h"
+#include "Special_uri.h"
 
 #include "qt_gtk.h"
 #include "gio/gio.h"
@@ -34,9 +35,15 @@ Directory::Directory(Main_window* mw, QString p_uri) :
     uri = uri.mid(7);
   }
 
-  if (uri == "places/mounts") {
+  Special_uri special_uri(uri);
+  if (special_uri == Special_uri::mounts) {
     connect(main_window, SIGNAL(gio_mounts_changed()), this, SLOT(refresh()));
   }
+
+  if (special_uri == Special_uri::bookmarks || special_uri == Special_uri::userdirs) {
+    connect(main_window->bookmarks(), SIGNAL(changed()), this, SLOT(refresh()));
+  }
+
 
   QTimer* t = new QTimer(this);
   connect(t, SIGNAL(timeout()), this, SLOT(refresh_timeout()));
@@ -47,10 +54,10 @@ QString Directory::get_parent_uri() {
   QRegExp network_root("^[^\\:]*\\://[^/]*/$");
   if (network_root.indexIn(uri) == 0) {
     //we are in network root such as "ftp://user@host/"
-    return "places/mounts";
+    return Special_uri(Special_uri::mounts).uri();
   }
-  if (uri == "/" || uri == "places") {
-    return "places";
+  if (uri == "/" || Special_uri(uri).name() == Special_uri::places) {
+    return Special_uri(Special_uri::places).uri();
   }
   QStringList m = uri.split("/"); //uri separator must always be "/"
   if (!m.isEmpty()) m.removeLast();
@@ -65,42 +72,43 @@ QString Directory::get_parent_uri() {
 }
 
 void Directory::refresh() {
-  //qDebug() << "Directory::refresh";
   if (uri.isEmpty()) {
     emit error(tr("Address is empty"));
     return;
   }
   if (uri.startsWith("/")) {
     // regular directory
-    //Task task(this, SLOT(thread_ready(QVariant)), task_directory_list, uri);
     create_task(uri);
     return;
   }
-  foreach(gio::Mount* mount, main_window->get_gio_mounts()) {
-    if (!mount->uri.isEmpty() && uri.startsWith(mount->uri)) {
-      //convert uri e.g. "ftp://user@host/path"
-      //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"
-      QString real_dir = mount->path + "/" + uri.mid(mount->uri.length());
-      create_task(real_dir);
-      return;
-    }
-  }
-  if (uri == "places") { //the root of our virtual directory tree
+  Special_uri special_uri(uri);
+  if (special_uri.name() == Special_uri::places) {
+    //the root of our virtual directory tree
     QList<File_info> r;
     File_info fi;
     fi.caption = tr("Filesystem root");
-    fi.file_path = "/";
     fi.uri = "/";
-    fi.is_file = false;
     r << fi;
     fi = File_info();
-    fi.caption = tr("Mounted filesystems");
-    fi.uri = "places/mounts";
+    fi.caption = tr("Home");
+    fi.uri = QDir::homePath();
+    r << fi;
+    fi = File_info();
+    fi.caption = Special_uri(Special_uri::mounts).caption();
+    fi.uri = Special_uri(Special_uri::mounts).uri();
+    r << fi;
+    fi = File_info();
+    fi.caption = Special_uri(Special_uri::bookmarks).caption();
+    fi.uri = Special_uri(Special_uri::bookmarks).uri();
+    r << fi;
+    fi = File_info();
+    fi.caption = Special_uri(Special_uri::userdirs).caption();
+    fi.uri = Special_uri(Special_uri::userdirs).uri();
     r << fi;
     emit ready(r);
     return;
   }
-  if (uri == "places/mounts") { // list of mounts
+  if (special_uri.name() == Special_uri::mounts) { // list of mounts
     QList<File_info> r;
     foreach (gio::Mount* m, main_window->get_gio_mounts()) {
       File_info i;
@@ -124,8 +132,8 @@ void Directory::refresh() {
     return;
   }
 
-  if (uri.startsWith("places/mounts/")) { //mounting of unmounted volume was requested
-    int id = uri.mid(14).toInt(); //uri is something like "places/mounts/42"
+  if (uri.startsWith(Special_uri(Special_uri::mounts).uri())) { //mounting of unmounted volume was requested
+    int id = uri.mid(Special_uri(Special_uri::mounts).uri().length() + 1).toInt(); //uri is something like "places/mounts/42"
     if (id < 0 || id >= main_window->get_gio_volumes().count()) {
       emit error(tr("Invalid volume id"));
       return;
@@ -134,6 +142,28 @@ void Directory::refresh() {
     async_result_type = async_result_mount_volume;
     g_volume_mount(volume, GMountMountFlags(), 0, 0, async_result, this);
     return;
+  }
+
+  if (special_uri.name() == Special_uri::bookmarks) { // list of bookmarks
+    QList<File_info> list = main_window->bookmarks()->get_all();
+    emit ready(list);
+    return;
+  }
+  if (special_uri.name() == Special_uri::userdirs) { // list of xdg bookmarks
+    QList<File_info> list = main_window->bookmarks()->get_xdg();
+    emit ready(list);
+    return;
+  }
+
+
+  foreach(gio::Mount* mount, main_window->get_gio_mounts()) {
+    if (!mount->uri.isEmpty() && uri.startsWith(mount->uri)) {
+      //convert uri e.g. "ftp://user@host/path"
+      //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"
+      QString real_dir = mount->path + "/" + uri.mid(mount->uri.length());
+      create_task(real_dir);
+      return;
+    }
   }
 
   //address not recognized. try to pass it to gio

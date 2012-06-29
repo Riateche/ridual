@@ -29,7 +29,9 @@ SOURCES += main.cpp\
     Path_button.cpp \
     Directory_list_task.cpp \
     Directory_watch_task.cpp \
-    Path_widget.cpp
+    Path_widget.cpp \
+    Bookmarks.cpp \
+    Special_uri.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -50,7 +52,9 @@ HEADERS  += Main_window.h \
     qt_gtk.h \
     Directory_list_task.h \
     Directory_watch_task.h \
-    Path_widget.h
+    Path_widget.h \
+    Bookmarks.h \
+    Special_uri.h
 
 FORMS    += Main_window.ui \
     Pane.ui \

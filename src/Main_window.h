@@ -8,6 +8,7 @@
 #include "gio/Volume.h"
 #include "File_info.h"
 #include "Task.h"
+#include "Bookmarks.h"
 
 namespace Ui {
   class Main_window;
@@ -32,8 +33,12 @@ public:
   QList<gio::Mount*> get_gio_mounts();
   QList<gio::Volume*> get_gio_volumes() { return volumes; }
 
+  inline Bookmarks* bookmarks() { return &_bookmarks; }
+
+
 
 private:
+  Bookmarks _bookmarks;
   GVolumeMonitor* volume_monitor;
   Ui::Main_window *ui;
 

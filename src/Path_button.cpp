@@ -2,7 +2,7 @@
 #include "Main_window.h"
 #include <QMenu>
 #include "Directory.h"
-
+#include "Special_uri.h"
 #include <QContextMenuEvent>
 
 Path_button::Path_button(Main_window* mw, QString text, QString p_uri) :
@@ -20,9 +20,9 @@ Path_button::Path_button(Main_window* mw, QString text, QString p_uri) :
 }
 
 void Path_button::contextMenuEvent(QContextMenuEvent *e) {
-  if (uri == "places") {
+  if (Special_uri(uri).name() == Special_uri::places) {
     QMenu* menu = new QMenu(this);
-    menu->addAction(tr("Places"))->setEnabled(false);
+    menu->addAction(Special_uri(Special_uri::places).caption())->setEnabled(false);
     menu->exec(e->globalPos());
     return;
   }
