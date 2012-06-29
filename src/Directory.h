@@ -99,12 +99,18 @@ public slots:
 
 private slots:
   void thread_ready(QVariant result);
+  void watcher_event();
+  void refresh_timeout();
 
 private:
   Main_window* main_window;
   QString uri;
   QFileSystemWatcher watcher;
   QFileIconProvider icon_provider;
+
+  static const int watcher_refresh_timeout = 1000; //ms
+
+  bool need_update;
 
   enum Async_result_type {
     async_result_unexpected,

@@ -12,6 +12,8 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   uri(p_uri)
 {
   async_result_type = async_result_unexpected;
+  need_update = false;
+
   if (uri.startsWith("~")) {
     uri = QDir::homePath() + uri.mid(1);
   }
@@ -30,7 +32,7 @@ Directory::Directory(Main_window* mw, QString p_uri) :
     uri = uri.mid(7);
   }
 
-  connect(&watcher, SIGNAL(directoryChanged(QString)), this, SLOT(refresh()));
+  connect(&watcher, SIGNAL(directoryChanged(QString)), this, SLOT(watcher_event()));
   if (uri.startsWith("/")) { //todo: watch for network fs
     watcher.addPath(uri); //todo: move watcher to separate thread
   }
@@ -38,6 +40,10 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   if (uri == "places/mounts") {
     connect(main_window, SIGNAL(gio_mounts_changed()), this, SLOT(refresh()));
   }
+
+  QTimer* t = new QTimer(this);
+  connect(t, SIGNAL(timeout()), this, SLOT(refresh_timeout()));
+  t->start(watcher_refresh_timeout);
 }
 
 QString Directory::get_parent_uri() {
@@ -62,6 +68,7 @@ QString Directory::get_parent_uri() {
 }
 
 void Directory::refresh() {
+  //qDebug() << "Directory::refresh";
   if (uri.isEmpty()) {
     emit error(tr("Address is empty"));
     return;
@@ -158,6 +165,16 @@ void Directory::thread_ready(QVariant result) {
     //todo: this is slow for network fs
   }
   emit ready(r);
+}
+
+void Directory::watcher_event() {
+  need_update = true;
+}
+
+void Directory::refresh_timeout() {
+  if (!need_update) return;
+  need_update = false;
+  refresh();
 }
 
 

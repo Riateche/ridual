@@ -72,3 +72,6 @@ enable_profiler { # gprof profiler
 
 RESOURCES += \
     resources/1.qrc
+
+OTHER_FILES += \
+    ../notes.txt

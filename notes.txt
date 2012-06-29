@@ -1,5 +1,4 @@
 Bugs:
-- don't update more than 1 time per second
 - path buttons must not be uncheckable by user
 - file icons slow for network fs
 - ability to disable shortcut
@@ -9,6 +8,7 @@ Bugs:
 - path toolbar for "places/mounts"
 
 Todo:
+- navigation history; hotkeys; quick search in history
 - watch for changes in network fs
 - undo
 - back/forward
