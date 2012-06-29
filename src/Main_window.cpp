@@ -45,6 +45,10 @@ Main_window::Main_window(QWidget *parent) :
   s.beginGroup("right_pane");
   ui->right_pane->load_state(&s);
   s.endGroup();
+  //todo: load columns
+  Columns columns = Columns::get_default();
+  ui->left_pane->set_columns(columns);
+  ui->right_pane->set_columns(columns);
 
   restoreState(s.value("main_window/state").toByteArray());
   restoreGeometry(s.value("main_window/geometry").toByteArray());

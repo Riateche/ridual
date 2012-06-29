@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     Directory_watch_task.cpp \
     Path_widget.cpp \
     Bookmarks.cpp \
-    Special_uri.cpp
+    Special_uri.cpp \
+    Columns.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -54,7 +55,8 @@ HEADERS  += Main_window.h \
     Directory_watch_task.h \
     Path_widget.h \
     Bookmarks.h \
-    Special_uri.h
+    Special_uri.h \
+    Columns.h
 
 FORMS    += Main_window.ui \
     Pane.ui \

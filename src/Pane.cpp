@@ -13,6 +13,8 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   ui->setupUi(this);
   ui->list->setModel(&file_list_model);
   ui->list->installEventFilter(this);
+  ui->list->viewport()->installEventFilter(this);
+  ui->list->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   ui->address->installEventFilter(this);
   ready = true;
   main_window = 0;
@@ -23,6 +25,8 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   QMovie* loading_movie = new QMovie(":/loading.gif", QByteArray(), ui->loading_indicator);
   ui->loading_indicator->setMovie(loading_movie);
   loading_movie->start();
+
+  connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(current_index_changed(QModelIndex,QModelIndex)));
 }
 
 Pane::~Pane() {
@@ -61,8 +65,10 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
   //without changing selection. It's the hormal behaviour for ctrl+nav.keys,
   //so we're going to emulate Ctrl pressing.
   QList<int> nav_keys;
-  nav_keys << Qt::Key_Down << Qt::Key_Up << Qt::Key_Space <<
+  nav_keys << Qt::Key_Down << Qt::Key_Up <<
+              Qt::Key_Space <<
               Qt::Key_PageDown << Qt::Key_PageUp << Qt::Key_Home << Qt::Key_End;
+  qDebug() << event;
   if (object == ui->list) {
     if (event->type() == QEvent::KeyPress) {
       QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event);
@@ -70,6 +76,11 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
       if (!key_event) return false;
       if (nav_keys.contains(key_event->key()) && key_event->modifiers() == Qt::NoModifier) {
         key_event->setModifiers(Qt::ControlModifier);
+      }
+      if (key_event->key() == Qt::Key_Left || key_event->key() == Qt::Key_Right) {
+        if (key_event->modifiers() == Qt::NoModifier) {
+          return true;
+        }
       }
       if (key_event->key() == Qt::Key_Return && key_event->modifiers() == Qt::NoModifier) {
         open_current();
@@ -90,6 +101,15 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
       }
     }
   }
+  /*if (object == ui->list->viewport()) {
+    QMouseEvent* e = dynamic_cast<QMouseEvent*>(event);
+    if (e && e->buttons() == Qt::LeftButton) {
+       ui->list->selectionModel()->setCurrentIndex(file_list_model.index(
+                                                     ui->list->indexAt(e->pos()).row(), 0),
+                                                     QItemSelectionModel::NoUpdate);
+       return true;
+     }
+  }*/
   return false;
 }
 
@@ -212,6 +232,13 @@ void Pane::directory_error(QString message) {
   }
   //todo: async messages
   QMessageBox::critical(0, tr("Failed to get file list"), message);
+}
+
+void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
+  if (current.column() != 0) {
+    ui->list->selectionModel()->setCurrentIndex(file_list_model.index(current.row(), 0),
+                              QItemSelectionModel::NoUpdate);
+  }
 }
 
 

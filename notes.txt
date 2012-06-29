@@ -1,40 +1,52 @@
 Bugs:
 - file icons slow for network fs
-- path buttons: head button for home, any bookmark
+- path buttons: head button for home dir
 - add unref's and free's to gtk code
-- path toolbar for "places/mounts"
+- watch for changes in network fs
+- don't delete tasks (don't set their parent), delete them after they're executed
 
 Todo:
-- allow relative path in address bar; autocomplete in address bar on keyboard input
-- navigation history; hotkeys; quick search in history
-- watch for changes in network fs
-- undo
-- back/forward
-- possibility to interrupt current task
-- async message box
-- view/edit file, adjustable commands
-- unmount, eject, safely remove
-- mount uri "archive://encoded_archive_uri/" when user goes into an archive; unmount on cdup
-- files list as table (date, owner, mode etc), adjustable columns
-- option "list folders before files"
-- gvfs mount with password and other questions
-- bookmarks support (use and edit)
-- unix drives list
-- display count of selected items, total space used by them, free space on current volume
-- copy (details mode / fast mode), move, make sort/hard links, rename, remove, move to trash
-- ask overwrite and error settings before starting operation
-- select all, unselect all, invert selection, select/unselect by regexp
-- progress in unity taskbar
-- get icon using libnautilus-private/nautilus-icon-info.c
-- copy selected file names to clipboard (only filename, full path, full network path)
-- display mime-type as is / human readable name
-- run tasks in the same time / in queue
-- set max copy speed
-- icons for "places" menus
-- file search
-- resizeable splitter between panes; saving state of splitter
-- ctrl+x/c/v
-- drag and drop
+
+Edit:
+  - open files, get list of programs to open this file
+  - separate shortcut for executing a file
+  - view/edit file, adjustable commands
+  - possibility to interrupt any current task
+  - copy (details mode / fast mode), move, make sort/hard links, rename, remove, move to trash
+  - extract archive to destination, extract here, browse into archive
+  - ask overwrite and error settings before starting operation
+  - progress in unity taskbar
+  - copy selected file names to clipboard (only filename, full path, full network path)
+  - run tasks in the same time / in queue
+  - set max copy speed
+  - ctrl+x/c/v
+  - drag and drop
+
+
+Browse:
+  - navigation history; hotkeys; quick search in history
+  - back/forward
+  - async message box
+  - mount uri "archive://encoded_archive_uri/" when user goes into an archive; unmount on cdup
+  - gvfs mount with password and other questions
+  - files list as table (date, owner, mode etc), adjustable columns
+  - option "list folders before files"
+  - display count of selected items, total space used by them, free space on current volume
+  - select all, unselect all, invert selection, select/unselect by regexp
+  - get icon using libnautilus-private/nautilus-icon-info.c
+  - display mime-type as is / human readable name
+  - icons for "places" menus
+  - file search
+  - resizeable splitter between panes; saving state of splitter
+  - shortcuts for all standard places
+
+Extra:
+  - allow relative path in address bar; autocomplete in address bar on keyboard input
+  - unmount, eject, safely remove
+  - undo
+  - edit bookmarks
+  - unix drives list
+
 
 
 
@@ -44,3 +56,4 @@ Benefits:
 - Display file icons from system theme.
 - All filesystem operations are executed in separate thread.
 - Featured integration with GIO/GVFS (network filesystems, external drives, archives etc).
+- Useful navigation widget with buttons and context menu.

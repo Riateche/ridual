@@ -33,6 +33,8 @@ public:
 
   QString get_uri();
 
+  inline void set_columns(Columns columns) { file_list_model.set_columns(columns); }
+
 signals:
   void uri_changed();
 
@@ -48,6 +50,7 @@ private slots:
   void show_loading_indicator();
   void directory_ready(QList<File_info> files);
   void directory_error(QString message);
+  void current_index_changed(QModelIndex current, QModelIndex previous);
 
 
 private:
