@@ -13,9 +13,6 @@ public:
   void interrupt();
   void add_task(Task* task);
 
-signals:
-  void about_to_terminate();
-  
 public slots:
 
 private:

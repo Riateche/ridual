@@ -27,7 +27,6 @@ void Tasks_thread::add_task(Task *task) {
 }
 
 void Tasks_thread::run() {
-  //watcher = new QFileSystemWatcher(this);
   while(!stopping) {
     Task* task = 0;
     {
@@ -43,5 +42,4 @@ void Tasks_thread::run() {
     queue.pop_back();
     task->exec();
   }
-  emit about_to_terminate();
 }

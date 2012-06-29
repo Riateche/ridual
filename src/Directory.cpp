@@ -142,10 +142,6 @@ void Directory::refresh() {
   g_file_mount_enclosing_volume(file, GMountMountFlags(), 0, 0, async_result, this);
 }
 
-//void Directory::test(QString m) {
-//  emit error(m);
-//}
-
 void Directory::task_ready(QList<File_info> r) {
   QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
   for(int i = 0; i < r.count(); i++) {

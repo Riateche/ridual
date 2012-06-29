@@ -96,7 +96,6 @@ public slots:
   */
   void refresh();
 
-  //void test(QString m);
 
 private slots:
   void task_ready(QList<File_info> result);
