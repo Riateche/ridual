@@ -51,6 +51,7 @@ private:
   void fetch_gio_mounts();
   static void gio_mount_changed(GVolumeMonitor *volume_monitor, GDrive *drive, Main_window* _this);
 
+  void resizeEvent(QResizeEvent *);
 
 private slots:
   void save_settings();

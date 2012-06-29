@@ -3,6 +3,7 @@
 
 #include <QToolButton>
 #include "File_info.h"
+#include <QPushButton>
 
 class Main_window;
 class Directory;
@@ -10,7 +11,7 @@ class Directory;
 class Path_button : public QToolButton {
   Q_OBJECT
 public:
-  explicit Path_button(Main_window* mw, QString text, QString path);
+  explicit Path_button(Main_window* mw, QString text, QString uri);
   inline void set_go_parent_visible(bool v) { go_parent_visible = v; }
 
   void contextMenuEvent(QContextMenuEvent *e);
@@ -22,7 +23,7 @@ public slots:
 
 private:
   Main_window* main_window;
-  QString path;
+  QString uri;
   Directory* parent_directory;
 
   bool menu_pending;

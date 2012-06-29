@@ -4,10 +4,12 @@
 #include "Task.h"
 #include "File_info.h"
 
+
 class Directory_list_task : public Task {
   Q_OBJECT
 public:
   explicit Directory_list_task(QObject *parent, QString p_path);
+  ~Directory_list_task();
   void exec();
   
 signals:
@@ -28,6 +30,7 @@ public slots:
 
 private:
   QString path;
+
   
 };
 

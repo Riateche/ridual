@@ -7,7 +7,12 @@ Directory_list_task::Directory_list_task(QObject *parent, QString p_path) :
 {
 }
 
+Directory_list_task::~Directory_list_task() {
+  access_mutex.lock();
+}
+
 void Directory_list_task::exec() {
+  QMutexLocker locker(&access_mutex);
   QDir dir(path);
   if (!dir.exists()) {
     emit error(tr("Directory %1 does not exist.").arg(dir.absolutePath()));

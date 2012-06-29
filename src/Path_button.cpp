@@ -5,23 +5,29 @@
 
 #include <QContextMenuEvent>
 
-Path_button::Path_button(Main_window* mw, QString text, QString p_path) :
+Path_button::Path_button(Main_window* mw, QString text, QString p_uri) :
   QToolButton(mw),
   main_window(mw),
-  path(p_path),
+  uri(p_uri),
   parent_directory(0),
   go_parent_visible(false)
 {
   setText(text);
-  setToolTip(path);
+  setToolTip(uri);
   setCheckable(true);
   connect(this, SIGNAL(clicked()), this, SLOT(slot_clicked()));
   //setContextMenuPolicy(Qt::CustomContextMenu);
 }
 
 void Path_button::contextMenuEvent(QContextMenuEvent *e) {
+  if (uri == "places") {
+    QMenu* menu = new QMenu(this);
+    menu->addAction(tr("Places"))->setEnabled(false);
+    menu->exec(e->globalPos());
+    return;
+  }
   if (parent_directory == 0) {
-    Directory d(main_window, path);
+    Directory d(main_window, uri);
     parent_directory = new Directory(main_window, d.get_parent_uri());
     connect(parent_directory, SIGNAL(ready(QList<File_info>)),
             this, SLOT(directory_ready(QList<File_info>)));
@@ -32,7 +38,7 @@ void Path_button::contextMenuEvent(QContextMenuEvent *e) {
 }
 
 void Path_button::slot_clicked() {
-  emit go_to(path);
+  emit go_to(uri);
 }
 
 void Path_button::directory_ready(QList<File_info> files) {
@@ -45,7 +51,7 @@ void Path_button::directory_ready(QList<File_info> files) {
   foreach(File_info i, files) {
     if (i.is_folder()) {
       QAction* a = menu->addAction(i.caption, this, SLOT(menu_action_triggered()));
-      if (i.uri == path) {
+      if (i.uri == uri) {
         a->setEnabled(false);
       }
       a->setData(i.uri);
@@ -67,6 +73,6 @@ void Path_button::menu_action_triggered() {
 }
 
 void Path_button::action_go_parent_triggered() {
-  Directory d(main_window, path);
+  Directory d(main_window, uri);
   emit go_to(d.get_parent_uri());
 }

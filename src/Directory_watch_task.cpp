@@ -10,8 +10,13 @@ Directory_watch_task::Directory_watch_task(QObject *parent, QString p_path) :
 {
 }
 
+Directory_watch_task::~Directory_watch_task() {
+  access_mutex.lock();
+}
+
 
 void Directory_watch_task::exec() {
+  QMutexLocker locker(&access_mutex);
   watcher.addPath(path);
   if (QDir(path).exists()) {
     connect(&watcher, SIGNAL(directoryChanged(QString)), this, SIGNAL(changed()));

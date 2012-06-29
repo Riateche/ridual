@@ -8,6 +8,7 @@ class Directory_watch_task : public Task {
   Q_OBJECT
 public:
   explicit Directory_watch_task(QObject *parent, QString path);
+  ~Directory_watch_task();
   void exec();
 
 signals:

@@ -9,6 +9,7 @@
 #include <QToolButton>
 #include <QLabel>
 #include "Path_button.h"
+#include <QSpacerItem>
 
 #include "qt_gtk.h"
 #include "gio/gio.h"
@@ -142,6 +143,10 @@ void Main_window::gio_mount_changed(GVolumeMonitor*, GDrive*, Main_window* _this
   _this->fetch_gio_mounts();
 }
 
+void Main_window::resizeEvent(QResizeEvent *) {
+  ui->path_widget->refresh();
+}
+
 void Main_window::switch_active_pane() {
   set_active_pane(ui->left_pane == active_pane? ui->right_pane: ui->left_pane);
 }
@@ -184,16 +189,8 @@ void Main_window::focus_address_line() {
 
 
 void Main_window::refresh_path_toolbar() {
-  ui->path_toolbar->clear();
   QList<File_info> path_items;
   QString real_path = active_pane->get_uri();
-  //if (real_path != "/" && real_path.endsWith("/")) real_path = real_path.left(real_path.length() - 1);
-  /*if (real_path == "places") {
-    File_info file_info;
-    file_info.uri = "places";
-    file_info.caption = tr("Places");
-    path_items << file_info;
-  } else {*/
   QString headless_path;
   bool root_found = false;
   foreach(gio::Mount* mount, mounts) {
@@ -240,25 +237,23 @@ void Main_window::refresh_path_toolbar() {
     }
   }
   old_path_items = path_items;
-//  }
 
   File_info places;
   places.caption = tr("Places");
   places.uri = "places";
   path_items.prepend(places);
+  QList<Path_button*> buttons;
   for(int i = 0; i < path_items.count(); i++) {
     QString caption = path_items[i].caption;
     if (i < path_items.count() - 1) {
       caption += tr(" ‣");
     }
     Path_button* b = new Path_button(this, caption, path_items[i].uri);
-    //if (i == 0) {
-    //  b->set_go_parent_visible(true);
-    //}
     b->setChecked(path_items[i].uri == real_path);
     connect(b, SIGNAL(go_to(QString)), this, SLOT(go_to(QString)));
-    ui->path_toolbar->addWidget(b);
+    buttons << b;
   }
+  ui->path_widget->set_buttons(buttons);
 }
 
 void Main_window::go_to(QString uri) {

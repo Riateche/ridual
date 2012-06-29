@@ -1,11 +1,11 @@
 Bugs:
 - file icons slow for network fs
-- move watcher to separate thread
 - path buttons: head button for home, any bookmark
 - add unref's and free's to gtk code
 - path toolbar for "places/mounts"
 
 Todo:
+- allow relative path in address bar; autocomplete in address bar on keyboard input
 - navigation history; hotkeys; quick search in history
 - watch for changes in network fs
 - undo
