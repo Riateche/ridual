@@ -1,6 +1,9 @@
 #include "Directory_list_task.h"
 #include <QDir>
 
+#include "qt_gtk.h"
+#include "gio/gio.h"
+
 Directory_list_task::Directory_list_task(QObject *parent, QString p_path) :
   Task(parent),
   path(p_path)
@@ -23,11 +26,11 @@ void Directory_list_task::exec() {
     return;
   }
   QFileInfoList list = dir.entryInfoList(QStringList(), QDir::AllEntries | QDir::NoDotAndDotDot);
-  QList<File_info> r;
+  File_info_list r;
   foreach (QFileInfo info, list) {
     File_info item;
-    item.caption = info.fileName();
-    item.file_path = info.absoluteFilePath();
+    item.name = info.fileName();
+    item.full_path = info.absoluteFilePath();
     item.is_file = info.isFile();
     item.owner = info.owner();
     item.group = info.group();
@@ -36,10 +39,20 @@ void Directory_list_task::exec() {
     item.extension = info.suffix();
     item.full_name = info.fileName();
     item.parent_folder = info.dir().path();
+    item.date_accessed = info.lastRead();
+    item.date_modified = info.lastModified();
+    item.date_created = info.created();
+
+    GFile *file = g_file_new_for_path (info.absoluteFilePath().toLocal8Bit());
+    GFileInfo* info = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, GFileQueryInfoFlags(), 0, 0);
+    const char* content_type = g_file_info_get_content_type(info);
+    item.mime_type = QString::fromLocal8Bit(content_type);
+    g_object_unref(file);
+    g_object_unref(info);
+
 
 
     /*
-    GFile *file = g_file_new_for_path (info.absoluteFilePath().toLocal8Bit());
     //todo: check for null pointers; add gerror for debug output
     GFileInfo *file_info = g_file_query_info (file, "standard::*", (GFileQueryInfoFlags) 0, 0, 0);
     GIcon *icon = g_file_info_get_icon (file_info);

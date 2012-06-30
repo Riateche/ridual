@@ -50,7 +50,7 @@ private:
   QList<gio::Mount*> mounts;
   Tasks_thread* tasks_thread;
 
-  QList<File_info> old_path_items;
+  File_info_list old_path_items;
 
   void init_gio_connects();
   void fetch_gio_mounts();

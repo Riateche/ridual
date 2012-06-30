@@ -17,7 +17,7 @@ signals:
     This signal is emitted when task is completed successfully.
     \param files List of files in the directory.
   */
-  void ready(QList<File_info> files);
+  void ready(File_info_list files);
 
   /*!
     This signal is emitted when task execution fails.

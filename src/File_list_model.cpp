@@ -1,11 +1,14 @@
 #include "File_list_model.h"
 #include <QIcon>
 
+#include "qt_gtk.h"
+#include "gio/gio.h"
+
 
 File_list_model::File_list_model() {
 }
 
-void File_list_model::set_data(QList<File_info> p_list) {
+void File_list_model::set_data(File_info_list p_list) {
   emit layoutAboutToBeChanged();
   list = p_list;
   emit layoutChanged();
@@ -25,20 +28,22 @@ int File_list_model::rowCount(const QModelIndex &parent) const {
 
 int File_list_model::columnCount(const QModelIndex &parent) const {
   if (list.isEmpty()) return 1;
-  return columns.count();
+  return get_current_columns().count();
 }
 
 QVariant File_list_model::headerData(int section, Qt::Orientation orientation, int role) const {
+  Columns current_columns = get_current_columns();
   if (list.isEmpty()) return QVariant();
   if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
-    if (section < 0 || section >= columns.count()) return QVariant();
-    Column column = columns.at(section);
+    if (section < 0 || section >= current_columns.count()) return QVariant();
+    Column column = current_columns.at(section);
     return Columns::get_all()[column];
   }
   return QVariant();
 }
 
 QVariant File_list_model::data(const QModelIndex &index, int role) const {
+  Columns current_columns = get_current_columns();
   int row = index.row(), column = index.column();
   if (list.isEmpty() && row == 0) {
     if (role == Qt::DisplayRole) {
@@ -49,8 +54,8 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
   if (row < 0 || row >= list.count()) return QVariant();
   const File_info& file_info = list.at(row);
   if (role == Qt::DisplayRole) {
-    if (column < 0 || column >= columns.count()) return QVariant();
-    switch (columns[column]) {
+    if (column < 0 || column >= current_columns.count()) return QVariant();
+    switch (current_columns[column]) {
       case column_full_name: {
         return file_info.full_name;
       }
@@ -64,7 +69,7 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
         return file_info.parent_folder;
       }
       case column_full_path: {
-        return file_info.file_path;
+        return file_info.full_path;
       }
       case column_owner: {
         return file_info.owner;
@@ -74,6 +79,24 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
       }
       case column_octal_permissions: {
         return format_octal_permissions(file_info.permissions);
+      }
+      case column_date_modified: {
+        return file_info.date_modified.toString(Qt::SystemLocaleShortDate);
+      }
+      case column_date_created: {
+        return file_info.date_created.toString(Qt::SystemLocaleShortDate);
+      }
+      case column_date_accessed: {
+        return file_info.date_accessed.toString(Qt::SystemLocaleShortDate);
+      }
+      case column_mime_type: {
+        return file_info.mime_type;
+      }
+      case column_type_description: {
+        return get_mime_description(file_info.mime_type);
+      }
+      case column_uri: {
+        return file_info.uri;
       }
       default: {
         return "not implemented";
@@ -108,6 +131,23 @@ File_info File_list_model::info(const QModelIndex &index) {
   return list[index.row()];
 }
 
+Columns File_list_model::get_current_columns() const {
+  if (list.custom_columns_mode) {
+    return list.columns;
+  } else {
+    return columns;
+  }
+}
+
+QString File_list_model::get_mime_description(QString mime_type) {
+  if (mime_descriptions.contains(mime_type)) return mime_descriptions[mime_type];
+  gchar* mime_description = g_content_type_get_description(mime_type.toLocal8Bit());
+  QString r = QString::fromLocal8Bit(mime_description);
+  g_free(mime_description);
+  mime_descriptions.insert(mime_type, r);
+  return r;
+}
+
 QString File_list_model::format_octal_permissions(QFile::Permissions permissions) {
   int r = 0;
   if (permissions & QFile::ReadOwner)   r += 0400;
@@ -121,3 +161,5 @@ QString File_list_model::format_octal_permissions(QFile::Permissions permissions
   if (permissions & QFile::ExeOther)    r += 0001;
   return QString("%1").arg(r, 0, 8);
 }
+
+QHash<QString, QString> File_list_model::mime_descriptions;

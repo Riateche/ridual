@@ -7,10 +7,12 @@ QMap<Column, QString> Columns::get_all() {
   r[column_full_name] = QObject::tr("Full name");
   r[column_parent_folder] = QObject::tr("Parent folder");
   r[column_full_path] = QObject::tr("Full path");
+  r[column_uri]       = QObject::tr("Location");
   r[column_mime_type] = QObject::tr("MIME type");
   r[column_type_description] = QObject::tr("Type");
   r[column_date_modified] = QObject::tr("Date modified");
   r[column_date_accessed] = QObject::tr("Date accessed");
+  r[column_date_created]  = QObject::tr("Date created");
   r[column_owner] = QObject::tr("Owner");
   r[column_owner_full_name] = QObject::tr("Owner name");
   r[column_group] = QObject::tr("Group");

@@ -46,8 +46,8 @@ void Pane::set_uri(QString new_directory) {
   }
   if (pending_directory) delete pending_directory;
   pending_directory = new Directory(main_window, new_directory);
-  connect(pending_directory, SIGNAL(ready(QList<File_info>)),
-          this, SLOT(directory_ready(QList<File_info>)));
+  connect(pending_directory, SIGNAL(ready(File_info_list)),
+          this, SLOT(directory_ready(File_info_list)));
   connect(pending_directory, SIGNAL(error(QString)),
           this, SLOT(directory_error(QString)));
   pending_directory->refresh();
@@ -68,7 +68,7 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
   nav_keys << Qt::Key_Down << Qt::Key_Up <<
               Qt::Key_Space <<
               Qt::Key_PageDown << Qt::Key_PageUp << Qt::Key_Home << Qt::Key_End;
-  qDebug() << event;
+  //qDebug() << event;
   if (object == ui->list) {
     if (event->type() == QEvent::KeyPress) {
       QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event);
@@ -174,7 +174,7 @@ void Pane::show_loading_indicator() {
   }
 }
 
-void Pane::directory_ready(QList<File_info> files) {
+void Pane::directory_ready(File_info_list files) {
   bool old_state_stored = false;
   QString new_current_uri;
   QModelIndex old_current_index;

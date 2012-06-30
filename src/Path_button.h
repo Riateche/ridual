@@ -32,7 +32,7 @@ private:
 
 
 private slots:
-  void directory_ready(QList<File_info> files);
+  void directory_ready(File_info_list files);
   void menu_action_triggered();
   void action_go_parent_triggered();
 };

@@ -6,11 +6,12 @@
 #include "File_info.h"
 #include <QFileIconProvider>
 #include "Columns.h"
+#include <QCache>
 
 class File_list_model : public QAbstractTableModel {
 public:
   File_list_model();
-  void set_data(QList<File_info> list);
+  void set_data(File_info_list list);
   void set_columns(const Columns& new_columns);
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -21,12 +22,16 @@ public:
   QModelIndex index_for_uri(QString uri);
 
   File_info info(const QModelIndex &index);
+  Columns get_current_columns() const;
+
+  static QString get_mime_description(QString mime_type);
 
 private:
-  QList<File_info> list;
+  File_info_list list;
   Columns columns;
-
   static QString format_octal_permissions(QFile::Permissions permissions);
+
+  static QHash<QString, QString> mime_descriptions;
 
 };
 

@@ -84,35 +84,37 @@ void Directory::refresh() {
   Special_uri special_uri(uri);
   if (special_uri.name() == Special_uri::places) {
     //the root of our virtual directory tree
-    QList<File_info> r;
+    File_info_list r;
     File_info fi;
-    fi.caption = tr("Filesystem root");
+    fi.name = tr("Filesystem root");
     fi.uri = "/";
     r << fi;
     fi = File_info();
-    fi.caption = tr("Home");
+    fi.name = tr("Home");
     fi.uri = QDir::homePath();
     r << fi;
     fi = File_info();
-    fi.caption = Special_uri(Special_uri::mounts).caption();
+    fi.name = Special_uri(Special_uri::mounts).caption();
     fi.uri = Special_uri(Special_uri::mounts).uri();
     r << fi;
     fi = File_info();
-    fi.caption = Special_uri(Special_uri::bookmarks).caption();
+    fi.name = Special_uri(Special_uri::bookmarks).caption();
     fi.uri = Special_uri(Special_uri::bookmarks).uri();
     r << fi;
     fi = File_info();
-    fi.caption = Special_uri(Special_uri::userdirs).caption();
+    fi.name = Special_uri(Special_uri::userdirs).caption();
     fi.uri = Special_uri(Special_uri::userdirs).uri();
     r << fi;
+    r.custom_columns_mode = true;
+    r.columns << column_name << column_uri;
     emit ready(r);
     return;
   }
   if (special_uri.name() == Special_uri::mounts) { // list of mounts
-    QList<File_info> r;
+    File_info_list r;
     foreach (gio::Mount* m, main_window->get_gio_mounts()) {
       File_info i;
-      i.caption = m->name;
+      i.name = m->name;
       i.uri = m->default_location;
       r << i;
     }
@@ -122,12 +124,14 @@ void Directory::refresh() {
       //mounted volumes have been listed as gio::Mount's
       if (!v->mounted) {
         File_info i;
-        i.caption = v->name + tr(" (unmounted)");
+        i.name = v->name + tr(" (unmounted)");
         i.uri = QString("places/mounts/%1").arg(id); //use number of volume in list as id
         r << i;
       }
       id++;
     }
+    r.custom_columns_mode = true;
+    r.columns << column_name << column_uri;
     emit ready(r);
     return;
   }
@@ -145,12 +149,16 @@ void Directory::refresh() {
   }
 
   if (special_uri.name() == Special_uri::bookmarks) { // list of bookmarks
-    QList<File_info> list = main_window->bookmarks()->get_all();
+    File_info_list list = main_window->bookmarks()->get_all();
+    list.custom_columns_mode = true;
+    list.columns << column_name << column_uri;
     emit ready(list);
     return;
   }
   if (special_uri.name() == Special_uri::userdirs) { // list of xdg bookmarks
-    QList<File_info> list = main_window->bookmarks()->get_xdg();
+    File_info_list list = main_window->bookmarks()->get_xdg();
+    list.custom_columns_mode = true;
+    list.columns << column_name << column_uri;
     emit ready(list);
     return;
   }
@@ -172,14 +180,14 @@ void Directory::refresh() {
   g_file_mount_enclosing_volume(file, GMountMountFlags(), 0, 0, async_result, this);
 }
 
-void Directory::task_ready(QList<File_info> r) {
+void Directory::task_ready(File_info_list r) {
   QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
   for(int i = 0; i < r.count(); i++) {
-    r[i].uri = uri_prefix + QFileInfo(r[i].file_path).fileName();
+    r[i].uri = uri_prefix + QFileInfo(r[i].full_path).fileName();
     //we can't get icons in non-gui thread, because QFileIconProvider uses QPixmap
     //and it produces warning. We must do it in gui thread, it's bad because
     //it causes GUI to freeze.
-    r[i].icon = icon_provider.icon(QFileInfo(r[i].file_path));
+    r[i].icon = icon_provider.icon(QFileInfo(r[i].full_path));
     //todo: this is slow for network fs
   }
   emit ready(r);
@@ -197,7 +205,7 @@ void Directory::refresh_timeout() {
 
 void Directory::create_task(QString path) {
   Directory_list_task* task = new Directory_list_task(this, path);
-  connect(task, SIGNAL(ready(QList<File_info>)), this, SLOT(task_ready(QList<File_info>)));
+  connect(task, SIGNAL(ready(File_info_list)), this, SLOT(task_ready(File_info_list)));
   connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
   //connect(task, SIGNAL(error(QString)), this, SLOT(test(QString)));
   main_window->add_task(task);

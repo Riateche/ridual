@@ -27,7 +27,7 @@ Main_window::Main_window(QWidget *parent) :
   tasks_thread = new Tasks_thread(this);
   //connect(this, SIGNAL(signal_add_task(Task)), tasks_thread, SLOT(add_task(Task)));
   tasks_thread->start();
-  qRegisterMetaType< QList<File_info> >("QList<File_info>");
+  qRegisterMetaType<File_info_list>("File_info_list");
   ui->setupUi(this);
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
@@ -194,7 +194,7 @@ void Main_window::focus_address_line() {
 
 
 void Main_window::refresh_path_toolbar() {
-  QList<File_info> path_items;
+  File_info_list path_items;
   QString real_path = active_pane->get_uri();
   QString headless_path;
   bool root_found = false;
@@ -206,7 +206,7 @@ void Main_window::refresh_path_toolbar() {
     if (real_path.startsWith(u.uri())) {
       File_info f;
       f.uri = u.uri();
-      f.caption = u.caption();
+      f.name = u.caption();
       path_items << f;
       break;
     }
@@ -220,7 +220,7 @@ void Main_window::refresh_path_toolbar() {
     if (!uri_prefix.isEmpty() && real_path.startsWith(uri_prefix)) {
       File_info file_info;
       file_info.uri = uri_prefix;
-      file_info.caption = mount->name;
+      file_info.name = mount->name;
       path_items << file_info;
       if (!uri_prefix.endsWith("/")) {
         uri_prefix += "/";
@@ -232,7 +232,7 @@ void Main_window::refresh_path_toolbar() {
   if (!root_found && real_path.startsWith("/")) {
     File_info file_info;
     file_info.uri = "/";
-    file_info.caption = tr("Root");
+    file_info.name = tr("Root");
     path_items << file_info;
     headless_path = real_path.mid(1);
     root_found = true;
@@ -241,7 +241,7 @@ void Main_window::refresh_path_toolbar() {
     QStringList parts = headless_path.split("/");
     for(int i = 0; i < parts.count(); i++) {
       File_info file_info;
-      file_info.caption = parts[i];
+      file_info.name = parts[i];
       file_info.uri = path_items.last().uri;
       if (!file_info.uri.endsWith("/")) {
         file_info.uri += "/";
@@ -261,12 +261,12 @@ void Main_window::refresh_path_toolbar() {
   old_path_items = path_items;
 
   File_info places;
-  places.caption = Special_uri(Special_uri::places).caption();
+  places.name = Special_uri(Special_uri::places).caption();
   places.uri = Special_uri(Special_uri::places).uri();
   path_items.prepend(places);
   QList<Path_button*> buttons;
   for(int i = 0; i < path_items.count(); i++) {
-    QString caption = path_items[i].caption;
+    QString caption = path_items[i].name;
     if (i < path_items.count() - 1) {
       caption += tr(" ‣");
     }

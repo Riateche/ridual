@@ -6,8 +6,14 @@ Bugs:
 - don't delete tasks (don't set their parent), delete them after they're executed
 
 
+Current task:
+- special columns for special places
+- permissions must be "-1" and invisible by default
+
+
 
 Todo:
+
 - left/right arrows for horizontal scrolling
 - editing column set
 

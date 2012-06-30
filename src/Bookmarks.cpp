@@ -42,7 +42,7 @@ void Bookmarks::read() {
     int i = s.indexOf(' ');
     if (i >= 0) {
       f.uri = QUrl::fromPercentEncoding(s.left(i).toAscii());
-      f.caption = s.mid(i + 1);
+      f.name = s.mid(i + 1);
     } else {
       f.uri = QUrl::fromPercentEncoding(s.toAscii());
       if (f.uri.startsWith("file://")) {
@@ -50,9 +50,9 @@ void Bookmarks::read() {
       }
       QStringList parts = f.uri.split("/");
       if (parts.last().isEmpty()) {
-        f.caption = f.uri;
+        f.name = f.uri;
       } else {
-        f.caption = parts.last();
+        f.name = parts.last();
       }
     }
     list << f;
@@ -93,7 +93,7 @@ void Bookmarks::read_xdg() {
         }
         File_info f;
         f.uri = value;
-        f.caption = known_dirs[key];
+        f.name = known_dirs[key];
         list_xdg << f;
       }
     }

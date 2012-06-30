@@ -29,8 +29,8 @@ void Path_button::contextMenuEvent(QContextMenuEvent *e) {
   if (parent_directory == 0) {
     Directory d(main_window, uri);
     parent_directory = new Directory(main_window, d.get_parent_uri());
-    connect(parent_directory, SIGNAL(ready(QList<File_info>)),
-            this, SLOT(directory_ready(QList<File_info>)));
+    connect(parent_directory, SIGNAL(ready(File_info_list)),
+            this, SLOT(directory_ready(File_info_list)));
   }
   menu_point = e->globalPos();
   menu_pending = true;
@@ -41,7 +41,7 @@ void Path_button::slot_clicked() {
   emit go_to(uri);
 }
 
-void Path_button::directory_ready(QList<File_info> files) {
+void Path_button::directory_ready(File_info_list files) {
   if (!menu_pending) return;
   QMenu* menu = new QMenu(main_window);
   if (go_parent_visible) {
@@ -50,7 +50,7 @@ void Path_button::directory_ready(QList<File_info> files) {
   }
   foreach(File_info i, files) {
     if (i.is_folder()) {
-      QAction* a = menu->addAction(i.caption, this, SLOT(menu_action_triggered()));
+      QAction* a = menu->addAction(i.name, this, SLOT(menu_action_triggered()));
       if (i.uri == uri) {
         a->setEnabled(false);
       }

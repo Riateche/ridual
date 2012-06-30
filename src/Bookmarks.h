@@ -9,8 +9,8 @@ class Bookmarks : public QObject {
   Q_OBJECT
 public:
   explicit Bookmarks(QObject *parent = 0);
-  inline QList<File_info> get_all() { return list; }
-  inline QList<File_info> get_xdg() { return list_xdg; }
+  inline File_info_list get_all() { return list; }
+  inline File_info_list get_xdg() { return list_xdg; }
 
 signals:
   void changed();
@@ -18,7 +18,7 @@ signals:
 private:
   QString filename, filename_xdg;
   QFileSystemWatcher watcher, watcher_xdg;
-  QList<File_info> list, list_xdg;
+  File_info_list list, list_xdg;
 
 private slots:
   void read();

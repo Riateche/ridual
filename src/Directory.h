@@ -73,7 +73,7 @@ signals:
     This signal is emitted after calling Directory::refresh (manually or automatically).
     \param files List of files in the directory.
   */
-  void ready(QList<File_info> files);
+  void ready(File_info_list files);
 
   /*!
     This signal is emitted after calling Directory::refresh (manually or automatically).
@@ -98,7 +98,7 @@ public slots:
 
 
 private slots:
-  void task_ready(QList<File_info> result);
+  void task_ready(File_info_list result);
   void watcher_event();
   void refresh_timeout();
 

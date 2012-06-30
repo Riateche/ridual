@@ -48,7 +48,7 @@ private slots:
   void on_go_clicked();
   void active_pane_changed();
   void show_loading_indicator();
-  void directory_ready(QList<File_info> files);
+  void directory_ready(File_info_list files);
   void directory_error(QString message);
   void current_index_changed(QModelIndex current, QModelIndex previous);
 
