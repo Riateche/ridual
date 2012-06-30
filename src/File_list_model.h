@@ -26,6 +26,8 @@ private:
   QList<File_info> list;
   Columns columns;
 
+  static QString format_octal_permissions(QFile::Permissions permissions);
+
 };
 
 #endif // FILE_LIST_MODEL_H

@@ -29,6 +29,14 @@ void Directory_list_task::exec() {
     item.caption = info.fileName();
     item.file_path = info.absoluteFilePath();
     item.is_file = info.isFile();
+    item.owner = info.owner();
+    item.group = info.group();
+    item.permissions = info.permissions();
+    item.name = info.baseName();
+    item.extension = info.suffix();
+    item.full_name = info.fileName();
+    item.parent_folder = info.dir().path();
+
 
     /*
     GFile *file = g_file_new_for_path (info.absoluteFilePath().toLocal8Bit());

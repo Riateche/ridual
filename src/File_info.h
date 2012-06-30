@@ -17,10 +17,12 @@ public:
   bool is_file;
   bool is_folder() { return !is_file; }
 
+  QString name, extension, full_name, parent_folder;
+
   QDateTime created_at, modified_at;
   QString mime_type;
   QString owner, group;
-  int permissions;
+  QFile::Permissions permissions;
 };
 
 //Q_DECLARE_METATYPE(File_info)

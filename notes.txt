@@ -5,10 +5,18 @@ Bugs:
 - watch for changes in network fs
 - don't delete tasks (don't set their parent), delete them after they're executed
 
+
+
 Todo:
+- left/right arrows for horizontal scrolling
+- editing column set
+
 
 Edit:
   - open files, get list of programs to open this file
+      http://developer.gnome.org/gio/stable/gio-GContentType.html
+      http://developer.gnome.org/gio/stable/GAppInfo.html
+
   - separate shortcut for executing a file
   - view/edit file, adjustable commands
   - possibility to interrupt any current task

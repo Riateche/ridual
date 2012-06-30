@@ -24,10 +24,12 @@ int File_list_model::rowCount(const QModelIndex &parent) const {
 }
 
 int File_list_model::columnCount(const QModelIndex &parent) const {
+  if (list.isEmpty()) return 1;
   return columns.count();
 }
 
 QVariant File_list_model::headerData(int section, Qt::Orientation orientation, int role) const {
+  if (list.isEmpty()) return QVariant();
   if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
     if (section < 0 || section >= columns.count()) return QVariant();
     Column column = columns.at(section);
@@ -50,7 +52,28 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
     if (column < 0 || column >= columns.count()) return QVariant();
     switch (columns[column]) {
       case column_full_name: {
-        return file_info.caption;
+        return file_info.full_name;
+      }
+      case column_name: {
+        return file_info.name;
+      }
+      case column_extension: {
+        return file_info.extension;
+      }
+      case column_parent_folder: {
+        return file_info.parent_folder;
+      }
+      case column_full_path: {
+        return file_info.file_path;
+      }
+      case column_owner: {
+        return file_info.owner;
+      }
+      case column_group: {
+        return file_info.group;
+      }
+      case column_octal_permissions: {
+        return format_octal_permissions(file_info.permissions);
       }
       default: {
         return "not implemented";
@@ -83,4 +106,18 @@ QModelIndex File_list_model::index_for_uri(QString uri) {
 File_info File_list_model::info(const QModelIndex &index) {
   if (index.row() < 0 || index.row() >= list.count()) return File_info();
   return list[index.row()];
+}
+
+QString File_list_model::format_octal_permissions(QFile::Permissions permissions) {
+  int r = 0;
+  if (permissions & QFile::ReadOwner)   r += 0400;
+  if (permissions & QFile::WriteOwner)  r += 0200;
+  if (permissions & QFile::ExeOwner)    r += 0100;
+  if (permissions & QFile::ReadGroup)   r += 0040;
+  if (permissions & QFile::WriteGroup)  r += 0020;
+  if (permissions & QFile::ExeGroup)    r += 0010;
+  if (permissions & QFile::ReadOther)   r += 0004;
+  if (permissions & QFile::WriteOther)  r += 0002;
+  if (permissions & QFile::ExeOther)    r += 0001;
+  return QString("%1").arg(r, 0, 8);
 }
