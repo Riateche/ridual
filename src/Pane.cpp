@@ -81,6 +81,8 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
       }
       if (key_event->key() == Qt::Key_Left || key_event->key() == Qt::Key_Right) {
         if (key_event->modifiers() == Qt::NoModifier) {
+          int dx = key_event->key() == Qt::Key_Left? -50: 50;
+          ui->list->horizontalScrollBar()->setValue(ui->list->horizontalScrollBar()->value() + dx);
           return true;
         }
       }

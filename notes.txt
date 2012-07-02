@@ -12,10 +12,6 @@ Todo:
 
 
 Edit:
-  - open files, get list of programs to open this file
-      http://developer.gnome.org/gio/stable/gio-GContentType.html
-      http://developer.gnome.org/gio/stable/GAppInfo.html
-
   - separate shortcut for executing a file
   - view/edit file, adjustable commands
   - possibility to interrupt any current task
