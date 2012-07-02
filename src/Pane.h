@@ -35,8 +35,11 @@ public:
 
   inline void set_columns(Columns columns) { file_list_model.set_columns(columns); }
 
+  File_info_list get_selected_files();
+
 signals:
   void uri_changed();
+  void selection_changed();
 
 public slots:
   void go_parent();

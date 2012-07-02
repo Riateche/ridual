@@ -43,6 +43,9 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="action_execute"/>
+    <addaction name="action_view"/>
+    <addaction name="action_edit"/>
    </widget>
    <widget class="QMenu" name="menu_settings">
     <property name="title">
@@ -57,8 +60,23 @@
     <addaction name="action_go_parent_directory"/>
     <addaction name="action_go_places"/>
     <addaction name="action_go_root"/>
+    <addaction name="separator"/>
+    <addaction name="action_refresh"/>
+   </widget>
+   <widget class="QMenu" name="menu_task">
+    <property name="title">
+     <string>Task</string>
+    </property>
+    <addaction name="action_copy"/>
+    <addaction name="action_move"/>
+    <addaction name="action_link"/>
+    <addaction name="action_symbolic_link"/>
+    <addaction name="action_rename"/>
+    <addaction name="action_remove"/>
+    <addaction name="action_move_to_trash"/>
    </widget>
    <addaction name="menu_file"/>
+   <addaction name="menu_task"/>
    <addaction name="menu_go"/>
    <addaction name="menu_settings"/>
   </widget>
@@ -72,15 +90,112 @@
    <property name="text">
     <string>Parent directory</string>
    </property>
+   <property name="shortcut">
+    <string>Backspace</string>
+   </property>
   </action>
   <action name="action_go_places">
    <property name="text">
     <string>Places</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+F1</string>
+   </property>
   </action>
   <action name="action_go_root">
    <property name="text">
     <string>Root filesystem</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F2</string>
+   </property>
+  </action>
+  <action name="action_execute">
+   <property name="text">
+    <string>Execute</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+X</string>
+   </property>
+  </action>
+  <action name="action_view">
+   <property name="text">
+    <string>View</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
+   </property>
+  </action>
+  <action name="action_edit">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
+   </property>
+  </action>
+  <action name="action_copy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="action_move">
+   <property name="text">
+    <string>Move</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="action_link">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Link</string>
+   </property>
+  </action>
+  <action name="action_symbolic_link">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Symbolic link</string>
+   </property>
+  </action>
+  <action name="action_rename">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Rename</string>
+   </property>
+  </action>
+  <action name="action_remove">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Remove</string>
+   </property>
+  </action>
+  <action name="action_move_to_trash">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Move to trash</string>
+   </property>
+  </action>
+  <action name="action_refresh">
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

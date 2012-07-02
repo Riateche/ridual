@@ -6,16 +6,15 @@ Bugs:
 
 
 Todo:
-
-- left/right arrows for horizontal scrolling
-- editing column set
+- open by uris if supported by app
+- open several selected files in one instanse of the app
 
 
 Edit:
   - separate shortcut for executing a file
   - view/edit file, adjustable commands
   - possibility to interrupt any current task
-  - copy (details mode / fast mode), move, make sort/hard links, rename, remove, move to trash
+  - copy (details mode / fast mode), move, make soft/hard links, rename, remove, move to trash
   - extract archive to destination, extract here, browse into archive
   - ask overwrite and error settings before starting operation
   - progress in unity taskbar
@@ -27,6 +26,7 @@ Edit:
 
 
 Browse:
+  - editing column set
   - navigation history; hotkeys; quick search in history
   - back/forward
   - async message box

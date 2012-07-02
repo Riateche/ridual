@@ -70,11 +70,16 @@ private slots:
   void focus_address_line();
   void refresh_path_toolbar();
   void go_to(QString uri);
+  void slot_selection_changed();
 
 
   void on_action_go_places_triggered();
 
   void on_action_go_root_triggered();
+
+  void on_action_refresh_triggered();
+
+  void on_action_execute_triggered();
 
 public slots:
   void switch_active_pane();
@@ -83,6 +88,7 @@ signals:
   void active_pane_changed();
   //void signal_add_task(Task task);
   void gio_mounts_changed();
+  void selection_changed();
 };
 
 #endif // MAIN_WINDOW_H

@@ -11,6 +11,7 @@
 #include "Path_button.h"
 #include <QSpacerItem>
 #include "Special_uri.h"
+#include <QProcess>
 
 #include "qt_gtk.h"
 
@@ -59,11 +60,25 @@ Main_window::Main_window(QWidget *parent) :
 
   set_active_pane(ui->left_pane);
 
-  hotkeys.add("Switch between panes",  "Tab",       this, SLOT(switch_active_pane()));
-  hotkeys.add("Parent directory",      "Backspace", ui->action_go_parent_directory);
-  hotkeys.add("Focus address bar",     "Ctrl+L",    this, SLOT(focus_address_line()));
-  hotkeys.add("Go to filesystem root", "Ctrl+2",    ui->action_go_root);
-  hotkeys.add("Go to places",          "Ctrl+1",    ui->action_go_places);
+  hotkeys.add("Switch between panes",
+              tr("Switch between panes"),
+              "Tab",
+              this, SLOT(switch_active_pane())
+              );
+  hotkeys.add("Focus address bar",
+              tr("Focus address bar"),
+              "Ctrl+L",
+              this, SLOT(focus_address_line())
+              );
+
+  hotkeys.add("Go to parent directory", ui->action_go_parent_directory);
+  hotkeys.add("Go to filesystem root",  ui->action_go_root);
+  hotkeys.add("Go to places",           ui->action_go_places);
+  hotkeys.add("Execute", ui->action_execute);
+  hotkeys.add("View", ui->action_view);
+  hotkeys.add("Edit", ui->action_edit);
+  hotkeys.add("Copy", ui->action_copy);
+  hotkeys.add("Move", ui->action_move);
 
   connect(ui->action_go_parent_directory, SIGNAL(triggered()),
           this, SLOT(go_parent()));
@@ -74,6 +89,10 @@ Main_window::Main_window(QWidget *parent) :
   connect(this, SIGNAL(active_pane_changed()),   this, SLOT(refresh_path_toolbar()));
   refresh_path_toolbar();
 
+  connect(ui->left_pane,  SIGNAL(selection_changed()),   this, SIGNAL(selection_changed()));
+  connect(ui->right_pane, SIGNAL(selection_changed()),   this, SIGNAL(selection_changed()));
+  connect(this,           SIGNAL(active_pane_changed()), this, SIGNAL(selection_changed()));
+  connect(this, SIGNAL(selection_changed()), this, SLOT(slot_selection_changed()));
 }
 
 Main_window::~Main_window() {
@@ -317,10 +336,42 @@ void Main_window::go_to(QString uri) {
   active_pane->set_uri(uri);
 }
 
+void Main_window::slot_selection_changed() {
+  File_info_list list = active_pane->get_selected_files();
+  bool can_execute = false;
+  bool can_edit = false;
+  foreach(File_info f, list) {
+    if (f.is_executable) {
+      can_execute = true;
+    }
+    if (f.is_file) {
+      can_edit = true;
+    }
+  }
+  ui->action_execute->setEnabled(can_execute);
+  ui->action_view->setEnabled(can_edit);
+  ui->action_edit->setEnabled(can_edit);
+}
+
 void Main_window::on_action_go_places_triggered() {
   go_to(Special_uri(Special_uri::places).uri());
 }
 
 void Main_window::on_action_go_root_triggered() {
   go_to("/");
+}
+
+void Main_window::on_action_refresh_triggered(){
+  active_pane->set_uri(active_pane->get_uri());
+}
+
+void Main_window::on_action_execute_triggered() {
+  File_info_list list = active_pane->get_selected_files();
+  foreach(File_info f, list) {
+    QProcess* p = new QProcess(this);
+    p->setWorkingDirectory(QFileInfo(f.full_path).dir().absolutePath());
+    p->start(f.full_path);
+    //todo: catch errors
+    //todo: run in tasks thread
+  }
 }

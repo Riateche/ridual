@@ -28,7 +28,9 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   ui->loading_indicator->setMovie(loading_movie);
   loading_movie->start();
 
-  connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(current_index_changed(QModelIndex,QModelIndex)));
+  connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(current_index_changed(QModelIndex,QModelIndex)));  
+  connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SIGNAL(selection_changed()));
+  connect(ui->list->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selection_changed()));
 }
 
 Pane::~Pane() {
@@ -134,6 +136,26 @@ QString Pane::get_uri() {
   return directory? directory->get_uri(): QString();
 }
 
+File_info_list Pane::get_selected_files() {
+  QModelIndexList indexes = ui->list->selectionModel()->selection().indexes();
+  if (indexes.isEmpty()) {
+    File_info info = file_list_model.info(ui->list->currentIndex());
+    if (info.uri.isEmpty()) {
+      return File_info_list();
+    } else {
+      File_info_list list;
+      list << info;
+      return list;
+    }
+  } else {
+    File_info_list list;
+    foreach (QModelIndex i, indexes) {
+      list << file_list_model.info(i);
+    }
+    return list;
+  }
+}
+
 void Pane::go_parent() {
   set_uri(directory->get_parent_uri());
 }
@@ -227,7 +249,7 @@ void Pane::directory_ready(File_info_list files) {
   }
 
   ui->list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-
+  emit selection_changed();
 }
 
 void Pane::directory_error(QString message) {

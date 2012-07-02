@@ -1,5 +1,6 @@
 #include "Hotkeys.h"
 #include "Hotkey_editor.h"
+#include <QAction>
 
 Hotkeys::Hotkeys(QWidget *parent) :
   QAbstractTableModel(parent),
@@ -14,23 +15,21 @@ Hotkeys::~Hotkeys() {
   }
 }
 
-QShortcut *Hotkeys::add(QString name,
-                         QString default_value,
-                         QObject* receiver,
-                         const char* slot) {
+
+
+void Hotkeys::add(QString name, QAction *action) {
   QSettings settings;
   settings.beginGroup(group_name);
-  hotkeys << new Hotkey(name, settings.value(name, default_value).toString(), default_value, parent_widget);
-  connect(hotkeys.last()->get_shortcut(), SIGNAL(activated()), receiver, slot);
+  QString default_value = action->shortcut().toString();
+  hotkeys << new Hotkey(name, action->text(), settings.value(name, default_value).toString(), default_value, action);
   settings.endGroup();
-  return hotkeys.last()->get_shortcut();
 }
 
-void Hotkeys::add(QString name, QString default_value, QAction* action) {
-  QSettings settings;
-  settings.beginGroup(group_name);
-  hotkeys << new Hotkey(name, settings.value(name, default_value).toString(), default_value, action);
-  settings.endGroup();
+QShortcut *Hotkeys::add(QString name, QString text, QString default_value, QObject *receiver, const char *slot) {
+  QAction* a = new QAction(text, receiver);
+  connect(a, SIGNAL(triggered()), receiver, slot);
+  a->setShortcut(QKeySequence::fromString(default_value));
+  add(name, a);
 }
 
 
@@ -63,7 +62,7 @@ int Hotkeys::rowCount(const QModelIndex &) const {
 QVariant Hotkeys::data(const QModelIndex &index, int role) const {
   if (role == Qt::DisplayRole || role == Qt::EditRole) {
     if (index.column() == column_name) {
-      return hotkeys[index.row()]->get_translated_name();
+      return hotkeys[index.row()]->get_text();
     } else if (index.column() == column_value) {
       return hotkeys[index.row()]->editor_value;
     }

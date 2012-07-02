@@ -24,25 +24,29 @@ public:
   explicit Hotkeys(QWidget *parent = 0);
   ~Hotkeys();
 
-  /*! Add shortcut and connect it to specified slot.
-    \param name           The name displayed in hotkey editor.
+
+  /*! Bind shortcut to specified QAction.
+    \param name           Untranslatable name used for storing value.
+    \param action         Object to be binded. QAction::setShortcut is called when you call
+                          this function. If user edits the shortcut, QAction::setShortcut
+                          will be called again. The shortcut is displayed in the right part
+                          of menu. action->text() is used as displayable name for shortcut.
+                          Initial value of action->shortcut() is used as default value.
+    */
+  void add(QString name, QAction *action);
+
+  /*! Helper method. Add QAction and connect it to specified slot.
+    \param name           Untranslatable name used for storing value.
+    \param text           The name displayed in hotkey editor.
     \param default_value  Default value of shortcut as returned by QKeySequence::toString.
-    \param receiver       Object to be connected to shortcut.
+    \param receiver       Object to be connected to shortcut. Also this object is used
+                          as QAction's parent.
     \param slot           Slot to be connected to shortcut. This slot will be called each time
                           hotkey is pressed. If user edits the shortcut, changes take place
                           immediately after pressing OK button.
     */
-  QShortcut* add(QString name, QString default_value, QObject* receiver, const char* slot);
+  QShortcut* add(QString name, QString text, QString default_value, QObject* receiver, const char* slot);
 
-  /*! Bind shortcut to specified QAction.
-    \param name           The name displayed in hotkey editor.
-    \param default_value  Default value of shortcut as returned by QKeySequence::toString.
-    \param action         Object to be binded. QAction::setShortcut is called when you call
-                          this function. If user edits the shortcut, QAction::setShortcut
-                          will be called again. The shortcut is displayed in the right part
-                          of menu.
-    */
-  void add(QString name, QString default_value, QAction* action);
 
   /*! Set group name used to store settings in QSettings. Default is "hotkeys".
     */
