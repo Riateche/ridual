@@ -2,7 +2,7 @@
 #include <QIcon>
 
 #include "qt_gtk.h"
-#include "gio/gio.h"
+
 
 
 File_list_model::File_list_model() {
@@ -149,6 +149,7 @@ QString File_list_model::get_mime_description(QString mime_type) {
 }
 
 QString File_list_model::format_octal_permissions(QFile::Permissions permissions) {
+  if (permissions == -1) return QString();
   int r = 0;
   if (permissions & QFile::ReadOwner)   r += 0400;
   if (permissions & QFile::WriteOwner)  r += 0200;

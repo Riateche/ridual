@@ -19,6 +19,7 @@ public:
   QString full_path; //! Real path in file system
   QIcon icon;
   bool is_file;
+  bool is_executable;
   bool is_folder() { return !is_file; }
 
   QString extension, full_name, parent_folder;
@@ -35,7 +36,7 @@ public:
   Columns columns;
 };
 
-//Q_DECLARE_METATYPE(File_info)
+Q_DECLARE_METATYPE(File_info)
 Q_DECLARE_METATYPE(File_info_list)
 
 #endif // FILE_INFO_H

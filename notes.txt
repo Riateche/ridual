@@ -2,14 +2,7 @@ Bugs:
 - file icons slow for network fs
 - path buttons: head button for home dir
 - add unref's and free's to gtk code
-- watch for changes in network fs
 - don't delete tasks (don't set their parent), delete them after they're executed
-
-
-Current task:
-- special columns for special places
-- permissions must be "-1" and invisible by default
-
 
 
 Todo:

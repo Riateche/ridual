@@ -6,6 +6,8 @@
 #include <QDebug>
 #include "Directory.h"
 #include <QMessageBox>
+#include <QMenu>
+#include <QScrollBar>
 
 Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   directory = 0;
@@ -139,7 +141,7 @@ void Pane::open_current() {
   if (info.is_folder()) {
     set_uri(info.uri);
   } else {
-    //use info.file_path
+    main_window->get_default_app(info.mime_type).launch(info.full_path);
   }
 }
 
@@ -179,6 +181,7 @@ void Pane::directory_ready(File_info_list files) {
   QString new_current_uri;
   QModelIndex old_current_index;
   QItemSelection old_selection;
+  QPoint old_scroll_pos;
 
   if (sender() == pending_directory) {
     if (pending_directory && directory &&
@@ -196,6 +199,8 @@ void Pane::directory_ready(File_info_list files) {
     old_state_stored = true;
     old_current_index = ui->list->currentIndex();
     old_selection = ui->list->selectionModel()->selection();
+    old_scroll_pos.setX(ui->list->horizontalScrollBar()->value());
+    old_scroll_pos.setY(ui->list->verticalScrollBar()->value());
   } else {
     qWarning("Unknown sender");
     return;
@@ -211,11 +216,16 @@ void Pane::directory_ready(File_info_list files) {
   if (old_state_stored) {
     ui->list->setCurrentIndex(old_current_index);
     ui->list->selectionModel()->select(old_selection, QItemSelectionModel::SelectCurrent);
+    ui->list->horizontalScrollBar()->setValue(old_scroll_pos.x());
+    ui->list->verticalScrollBar()->setValue(old_scroll_pos.y());
   }
   if (!new_current_uri.isEmpty()) {
     ui->list->selectionModel()->setCurrentIndex(file_list_model.index_for_uri(new_current_uri),
                               QItemSelectionModel::NoUpdate);
   }
+
+  ui->list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+
 }
 
 void Pane::directory_error(QString message) {
@@ -242,3 +252,46 @@ void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
 }
 
 
+
+void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
+  File_info file = file_list_model.info(ui->list->indexAt(pos));
+  App_info_list apps = main_window->get_apps(file.mime_type);
+  QMenu* menu = new QMenu(this);
+  if (file.is_folder()) {
+    menu->addAction(tr("Browse"))->setEnabled(false);
+  }
+  if (file.is_file) {
+    menu->addAction(tr("View"))->setEnabled(false);
+    menu->addAction(tr("Edit"))->setEnabled(false);
+  }
+  if (file.is_executable) {
+    menu->addAction(tr("Execute"))->setEnabled(false);
+  }
+  if (menu->actions().count() > 0) menu->addSeparator();
+
+  foreach(App_info app, apps) {
+    QAction* a = menu->addAction(tr("Open with %1 (%2)").arg(app.name()).arg(app.command()), this, SLOT(action_launch_triggered()));
+    QVariantList data;
+    data << QVariant::fromValue(app) << QVariant::fromValue(file);
+    a->setData(data);
+    if (app == apps.default_app) {
+      QFont f = a->font();
+      f.setBold(true);
+      a->setFont(f);
+    }
+  }
+  menu->exec(ui->list->mapToGlobal(pos));
+}
+
+void Pane::action_launch_triggered() {
+  QAction* a = dynamic_cast<QAction*>(sender());
+  if (!a) return;
+  QVariantList data = a->data().toList();
+  if (data.count() != 2 || !data[0].canConvert<App_info>() || !data[1].canConvert<File_info>()) {
+    qWarning("wrong data attached");
+    return;
+  }
+  App_info app = data[0].value<App_info>();
+  File_info file = data[1].value<File_info>();
+  app.launch(file.full_path);
+}

@@ -2,7 +2,7 @@
 #include <QDir>
 
 #include "qt_gtk.h"
-#include "gio/gio.h"
+
 
 Directory_list_task::Directory_list_task(QObject *parent, QString p_path) :
   Task(parent),
@@ -42,6 +42,7 @@ void Directory_list_task::exec() {
     item.date_accessed = info.lastRead();
     item.date_modified = info.lastModified();
     item.date_created = info.created();
+    item.is_executable = item.is_file && info.isExecutable();
 
     GFile *file = g_file_new_for_path (info.absoluteFilePath().toLocal8Bit());
     GFileInfo* info = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, GFileQueryInfoFlags(), 0, 0);

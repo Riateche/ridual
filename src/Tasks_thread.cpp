@@ -4,7 +4,7 @@
 #include <QDebug>
 
 #include "qt_gtk.h"
-#include "gio/gio.h"
+
 
 //#define ICON_BUFFER_SIZE 64*64*16
 // max. size 64x64, 16 will be enough for all ;)

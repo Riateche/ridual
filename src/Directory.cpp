@@ -7,7 +7,7 @@
 #include "Special_uri.h"
 
 #include "qt_gtk.h"
-#include "gio/gio.h"
+
 
 Directory::Directory(Main_window* mw, QString p_uri) :
   main_window(mw),

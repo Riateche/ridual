@@ -9,6 +9,7 @@
 #include "File_info.h"
 #include "Task.h"
 #include "Bookmarks.h"
+#include "App_info.h"
 
 namespace Ui {
   class Main_window;
@@ -34,6 +35,9 @@ public:
   QList<gio::Volume*> get_gio_volumes() { return volumes; }
 
   inline Bookmarks* bookmarks() { return &_bookmarks; }
+
+  App_info_list get_apps(const QString& mime_type);
+  App_info get_default_app(const QString& mime_type);
 
 
 

@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     Path_widget.cpp \
     Bookmarks.cpp \
     Special_uri.cpp \
-    Columns.cpp
+    Columns.cpp \
+    App_info.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -56,7 +57,8 @@ HEADERS  += Main_window.h \
     Path_widget.h \
     Bookmarks.h \
     Special_uri.h \
-    Columns.h
+    Columns.h \
+    App_info.h
 
 FORMS    += Main_window.ui \
     Pane.ui \

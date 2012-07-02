@@ -13,7 +13,7 @@
 #include "Special_uri.h"
 
 #include "qt_gtk.h"
-#include "gio/gio.h"
+
 
 
 Main_window::Main_window(QWidget *parent) :
@@ -95,6 +95,40 @@ void Main_window::add_task(Task* task) {
 
 QList<gio::Mount *> Main_window::get_gio_mounts() {
   return mounts;
+}
+
+App_info_list Main_window::get_apps(const QString &mime_type) {
+  //qDebug() << "Main_window::get_apps";
+  App_info_list r;
+  GList* list = g_app_info_get_all_for_type(mime_type.toLocal8Bit());
+  if (!list) return r;
+  for(; list; list = list->next) {
+    r << App_info(static_cast<GAppInfo*>(list->data));
+    //qDebug() << "found app:" << list->data;
+  }
+
+  QStringList was;
+  for(int i = 0; i < r.count(); i++) {
+
+    QString command = r[i].command();
+    if (was.contains(command)) {
+      r.removeAt(i);
+      i--;
+    } else {
+      was << command;
+    }
+  }
+
+  GAppInfo* default_app = g_app_info_get_default_for_type(mime_type.toLocal8Bit(), 0);
+  //todo: GError here
+  r.default_app = App_info(default_app);
+  return r;
+}
+
+App_info Main_window::get_default_app(const QString &mime_type) {
+  GAppInfo* default_app = g_app_info_get_default_for_type(mime_type.toLocal8Bit(), 0);
+  //todo: GError here
+  return App_info(default_app);
 }
 
 

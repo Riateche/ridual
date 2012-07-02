@@ -53,6 +53,9 @@ private slots:
   void current_index_changed(QModelIndex current, QModelIndex previous);
 
 
+  void on_list_customContextMenuRequested(const QPoint &pos);
+  void action_launch_triggered();
+
 private:
   Ui::Pane *ui;
   bool ready;
