@@ -150,7 +150,9 @@ File_info_list Pane::get_selected_files() {
   } else {
     File_info_list list;
     foreach (QModelIndex i, indexes) {
-      list << file_list_model.info(i);
+      if (i.column() == 0) {
+        list << file_list_model.info(i);
+      }
     }
     return list;
   }

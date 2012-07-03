@@ -13,7 +13,6 @@
 #include "Special_uri.h"
 #include <QProcess>
 #include "Settings_dialog.h"
-
 #include "qt_gtk.h"
 
 

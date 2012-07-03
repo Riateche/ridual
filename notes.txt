@@ -1,5 +1,4 @@
 - add unref's and free's to gtk code
-- path buttons: head button for home dir
 - open several selected files in one instanse of the app
 - copy and move selected files
   - ask overwrite and error settings before starting operation
