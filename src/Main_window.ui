@@ -51,6 +51,7 @@
     <property name="title">
      <string>Settings</string>
     </property>
+    <addaction name="action_general_settings"/>
     <addaction name="action_hotkeys"/>
    </widget>
    <widget class="QMenu" name="menu_go">
@@ -135,6 +136,9 @@
    </property>
   </action>
   <action name="action_copy">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Copy</string>
    </property>
@@ -143,6 +147,9 @@
    </property>
   </action>
   <action name="action_move">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Move</string>
    </property>
@@ -196,6 +203,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="action_general_settings">
+   <property name="text">
+    <string>General settings</string>
    </property>
   </action>
  </widget>

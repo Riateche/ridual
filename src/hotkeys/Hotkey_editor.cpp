@@ -42,3 +42,4 @@ void Hotkey_editor::set_default_value() {
 void Hotkey_editor::disable_shortcut() {
   hotkeys->disable_shortcut(menu_index);
 }
+

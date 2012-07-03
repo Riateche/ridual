@@ -12,6 +12,7 @@
 #include <QSpacerItem>
 #include "Special_uri.h"
 #include <QProcess>
+#include "Settings_dialog.h"
 
 #include "qt_gtk.h"
 
@@ -205,6 +206,22 @@ void Main_window::resizeEvent(QResizeEvent *) {
   ui->path_widget->refresh();
 }
 
+void Main_window::view_or_edit_selected(bool edit) {
+  File_info_list list = active_pane->get_selected_files();
+  foreach(File_info f, list) {
+    QProcess* p = new QProcess(this);
+    p->setWorkingDirectory(QFileInfo(f.full_path).dir().absolutePath());
+    QString command = QSettings().value(edit? "edit_command": "view_command", "gedit %U").toString();
+    command = command.replace("%U", QString("\"%1\"").arg(f.uri));
+    command = command.replace("%F", QString("\"%1\"").arg(f.full_path));
+    //todo: correct shell escaping
+    p->start(command);
+    //todo: catch errors
+    //todo: run in tasks thread
+  }
+
+}
+
 void Main_window::switch_active_pane() {
   set_active_pane(ui->left_pane == active_pane? ui->right_pane: ui->left_pane);
 }
@@ -374,4 +391,17 @@ void Main_window::on_action_execute_triggered() {
     //todo: catch errors
     //todo: run in tasks thread
   }
+}
+
+void Main_window::on_action_general_settings_triggered() {
+  (new Settings_dialog(this))->show();
+}
+
+void Main_window::on_action_view_triggered() {
+  view_or_edit_selected(false);
+}
+
+void Main_window::on_action_edit_triggered() {
+  view_or_edit_selected(true);
+
 }

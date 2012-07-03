@@ -1,4 +1,5 @@
 Bugs:
+- select view and open commands from gio apps list
 - file icons slow for network fs
 - path buttons: head button for home dir
 - add unref's and free's to gtk code
@@ -11,8 +12,6 @@ Todo:
 
 
 Edit:
-  - separate shortcut for executing a file
-  - view/edit file, adjustable commands
   - possibility to interrupt any current task
   - copy (details mode / fast mode), move, make soft/hard links, rename, remove, move to trash
   - extract archive to destination, extract here, browse into archive

@@ -62,6 +62,8 @@ private:
 
   void resizeEvent(QResizeEvent *);
 
+  void view_or_edit_selected(bool edit);
+
 private slots:
   void save_settings();
   void on_action_hotkeys_triggered();
@@ -80,6 +82,12 @@ private slots:
   void on_action_refresh_triggered();
 
   void on_action_execute_triggered();
+
+  void on_action_general_settings_triggered();
+
+  void on_action_view_triggered();
+
+  void on_action_edit_triggered();
 
 public slots:
   void switch_active_pane();

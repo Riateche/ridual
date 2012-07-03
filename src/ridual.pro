@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     Bookmarks.cpp \
     Special_uri.cpp \
     Columns.cpp \
-    App_info.cpp
+    App_info.cpp \
+    Settings_dialog.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -58,11 +59,13 @@ HEADERS  += Main_window.h \
     Bookmarks.h \
     Special_uri.h \
     Columns.h \
-    App_info.h
+    App_info.h \
+    Settings_dialog.h
 
 FORMS    += Main_window.ui \
     Pane.ui \
-    hotkeys/Hotkey_editor.ui
+    hotkeys/Hotkey_editor.ui \
+    Settings_dialog.ui
 
 TRANSLATIONS += translations/ru.ts
 
