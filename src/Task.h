@@ -7,12 +7,10 @@
 class Task: public QObject {
   Q_OBJECT
 public:
-  Task(QObject* parent);
+  Task();
   virtual ~Task() {}
   virtual void exec() = 0;
 
-protected:
-  QMutex access_mutex;
 };
 
 

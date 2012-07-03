@@ -3,9 +3,7 @@
 #include <QDir>
 #include <QDebug>
 
-Directory_watch_task::Directory_watch_task(QObject *parent, QString p_path) :
-  Task(parent),
-  watcher(0),
+Directory_watch_task::Directory_watch_task(QString p_path) :
   path(p_path)
 {
 }
@@ -20,7 +18,7 @@ void Directory_watch_task::exec() {
   watcher.addPath(path);
   if (QDir(path).exists()) {
     connect(&watcher, SIGNAL(directoryChanged(QString)), this, SIGNAL(changed()));
-    qDebug() << "create watcher for" << path;
+//    qDebug() << "create watcher for" << path;
   }
 }
 

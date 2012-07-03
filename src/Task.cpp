@@ -13,5 +13,5 @@ Task::Task(QObject *p_receiver,
   arguments << arg1 << arg2 << arg3;
 }*/
 
-Task::Task(QObject *parent): QObject(parent) {
+Task::Task(): QObject() {
 }

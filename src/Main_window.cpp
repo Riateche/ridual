@@ -299,6 +299,16 @@ void Main_window::refresh_path_toolbar() {
       root_found = true;
     }
   }
+  QString home = QDir::homePath();
+  if (!root_found && real_path.startsWith(home)) {
+    File_info file_info;
+    file_info.uri = home;
+    file_info.name = tr("Home");
+    path_items << file_info;
+    if (!home.endsWith("/")) home += "/";
+    headless_path = real_path.mid(home.length());
+    root_found = true;
+  }
   if (!root_found && real_path.startsWith("/")) {
     File_info file_info;
     file_info.uri = "/";

@@ -17,7 +17,7 @@ QString Special_uri::uri() {
 QString Special_uri::caption() {
   switch(_name) {
     case places:      return QObject::tr("Places");
-    case mounts:      return QObject::tr("Mounted filesystems");
+    case mounts:      return QObject::tr("External drives and network resources");
     case bookmarks:   return QObject::tr("Bookmarks");
     case userdirs:    return QObject::tr("User dirs");
     default: qWarning("Special_uri::caption failed"); return QString();

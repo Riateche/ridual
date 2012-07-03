@@ -204,14 +204,14 @@ void Directory::refresh_timeout() {
 }
 
 void Directory::create_task(QString path) {
-  Directory_list_task* task = new Directory_list_task(this, path);
+  Directory_list_task* task = new Directory_list_task(path);
   connect(task, SIGNAL(ready(File_info_list)), this, SLOT(task_ready(File_info_list)));
   connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
   //connect(task, SIGNAL(error(QString)), this, SLOT(test(QString)));
   main_window->add_task(task);
 
   if (!watcher_created) {
-    Directory_watch_task* task2 = new Directory_watch_task(this, path);
+    Directory_watch_task* task2 = new Directory_watch_task(path);
     connect(task2, SIGNAL(changed()), this, SLOT(watcher_event()));
     main_window->add_task(task2);
     watcher_created = true;

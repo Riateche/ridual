@@ -1,55 +1,55 @@
-Bugs:
+- add unref's and free's to gtk code
+- path buttons: head button for home dir
+- open several selected files in one instanse of the app
+- copy and move selected files
+  - ask overwrite and error settings before starting operation
+  - run tasks in the same time / in queue
+  - progress in unity taskbar
+  - don't deal with "places" locations
+- editing column set
+
+Org:
+- choose license, add license to sources and gui ("about" dialog)
+- add readme
+
+------------------
+
 - select view and open commands from gio apps list
 - file icons slow for network fs
-- path buttons: head button for home dir
-- add unref's and free's to gtk code
-- don't delete tasks (don't set their parent), delete them after they're executed
 
-
-Todo:
-- open by uris if supported by app
-- open several selected files in one instanse of the app
 
 
 Edit:
-  - possibility to interrupt any current task
   - copy (details mode / fast mode), move, make soft/hard links, rename, remove, move to trash
+  - open by uris if supported by app
+  - possibility to interrupt any current task
   - extract archive to destination, extract here, browse into archive
-  - ask overwrite and error settings before starting operation
-  - progress in unity taskbar
   - copy selected file names to clipboard (only filename, full path, full network path)
-  - run tasks in the same time / in queue
   - set max copy speed
   - ctrl+x/c/v
   - drag and drop
 
 
 Browse:
-  - editing column set
   - navigation history; hotkeys; quick search in history
   - back/forward
   - async message box
   - mount uri "archive://encoded_archive_uri/" when user goes into an archive; unmount on cdup
   - gvfs mount with password and other questions
-  - files list as table (date, owner, mode etc), adjustable columns
   - option "list folders before files"
   - display count of selected items, total space used by them, free space on current volume
   - select all, unselect all, invert selection, select/unselect by regexp
   - get icon using libnautilus-private/nautilus-icon-info.c
-  - display mime-type as is / human readable name
   - icons for "places" menus
   - file search
   - resizeable splitter between panes; saving state of splitter
   - shortcuts for all standard places
-
-Extra:
+  - select file by typing its name
   - allow relative path in address bar; autocomplete in address bar on keyboard input
   - unmount, eject, safely remove
   - undo
   - edit bookmarks
   - unix drives list
-
-
 
 
 Benefits:
@@ -59,3 +59,5 @@ Benefits:
 - All filesystem operations are executed in separate thread.
 - Featured integration with GIO/GVFS (network filesystems, external drives, archives etc).
 - Useful navigation widget with buttons and context menu.
+- Open source.
+

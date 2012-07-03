@@ -8,7 +8,7 @@
 class Directory_list_task : public Task {
   Q_OBJECT
 public:
-  explicit Directory_list_task(QObject *parent, QString p_path);
+  explicit Directory_list_task(QString p_path);
   ~Directory_list_task();
   void exec();
   

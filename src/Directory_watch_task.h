@@ -7,7 +7,7 @@
 class Directory_watch_task : public Task {
   Q_OBJECT
 public:
-  explicit Directory_watch_task(QObject *parent, QString path);
+  explicit Directory_watch_task(QString p_path);
   ~Directory_watch_task();
   void exec();
 
@@ -18,6 +18,7 @@ signals:
 private:
   QFileSystemWatcher watcher;
   QString path;
+  QMutex access_mutex;
   
 };
 

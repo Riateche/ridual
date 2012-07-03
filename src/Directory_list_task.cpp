@@ -4,25 +4,24 @@
 #include "qt_gtk.h"
 
 
-Directory_list_task::Directory_list_task(QObject *parent, QString p_path) :
-  Task(parent),
+Directory_list_task::Directory_list_task(QString p_path) :
   path(p_path)
 {
 }
 
 Directory_list_task::~Directory_list_task() {
-  access_mutex.lock();
 }
 
 void Directory_list_task::exec() {
-  QMutexLocker locker(&access_mutex);
   QDir dir(path);
   if (!dir.exists()) {
     emit error(tr("Directory %1 does not exist.").arg(dir.absolutePath()));
+    deleteLater();
     return;
   }
   if (!dir.isReadable()) {
     emit error(tr("Directory %1 can not be read.").arg(dir.absolutePath()));
+    deleteLater();
     return;
   }
   QFileInfoList list = dir.entryInfoList(QStringList(), QDir::AllEntries | QDir::NoDotAndDotDot);
@@ -77,10 +76,8 @@ void Directory_list_task::exec() {
       qDebug() << "g_input_stream_read_all failed";
     }
 */
-
-
-
     r << item;
   }
   emit ready(r);
+  deleteLater();
 }
