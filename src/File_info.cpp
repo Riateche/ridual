@@ -7,4 +7,12 @@ File_info::File_info():
 {
 }
 
+QStringList File_info_list::paths() {
+  QStringList r;
+  foreach(File_info i, *this) {
+    r << i.full_path;
+  }
+  return r;
+}
+
 

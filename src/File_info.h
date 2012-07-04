@@ -34,6 +34,7 @@ public:
   File_info_list(): custom_columns_mode(false) {}
   bool custom_columns_mode;
   Columns columns;
+  QStringList paths();
 };
 
 Q_DECLARE_METATYPE(File_info)

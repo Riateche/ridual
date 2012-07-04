@@ -14,7 +14,7 @@
 #include <QProcess>
 #include "Settings_dialog.h"
 #include "qt_gtk.h"
-
+#include <Copy_dialog.h>
 
 
 Main_window::Main_window(QWidget *parent) :
@@ -148,6 +148,10 @@ App_info Main_window::get_default_app(const QString &mime_type) {
   GAppInfo* default_app = g_app_info_get_default_for_type(mime_type.toLocal8Bit(), 0);
   //todo: GError here
   return App_info(default_app);
+}
+
+Pane *Main_window::destination_pane() {
+  return ui->left_pane == active_pane? ui->right_pane: ui->left_pane;
 }
 
 
@@ -413,4 +417,9 @@ void Main_window::on_action_view_triggered() {
 void Main_window::on_action_edit_triggered() {
   view_or_edit_selected(true);
 
+}
+
+void Main_window::on_action_copy_triggered() {
+  File_info_list list = active_pane->get_selected_files();
+  new Copy_dialog(this, file_action_copy, list.paths(), destination_pane()->get_uri());
 }

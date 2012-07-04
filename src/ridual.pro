@@ -34,7 +34,10 @@ SOURCES += main.cpp\
     Special_uri.cpp \
     Columns.cpp \
     App_info.cpp \
-    Settings_dialog.cpp
+    Settings_dialog.cpp \
+    Copy_dialog.cpp \
+    File_action_task.cpp \
+    File_action_queue.cpp
 
 HEADERS  += Main_window.h \
     Pane.h \
@@ -60,12 +63,16 @@ HEADERS  += Main_window.h \
     Special_uri.h \
     Columns.h \
     App_info.h \
-    Settings_dialog.h
+    Settings_dialog.h \
+    Copy_dialog.h \
+    File_action_task.h \
+    File_action_queue.h
 
 FORMS    += Main_window.ui \
     Pane.ui \
     hotkeys/Hotkey_editor.ui \
-    Settings_dialog.ui
+    Settings_dialog.ui \
+    Copy_dialog.ui
 
 TRANSLATIONS += translations/ru.ts
 

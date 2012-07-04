@@ -13,7 +13,7 @@ Org:
 
 ------------------
 
-- select view and open commands from gio apps list
+- select view and open commands from gio apps list (optional)
 - file icons slow for network fs
 
 

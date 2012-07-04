@@ -39,6 +39,8 @@ public:
   App_info_list get_apps(const QString& mime_type);
   App_info get_default_app(const QString& mime_type);
 
+  Pane* destination_pane();
+
 
 
 private:
@@ -88,6 +90,8 @@ private slots:
   void on_action_view_triggered();
 
   void on_action_edit_triggered();
+
+  void on_action_copy_triggered();
 
 public slots:
   void switch_active_pane();
