@@ -30,6 +30,7 @@ Main_window::Main_window(QWidget *parent) :
   tasks_thread->start();
   qRegisterMetaType<File_info_list>("File_info_list");
   ui->setupUi(this);
+  delete ui->menu_task;
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
 

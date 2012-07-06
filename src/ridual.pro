@@ -98,4 +98,5 @@ RESOURCES += \
     resources/1.qrc
 
 OTHER_FILES += \
-    ../notes.txt
+    ../todo.txt \
+    ../README.md

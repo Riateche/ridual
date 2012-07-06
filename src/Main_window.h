@@ -41,7 +41,7 @@ public:
 
   Pane* destination_pane();
 
-
+  Ui::Main_window* get_ui() { return ui; }
 
 private:
   Bookmarks _bookmarks;

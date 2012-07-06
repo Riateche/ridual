@@ -2,6 +2,7 @@
 #include "ui_Pane.h"
 #include <QKeyEvent>
 #include "Main_window.h"
+#include "ui_Main_window.h"
 #include <QMovie>
 #include <QDebug>
 #include "Directory.h"
@@ -287,11 +288,11 @@ void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
     menu->addAction(tr("Browse"))->setEnabled(false);
   }
   if (file.is_file) {
-    menu->addAction(tr("View"))->setEnabled(false);
-    menu->addAction(tr("Edit"))->setEnabled(false);
+    menu->addAction(main_window->get_ui()->action_view);
+    menu->addAction(main_window->get_ui()->action_edit);
   }
   if (file.is_executable) {
-    menu->addAction(tr("Execute"))->setEnabled(false);
+    menu->addAction(main_window->get_ui()->action_execute);
   }
   if (menu->actions().count() > 0) menu->addSeparator();
 
