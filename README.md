@@ -39,7 +39,7 @@ that aren't implemented yet. The following features will be implemented soon:
 - Undoing operations.
 - Using vavigation history.
 
-
+Ridual is distributed under MIT license (see LICENSE file).
 
 Ridual is written on C++/Qt. You can use Qt Creator to build the project
 from sources, or just type in terminal:
