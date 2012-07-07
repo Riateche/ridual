@@ -1,0 +1,15 @@
+Source: ridual
+Section: devel
+Priority: extra
+Maintainer: Pavel Strakhov <ri@idzaaus.org>
+Build-Depends: debhelper (>= 8.0.0), cdbs (>= 0.3.0), libqt4-dev (>= 4.8.0), qt4-qmake (>= 4.8.0), pkg-config (>= 0.26), libglib2.0-dev (>= 2.32.0), libgtk2.0-dev (>= 2.24.0)
+Standards-Version: 3.9.3
+Homepage: https://github.com/Riateche/ridual
+#Vcs-Git: git://git.debian.org/collab-maint/ridual.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/ridual.git;a=summary
+
+Package: ridual
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Dual-pane file manager
+ Dual-pane file manager for Ubuntu.

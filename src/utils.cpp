@@ -1,4 +1,5 @@
 #include "utils.h"
+/*
 #include <QDebug>
 #include <magic.h>
 
@@ -23,3 +24,4 @@ QString get_mime_type(const QString &filename) {
   //qDebug() << "get_mime_type(" << filename << ") = " << result;
   return result;
 }
+*/
