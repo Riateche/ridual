@@ -6,6 +6,8 @@ There are quite few dual-pane file managers for Linux. This one is
 developed especially for Ubuntu. We're trying to achieve high
 integration with Ubuntu-specific features.
 
+![screenshot](https://github.com/Riateche/ridual/raw/master/doc/screenshot.png)
+
 Ridual will become the best of its kind because it:
 - uses system color theme. You will see no crazy colors.
 - allows to use and change hotkeys for every action.
