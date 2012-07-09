@@ -44,11 +44,11 @@ void Directory_list_task::exec() {
     item.is_executable = item.is_file && info.isExecutable();
 
     GFile *file = g_file_new_for_path (info.absoluteFilePath().toLocal8Bit());
-    GFileInfo* info = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, GFileQueryInfoFlags(), 0, 0);
-    const char* content_type = g_file_info_get_content_type(info);
+    GFileInfo* gfileinfo = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, GFileQueryInfoFlags(), 0, 0);
+    const char* content_type = g_file_info_get_content_type(gfileinfo);
     item.mime_type = QString::fromLocal8Bit(content_type);
     g_object_unref(file);
-    g_object_unref(info);
+    g_object_unref(gfileinfo);
 
 
 
