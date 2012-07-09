@@ -7,13 +7,7 @@
   - progress in unity taskbar
   - don't deal with "places" locations
 - editing column set
-
-Org:
-- choose license, add license to sources and gui ("about" dialog)
-- add readme
-
-
-
+- highlight current item with bold font
 
 Edit:
   - copy (details mode / fast mode), move, make soft/hard links, rename, remove, move to trash
