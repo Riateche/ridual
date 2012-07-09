@@ -41,10 +41,11 @@ that aren't implemented yet. The following features will be implemented soon:
 - Undoing operations.
 - Using vavigation history.
 
-Ridual is distributed under MIT license (see LICENSE file).
+If you're using Ubuntu Precise, you can install Ridual from [our PPA](https://launchpad.net/%7Estrahovp/+archive/ridual).
 
-Ridual is written on C++/Qt. You can use Qt Creator to build the project
-from sources, or just type in terminal:
+You also can download sources and run the command:
 
     qmake && make
+
+Ridual is written on C++/Qt and is distributed under MIT license (see LICENSE file). 
 
