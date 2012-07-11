@@ -12,4 +12,26 @@ Package: ridual
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Dual-pane file manager
- Dual-pane file manager for Ubuntu.
+ Ridual is dual-pane file manager for Ubuntu. There are quite few dual-pane
+ file managers for Linux. This one is developed especially for Ubuntu. We're
+ trying to achieve high integration with Ubuntu-specific features.
+ .
+ Ridual will become the best of its kind because it:
+  - uses system color theme. You will see no crazy colors.
+  - allows one to use and change hotkeys for every action.
+  - displays file icons from system theme based on mime type.
+  - executes all filesystem operations in separate thread.
+  - supports GIO/GVFS mount points. It means you can mount and browse
+    any external drive or network filesystem (such as FTP, SMB, SFTP etc.)
+    just as it can be done in Nautilus. (Note that you can use resources which
+    are already mounted or can be mounted without asking a password. Password
+    dialogs for GIO aren't implemented yet.)
+  - has useful navigation widget with buttons for each part of current path.
+    You can navigate to each of them by clicking on buttons. You can also
+    navigate to another folder by using buttons' context menu.
+  - can open any file in the program accosiated with them accordingly to GNOME
+    settings. You can also choose another program in file's context menu.
+  - supports GNOME bookmarks and user directories (Documents, Desktop, Music)
+  - works in UTF-8 encoding.
+  - supports translations (but there is no translations yet).
+  - is open source and totally free.
