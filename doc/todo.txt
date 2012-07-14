@@ -1,17 +1,72 @@
+F5 - copy with last used settings
+Ctrl+F5 - show copy dialog
+
+F6 - move
+Ctrl+F6 - show move dialog
+Alt+L - create link dialog:
+- Type of link
+  - hard link
+  - absolute soft link
+  - relative soft link
+- No recursive options
+- No "directory exists" error action
+- No max speed
+
+F8 - delete selected files.
+Ctrl+F8 - delete with dialog:
+- No "directory/file exists" error actions
+- No max speed
+
+Tasks must not be created with "places" schema in source or destination.
+
+Option "Follow symlinks"
+
+Actions when there is an error while executing a task:
+- if predefined action was "cancel", cancel task and show a message
+- if predefined action was "ask":
+  Create new window and ask OS to pay attention on it. Show information about bad file,
+  destination (if any), buttons for possible actions (don't forget "retry" action for
+  all cases), total count of errors in the task.
+  If all files are iterated and there are pending question(s), task becomes suspended.
+  Task also pauses if maximum length of bad files list is reached.
+- else perform predefined action and continue.
+
+All options in the dialog must be remembered. Their values must be default on next dialog
+showing.
+
+If some files was skipped or overwritten without propmt, the dialog about this must
+appear after the task is completed.
+
+At the bottom of main window the tasks table must be displayed. Columns:
+- Current action:
+  - "Copying <relative_filename>". May be also "Moving", "Creating link to" etc.
+  - "Reading files list". Appears on recursive looking at the start of task or in main loop.
+  (Files tree mustn't be saved on recursive looking because it can be rather big.)
+  - "Waiting in queue"
+  - "Waiting for your answer"
+- Current progress: progress bar for copying current file (if any)
+- Total progress: progress bar for the whole task (if available)
+- Errors count: count of files skipped and waiting for user's answer. After giving an answer
+  this number must decrease.
+
+Context menu of table row:
+- Pause/Resume
+- Abort
+- Settings: show settings dialog. Settings dialog is the same is creation dialog. Name of
+  action (copy, move etc), all source files and destination dir (if any) must be displayed
+  in description field (in html for beautiful output). Queue can't be changed after creating
+  a task.
+
+
+
+
 - align nav.buttons to the right for right pane
 - hotkeys for 2nd, 3rd associated apps
-
-
-
-- copy and move selected files
-  - ask overwrite and error settings before starting operation
-  - run tasks in the same time / in queue
-  - progress in unity taskbar
-  - don't deal with "places" locations
+- progress in unity taskbar
 - editing column set
-- highlight current item with bold font
 
 Edit:
+  - create folder / file
   - copy (details mode / fast mode), move, make soft/hard links, rename, remove, move to trash
   - open by uris if supported by app
   - possibility to interrupt any current task
@@ -21,7 +76,7 @@ Edit:
   - ctrl+x/c/v
   - drag and drop
   - select view and open commands from gio apps list (optional)
-
+  - rename many with regexp
 
 Browse:
   - file icons slow for network fs

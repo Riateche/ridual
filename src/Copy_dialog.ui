@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>524</width>
-    <height>499</height>
+    <width>511</width>
+    <height>432</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,48 +15,197 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
+    <widget class="QTextBrowser" name="description"/>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Fetching recursive list of files before opereation</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QRadioButton" name="recursive_fetch_auto">
+        <property name="text">
+         <string>Auto</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="recursive_fetch_off">
+        <property name="text">
+         <string>Disable</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="recursive_fetch_on">
+        <property name="text">
+         <string>Enable</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Action on errors:</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Failed to read, write or delete files:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="action_on_rw_error">
+        <item>
+         <property name="text">
+          <string>Ask</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Skip</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Abort</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="action_on_folder_exists">
+        <item>
+         <property name="text">
+          <string>Ask</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Merge</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Overwrite</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Skip</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Abort</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="action_on_file_exists">
+        <item>
+         <property name="text">
+          <string>Ask</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Overwrite</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Skip</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Append</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Abort</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Destination folder exists:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Destination file exists:</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLabel" name="label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QCheckBox" name="enable_max_speed">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
        <property name="text">
-        <string>Action:</string>
+        <string>Max copy speed:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="action">
+      <widget class="QLineEdit" name="max_speed">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <item>
-        <property name="text">
-         <string>Copy</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Move</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Delete</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Move to trash</string>
-        </property>
-       </item>
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>1000</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>kbytes/s</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -73,97 +222,6 @@
       </spacer>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Action will be performed with the following files:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTextEdit" name="target_files">
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QLabel" name="label_destination">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Destination:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="destination">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Fetching recursive list of files before opereation</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QRadioButton" name="recursive_fetch_on">
-        <property name="text">
-         <string>Enable</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Time estimation will be possible, 
-but this can be very slow on large counts of files.</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="recursive_fetch_off">
-        <property name="text">
-         <string>Disable</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Faster, but time estimation will be unavailable.</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="recursive_fetch_auto">
-        <property name="text">
-         <string>Auto</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Recursive fetching will be disabled 
-if too many files found.</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -198,6 +256,16 @@ if too many files found.</string>
       <widget class="QPushButton" name="cancel">
        <property name="text">
         <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="help">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Help</string>
        </property>
       </widget>
      </item>
