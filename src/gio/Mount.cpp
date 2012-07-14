@@ -45,9 +45,9 @@ Mount::Mount(GMount *src) {
     default_location = path;
     uri = path;
   }
-  qDebug() << "path" << path;
-  qDebug() << "default_location" << default_location;
-  qDebug() << "uri" << uri;
+  //qDebug() << "path" << path;
+  //qDebug() << "default_location" << default_location;
+  //qDebug() << "uri" << uri;
   g_object_unref(file);
 }
 
