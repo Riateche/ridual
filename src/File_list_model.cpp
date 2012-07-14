@@ -1,5 +1,7 @@
 #include "File_list_model.h"
 #include <QIcon>
+#include <QDebug>
+#include <QFont>
 
 #include "qt_gtk.h"
 
@@ -38,6 +40,10 @@ QVariant File_list_model::headerData(int section, Qt::Orientation orientation, i
     if (section < 0 || section >= current_columns.count()) return QVariant();
     Column column = current_columns.at(section);
     return Columns::get_all()[column];
+  }
+  if (role == Qt::DisplayRole && orientation == Qt::Vertical) {
+    //return QString("%1").arg(section + 1);
+    return section == current_index.row()? ">": "";
   }
   return QVariant();
 }
@@ -107,6 +113,14 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
   if (role == Qt::DecorationRole && column == 0) {
     return file_info.icon;
   }
+  if (role == Qt::FontRole) {
+    QFont font;
+    if (row == current_index.row()) {
+      font.setBold(true);
+      //if (column == 0) font.setUnderline(true);
+    }
+    return font;
+  }
   return QVariant();
 }
 
@@ -146,6 +160,20 @@ QString File_list_model::get_mime_description(QString mime_type) {
   g_free(mime_description);
   mime_descriptions.insert(mime_type, r);
   return r;
+}
+
+void File_list_model::set_current_index(const QModelIndex &new_index) {
+  QModelIndex old = current_index;
+  current_index = new_index;
+  qDebug() << "dataChanged" << this << old.row() << new_index.row();
+  emit_row_changed(old.row());
+  emit_row_changed(new_index.row());
+}
+
+void File_list_model::emit_row_changed(int row) {
+  if (row < 0) return;
+  emit dataChanged(index(row, 0), index(row, columnCount()));
+  emit headerDataChanged(Qt::Vertical, row, row);
 }
 
 QString File_list_model::format_octal_permissions(QFile::Permissions permissions) {

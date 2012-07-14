@@ -1,6 +1,7 @@
 #include "Hotkeys.h"
 #include "Hotkey_editor.h"
 #include <QAction>
+#include <QWidget>
 
 Hotkeys::Hotkeys(QWidget *parent) :
   QAbstractTableModel(parent),
@@ -25,11 +26,14 @@ void Hotkeys::add(QString name, QAction *action) {
   settings.endGroup();
 }
 
-QShortcut *Hotkeys::add(QString name, QString text, QString default_value, QObject *receiver, const char *slot) {
+QAction *Hotkeys::add(QString name, QString text, QString default_value, QWidget *receiver, const char *slot) {
   QAction* a = new QAction(text, receiver);
   connect(a, SIGNAL(triggered()), receiver, slot);
   a->setShortcut(QKeySequence::fromString(default_value));
+  a->setShortcutContext(Qt::ApplicationShortcut);
   add(name, a);
+  receiver->addAction(a); //we must add action to a widget to make shortcuts work
+  return a;
 }
 
 

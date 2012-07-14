@@ -18,6 +18,10 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   ui->list->installEventFilter(this);
   ui->list->viewport()->installEventFilter(this);
   ui->list->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
+  QFontMetrics font_metrics(ui->list->font());
+  ui->list->verticalHeader()->setFixedWidth(10 + font_metrics.width(">"));
+
   ui->address->installEventFilter(this);
   ready = true;
   main_window = 0;
@@ -71,7 +75,7 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
   //without changing selection. It's the hormal behaviour for ctrl+nav.keys,
   //so we're going to emulate Ctrl pressing.
   QList<int> nav_keys;
-  nav_keys << Qt::Key_Down << Qt::Key_Up <<
+  nav_keys << Qt::Key_Down << Qt::Key_Up << Qt::Key_Left << Qt::Key_Right <<
               Qt::Key_Space <<
               Qt::Key_PageDown << Qt::Key_PageUp << Qt::Key_Home << Qt::Key_End;
   //qDebug() << event;
@@ -83,13 +87,13 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
       if (nav_keys.contains(key_event->key()) && key_event->modifiers() == Qt::NoModifier) {
         key_event->setModifiers(Qt::ControlModifier);
       }
-      if (key_event->key() == Qt::Key_Left || key_event->key() == Qt::Key_Right) {
+      /*if (key_event->key() == Qt::Key_Left || key_event->key() == Qt::Key_Right) {
         if (key_event->modifiers() == Qt::NoModifier) {
           int dx = key_event->key() == Qt::Key_Left? -50: 50;
           ui->list->horizontalScrollBar()->setValue(ui->list->horizontalScrollBar()->value() + dx);
           return true;
         }
-      }
+      }*/
       if (key_event->key() == Qt::Key_Return && key_event->modifiers() == Qt::NoModifier) {
         main_window->open_current();
         return true;
@@ -191,6 +195,12 @@ void Pane::active_pane_changed() {
   if (is_active()) {
     ui->list->setFocus();
   }
+
+  if (is_active()) {
+    file_list_model.set_current_index(ui->list->selectionModel()->currentIndex());
+  } else {
+    file_list_model.set_current_index(file_list_model.index(-1 , -1));
+  }
 }
 
 void Pane::show_loading_indicator() {
@@ -269,9 +279,14 @@ void Pane::directory_error(QString message) {
 }
 
 void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
-  if (current.column() != 0) {
-    ui->list->selectionModel()->setCurrentIndex(file_list_model.index(current.row(), 0),
-                              QItemSelectionModel::NoUpdate);
+  //if (current.column() != 0) {
+  //  ui->list->selectionModel()->setCurrentIndex(file_list_model.index(current.row(), 0),
+  //                            QItemSelectionModel::NoUpdate);
+  //}
+  if (is_active()) {
+    file_list_model.set_current_index(current);
+  } else {
+    file_list_model.set_current_index(file_list_model.index(-1 , -1));
   }
 }
 

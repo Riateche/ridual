@@ -26,9 +26,14 @@ public:
 
   static QString get_mime_description(QString mime_type);
 
+  void set_current_index(const QModelIndex& index);
+
 private:
   File_info_list list;
+  QModelIndex current_index;
   Columns columns;
+
+  void emit_row_changed(int row);
   static QString format_octal_permissions(QFile::Permissions permissions);
 
   static QHash<QString, QString> mime_descriptions;

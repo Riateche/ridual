@@ -66,6 +66,10 @@ Main_window::Main_window(QWidget *parent) :
               "Tab",
               this, SLOT(switch_active_pane())
               );
+
+
+  //ui->menu_file->addAction(test);
+
   hotkeys.add("Focus address bar",
               tr("Focus address bar"),
               "Ctrl+L",

@@ -45,7 +45,7 @@ public:
                           hotkey is pressed. If user edits the shortcut, changes take place
                           immediately after pressing OK button.
     */
-  QShortcut* add(QString name, QString text, QString default_value, QObject* receiver, const char* slot);
+  QAction* add(QString name, QString text, QString default_value, QWidget* receiver, const char* slot);
 
 
   /*! Set group name used to store settings in QSettings. Default is "hotkeys".
