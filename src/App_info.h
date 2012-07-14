@@ -13,6 +13,7 @@ public:
   QString command() const;
   bool operator==(const App_info& other);
   void launch(QString filename);
+  void launch(QStringList filenames);
 
 private:
   GAppInfo* object;

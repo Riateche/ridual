@@ -1,5 +1,6 @@
 #include "App_info.h"
 #include <QDebug>
+#include <QStringList>
 
 App_info::App_info(GAppInfo* obj): object(obj) {
 
@@ -30,16 +31,24 @@ bool App_info::operator ==(const App_info &other) {
 }
 
 void App_info::launch(QString filename) {
-  qDebug() << "launch app" << name() << "with file" << filename;
+  launch( QStringList() << filename );
+}
+
+void App_info::launch(QStringList filenames) {
   GList* list = 0;
-  GFile* file = g_file_new_for_path(filename.toLocal8Bit());
   GError* error = 0;
-  list = g_list_append(list, file);
+  foreach(QString filename, filenames) {
+    GFile* file = g_file_new_for_path(filename.toLocal8Bit());
+    list = g_list_append(list, file);
+  }
   g_app_info_launch(object, list, 0, &error);
-  g_object_unref(file);
+  for(; list; list = list->next) {
+    g_object_unref(static_cast<GFile*>(list->data));
+  }
   g_list_free(list);
   if (error) {
     qDebug() << "error: " << error->message;
+    g_error_free(error);
     //todo: display message to user
   }
 }

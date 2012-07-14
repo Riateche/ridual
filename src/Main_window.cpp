@@ -140,14 +140,12 @@ App_info_list Main_window::get_apps(const QString &mime_type) {
   }
 
   GAppInfo* default_app = g_app_info_get_default_for_type(mime_type.toLocal8Bit(), 0);
-  //todo: GError here
   r.default_app = App_info(default_app);
   return r;
 }
 
 App_info Main_window::get_default_app(const QString &mime_type) {
   GAppInfo* default_app = g_app_info_get_default_for_type(mime_type.toLocal8Bit(), 0);
-  //todo: GError here
   return App_info(default_app);
 }
 
