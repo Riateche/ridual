@@ -2,7 +2,7 @@
 - hotkeys for 2nd, 3rd associated apps
 
 
-- open several selected files in one instanse of the app
+
 - copy and move selected files
   - ask overwrite and error settings before starting operation
   - run tasks in the same time / in queue

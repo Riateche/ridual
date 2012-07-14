@@ -22,7 +22,6 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   ready = true;
   main_window = 0;
   connect(ui->address, SIGNAL(returnPressed()), this, SLOT(on_go_clicked()));
-  connect(ui->list, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(open_current()));
 
   ui->loading_indicator->hide();
   QMovie* loading_movie = new QMovie(":/loading.gif", QByteArray(), ui->loading_indicator);
@@ -42,6 +41,8 @@ Pane::~Pane() {
 void Pane::set_main_window(Main_window *p_main_window) {
   main_window = p_main_window;
   connect(main_window, SIGNAL(active_pane_changed()), this, SLOT(active_pane_changed()));
+  connect(ui->list, SIGNAL(doubleClicked(QModelIndex)), main_window, SLOT(open_current()));
+
 }
 
 void Pane::set_uri(QString new_directory) {
@@ -90,7 +91,7 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
         }
       }
       if (key_event->key() == Qt::Key_Return && key_event->modifiers() == Qt::NoModifier) {
-        open_current();
+        main_window->open_current();
         return true;
       }
     } else if (event->type() == QEvent::FocusIn) {
@@ -159,18 +160,14 @@ File_info_list Pane::get_selected_files() {
   }
 }
 
+File_info Pane::get_current_file() {
+  return file_list_model.info(ui->list->currentIndex());
+}
+
 void Pane::go_parent() {
   set_uri(directory->get_parent_uri());
 }
 
-void Pane::open_current() {
-  File_info info = file_list_model.info(ui->list->currentIndex());
-  if (info.is_folder()) {
-    set_uri(info.uri);
-  } else {
-    main_window->get_default_app(info.mime_type).launch(info.full_path);
-  }
-}
 
 void Pane::focus_address_line() {
   ui->address->setFocus();

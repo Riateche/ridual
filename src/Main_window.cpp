@@ -255,7 +255,21 @@ void Main_window::go_parent() {
 }
 
 void Main_window::open_current() {
-  active_pane->open_current();
+  File_info info = active_pane->get_current_file();
+  if (info.is_folder()) {
+    active_pane->set_uri(info.uri);
+    return;
+  }
+  File_info_list files = active_pane->get_selected_files();
+  QMap<QString, QStringList> types;
+  foreach (File_info i, files) {
+    if (i.is_file && !i.uri.isEmpty() && !i.mime_type.isEmpty()) {
+      types[i.mime_type] << i.uri;
+    }
+  }
+  foreach (QString mime_type, types.keys()) {
+    get_default_app(mime_type).launch(types[mime_type]);
+  }
 }
 
 void Main_window::focus_address_line() {

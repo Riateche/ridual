@@ -36,6 +36,7 @@ public:
   inline void set_columns(Columns columns) { file_list_model.set_columns(columns); }
 
   File_info_list get_selected_files();
+  File_info get_current_file();
 
 signals:
   void uri_changed();
@@ -43,7 +44,6 @@ signals:
 
 public slots:
   void go_parent();
-  void open_current();
   void focus_address_line();
   void refresh();
 

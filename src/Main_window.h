@@ -70,7 +70,6 @@ private slots:
   void save_settings();
   void on_action_hotkeys_triggered();
   void go_parent();
-  void open_current();
   void focus_address_line();
   void refresh_path_toolbar();
   void go_to(QString uri);
@@ -94,6 +93,7 @@ private slots:
   void on_action_copy_triggered();
 
 public slots:
+  void open_current();
   void switch_active_pane();
 
 signals:
