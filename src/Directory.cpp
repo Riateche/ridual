@@ -221,12 +221,10 @@ void Directory::create_task(QString path) {
 
 void Directory::async_result(GObject *source_object, GAsyncResult *res, gpointer p_this) {
   Directory* _this = static_cast<Directory*>(p_this);
-  qDebug() << "async result";
   if (_this->async_result_type == _this->async_result_unexpected) {
     qWarning("Directory::async_result: unexpected call");
   }
   GError* e = 0;
-
   if (_this->async_result_type == _this->async_result_mount_location) {
     g_file_mount_enclosing_volume_finish(reinterpret_cast<GFile*>(source_object), res, &e);
     if (e) {
@@ -234,31 +232,43 @@ void Directory::async_result(GObject *source_object, GAsyncResult *res, gpointer
         //error "volume doesn't implement mount"  occurs on invalid address
         emit _this->error(tr("Address not recognized"));
       } else {
-        emit _this->error(QString::fromLocal8Bit(e->message));
-        qDebug() << "error code: " << e->code << e->message;
+        emit _this->error( tr("Error %1: %2").arg(e->message)
+                           .arg(QString::fromLocal8Bit(e->message)) );
       }
+      g_error_free(e);
       return;
     }
+    g_object_unref(source_object); // source_object is GFile created by us
     // location is mounted now, retry
     _this->refresh();
 
   } else if (_this->async_result_type == _this->async_result_mount_volume) {
     GVolume* volume = reinterpret_cast<GVolume*>(source_object);
     g_volume_mount_finish(volume, res, &e);
+    if (e) {
+      emit _this->error( tr("Error %1: %2").arg(e->message)
+                         .arg(QString::fromLocal8Bit(e->message)) );
+      g_error_free(e);
+      return;
+    }
     GMount* mount = g_volume_get_mount(volume);
     if (!mount) {
       qWarning("mount == null");
+      emit _this->error(tr("Unexpected failure while mounting a volume."));
       return;
     }
     GFile* f = g_mount_get_root(mount);
+    if (!f) {
+      qWarning("f == null");
+      emit _this->error(tr("Unexpected failure while mounting a volume."));
+      return;
+    }
     char* path = g_file_get_path(f);
     _this->uri = QString::fromLocal8Bit(path);
     g_free(path);
-    _this->refresh();
+    g_object_unref(f);
     g_object_unref(mount);
+    _this->refresh();
   }
   _this->async_result_type = _this->async_result_unexpected;
-
-  //todo: g_unref, g_free and error reporting
-
 }
