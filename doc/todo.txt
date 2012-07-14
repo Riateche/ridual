@@ -1,5 +1,7 @@
+- align nav.buttons to the right for right pane
+- hotkeys for 2nd, 3rd associated apps
 
-- add unref's and free's to gtk code
+
 - open several selected files in one instanse of the app
 - copy and move selected files
   - ask overwrite and error settings before starting operation

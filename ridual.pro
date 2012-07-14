@@ -105,5 +105,5 @@ RESOURCES += \
     resources/1.qrc
 
 OTHER_FILES += \
-    todo.txt \
-    README.md
+    README.md \
+    doc/todo.txt
