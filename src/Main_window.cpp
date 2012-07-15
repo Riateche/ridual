@@ -19,6 +19,8 @@
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
+  bookmarks(QDir::home().absoluteFilePath(".gtk-bookmarks"), Bookmarks_file_parser::format_gtk),
+  user_dirs(QDir::home().absoluteFilePath(".config/user-dirs.dirs"), Bookmarks_file_parser::format_xdg),
   ui(new Ui::Main_window),
   hotkeys(this)
 {

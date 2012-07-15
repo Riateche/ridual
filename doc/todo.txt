@@ -28,7 +28,7 @@ Actions when there is an error while executing a task:
   destination (if any), buttons for possible actions (don't forget "retry" action for
   all cases), total count of errors in the task.
   If all files are iterated and there are pending question(s), task becomes suspended.
-  Task also pauses if maximum length of bad files list is reached.
+  Task also pauses if maximum length of bad files list (50,000) is reached.
 - else perform predefined action and continue.
 
 All options in the dialog must be remembered. Their values must be default on next dialog
@@ -58,7 +58,8 @@ Context menu of table row:
   a task.
 
 
-
+- ability to move conflicted files and dirs to *.orig
+- shortcut to abort last created task
 
 - align nav.buttons to the right for right pane
 - hotkeys for 2nd, 3rd associated apps

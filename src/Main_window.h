@@ -8,7 +8,7 @@
 #include "gio/Volume.h"
 #include "File_info.h"
 #include "Task.h"
-#include "Bookmarks.h"
+#include "Bookmarks_file_parser.h"
 #include "App_info.h"
 
 namespace Ui {
@@ -34,7 +34,8 @@ public:
   QList<gio::Mount*> get_gio_mounts();
   QList<gio::Volume*> get_gio_volumes() { return volumes; }
 
-  inline Bookmarks* bookmarks() { return &_bookmarks; }
+  inline Bookmarks_file_parser* get_bookmarks() { return &bookmarks; }
+  inline Bookmarks_file_parser* get_user_dirs() { return &user_dirs; }
 
   App_info_list get_apps(const QString& mime_type);
   App_info get_default_app(const QString& mime_type);
@@ -44,7 +45,7 @@ public:
   Ui::Main_window* get_ui() { return ui; }
 
 private:
-  Bookmarks _bookmarks;
+  Bookmarks_file_parser bookmarks, user_dirs;
   GVolumeMonitor* volume_monitor;
   Ui::Main_window *ui;
 

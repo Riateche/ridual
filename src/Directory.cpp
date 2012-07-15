@@ -36,12 +36,16 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   }
 
   Special_uri special_uri(uri);
-  if (special_uri == Special_uri::mounts) {
+  if (special_uri.name() == Special_uri::mounts) {
     connect(main_window, SIGNAL(gio_mounts_changed()), this, SLOT(refresh()));
   }
 
-  if (special_uri == Special_uri::bookmarks || special_uri == Special_uri::userdirs) {
-    connect(main_window->bookmarks(), SIGNAL(changed()), this, SLOT(refresh()));
+  if (special_uri.name() == Special_uri::bookmarks) {
+    connect(main_window->get_bookmarks(), SIGNAL(changed()), this, SLOT(refresh()));
+  }
+
+  if (special_uri.name() == Special_uri::userdirs) {
+    connect(main_window->get_user_dirs(), SIGNAL(changed()), this, SLOT(refresh()));
   }
 
 
@@ -149,20 +153,19 @@ void Directory::refresh() {
   }
 
   if (special_uri.name() == Special_uri::bookmarks) { // list of bookmarks
-    File_info_list list = main_window->bookmarks()->get_all();
+    File_info_list list = main_window->get_bookmarks()->get_all();
     list.custom_columns_mode = true;
     list.columns << column_name << column_uri;
     emit ready(list);
     return;
   }
   if (special_uri.name() == Special_uri::userdirs) { // list of xdg bookmarks
-    File_info_list list = main_window->bookmarks()->get_xdg();
+    File_info_list list = main_window->get_user_dirs()->get_all();
     list.custom_columns_mode = true;
     list.columns << column_name << column_uri;
     emit ready(list);
     return;
   }
-
 
   foreach(gio::Mount* mount, main_window->get_gio_mounts()) {
     if (!mount->uri.isEmpty() && uri.startsWith(mount->uri)) {

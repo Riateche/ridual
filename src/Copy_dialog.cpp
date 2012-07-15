@@ -12,12 +12,6 @@ Copy_dialog::Copy_dialog(Main_window *mw, File_action_type p_action, QStringList
   destination(p_destination)
 {
   ui->setupUi(this);
-  ui->target_files->setText(target.join("\n"));
-  ui->destination->setText(destination);
-  if (action == file_action_delete) {
-    ui->label_destination->hide();
-    ui->destination->hide();
-  }
   QSettings settings;
   int option = settings.value("recursive_fetch_last_used", 1).toInt();
   switch(static_cast<Recursive_fetch_option>(option)) {

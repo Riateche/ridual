@@ -165,7 +165,6 @@ QString File_list_model::get_mime_description(QString mime_type) {
 void File_list_model::set_current_index(const QModelIndex &new_index) {
   QModelIndex old = current_index;
   current_index = new_index;
-  qDebug() << "dataChanged" << this << old.row() << new_index.row();
   emit_row_changed(old.row());
   emit_row_changed(new_index.row());
 }

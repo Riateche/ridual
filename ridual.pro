@@ -48,7 +48,8 @@ SOURCES += src/main.cpp\
     src/Settings_dialog.cpp \
     src/Copy_dialog.cpp \
     src/File_action_task.cpp \
-    src/File_action_queue.cpp
+    src/File_action_queue.cpp \
+    src/Bookmarks_file_parser.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -77,7 +78,8 @@ HEADERS  += src/Main_window.h \
     src/Settings_dialog.h \
     src/Copy_dialog.h \
     src/File_action_task.h \
-    src/File_action_queue.h
+    src/File_action_queue.h \
+    src/Bookmarks_file_parser.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \
