@@ -95,3 +95,4 @@ void Bookmarks_file_parser::read() {
   watcher.addPath(filename);
 }
 
+

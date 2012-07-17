@@ -21,8 +21,7 @@ INSTALLS += install_desktop
 TEMPLATE = app
 
 
-SOURCES += src/main.cpp\
-    src/Main_window.cpp \
+SOURCES += src/Main_window.cpp \
     src/Pane.cpp \
     src/File_list_model.cpp \
     src/hotkeys/Hotkey_editor.cpp \
@@ -41,7 +40,6 @@ SOURCES += src/main.cpp\
     src/Directory_list_task.cpp \
     src/Directory_watch_task.cpp \
     src/Path_widget.cpp \
-    src/Bookmarks.cpp \
     src/Special_uri.cpp \
     src/Columns.cpp \
     src/App_info.cpp \
@@ -71,7 +69,6 @@ HEADERS  += src/Main_window.h \
     src/Directory_list_task.h \
     src/Directory_watch_task.h \
     src/Path_widget.h \
-    src/Bookmarks.h \
     src/Special_uri.h \
     src/Columns.h \
     src/App_info.h \
@@ -102,6 +99,17 @@ enable_profiler { # gprof profiler
   QMAKE_CXXFLAGS+=-pg
   QMAKE_LFLAGS+=-pg
 }
+
+testing {
+  LIBS += -lgtest -lgtest_main
+  SOURCES +=  $$_PRO_FILE_PWD_/tests/*.cpp
+  TARGET = ridual-test
+  DEFINES += "TEST_ENV_PATH=\\\"$$_PRO_FILE_PWD_/tests/env\\\""
+} else {
+  SOURCES += src/main.cpp
+}
+
+
 
 RESOURCES += \
     resources/1.qrc
