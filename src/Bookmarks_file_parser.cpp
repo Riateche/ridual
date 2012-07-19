@@ -23,6 +23,7 @@ Bookmarks_file_parser::Bookmarks_file_parser(QString file_path,
 }
 
 void Bookmarks_file_parser::read() {
+  //qDebug() << "Bookmarks_file_parser::read";
   list.clear();
   QFile file(filename);
   if (!file.open(QFile::ReadOnly)) {
@@ -34,6 +35,7 @@ void Bookmarks_file_parser::read() {
     stream.setCodec("UTF-8");
     while(!stream.atEnd()) {
       QString s = stream.readLine().trimmed();
+      //qDebug() << "line: " << s;
       if (s.isEmpty()) continue;
       File_info f;
       int i = s.indexOf(' ');
@@ -42,15 +44,15 @@ void Bookmarks_file_parser::read() {
         f.name = s.mid(i + 1);
       } else {
         f.uri = QUrl::fromPercentEncoding(s.toAscii());
-        if (f.uri.startsWith("file://")) {
-          f.uri = f.uri.mid(7);
-        }
         QStringList parts = f.uri.split("/");
         if (parts.last().isEmpty()) {
           f.name = f.uri;
         } else {
           f.name = parts.last();
         }
+      }
+      if (f.uri.startsWith("file://")) {
+        f.uri = f.uri.mid(7);
       }
       list << f;
     }

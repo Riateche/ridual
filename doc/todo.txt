@@ -1,3 +1,13 @@
+- tests:
+-- add "clear" option for test launcher
+-- correct getting project dir
+-- modify readme to reflect new script
+-- compile from gtest source
+-- continue writing tests for Directory
+
+
+- file size in File_info
+
 F5 - copy with last used settings
 Ctrl+F5 - show copy dialog
 

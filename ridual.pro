@@ -101,10 +101,12 @@ enable_profiler { # gprof profiler
 }
 
 testing {
-  LIBS += -lgtest -lgtest_main
-  SOURCES +=  $$_PRO_FILE_PWD_/tests/*.cpp
+  QT += testlib
+  LIBS += -lgtest
+  SOURCES += $$_PRO_FILE_PWD_/tests/*.cpp
+  HEADERS += $$_PRO_FILE_PWD_/tests/*.h
   TARGET = ridual-test
-  DEFINES += "TEST_ENV_PATH=\\\"$$_PRO_FILE_PWD_/tests/env\\\""
+  #DEFINES += "TEST_ENV_PATH=\\\"$$_PRO_FILE_PWD_/tests/env\\\""
 } else {
   SOURCES += src/main.cpp
 }
@@ -116,4 +118,5 @@ RESOURCES += \
 
 OTHER_FILES += \
     README.md \
-    doc/todo.txt
+    doc/todo.txt \
+    tests/run.sh

@@ -45,11 +45,11 @@ that aren't implemented yet. The following features will be implemented soon:
 
 If you're using Ubuntu Precise, you can install Ridual from [our PPA](https://launchpad.net/%7Estrahovp/+archive/ridual).
 
-You also can download sources and run the command:
+You also can download sources and run the following commands:
 
     qmake
     make
-    make install
+    sudo checkinstall
 
 Ridual is written on C++/Qt and is distributed under MIT license (see LICENSE file). 
 

@@ -15,6 +15,8 @@
 #include "Settings_dialog.h"
 #include "qt_gtk.h"
 #include <Copy_dialog.h>
+#include <QTextCodec>
+
 
 
 Main_window::Main_window(QWidget *parent) :
@@ -24,6 +26,8 @@ Main_window::Main_window(QWidget *parent) :
   ui(new Ui::Main_window),
   hotkeys(this)
 {
+  QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
+
   init_gio_connects();
   fetch_gio_mounts();
 
@@ -40,7 +44,7 @@ Main_window::Main_window(QWidget *parent) :
   //qDebug() << "language: " << QLocale::languageToString(language);
 
   QApplication::setApplicationName("ridual");
-  QApplication::setOrganizationName("riateche");
+  QApplication::setOrganizationName("ridual");
 
   QSettings s;
   s.beginGroup("left_pane");
