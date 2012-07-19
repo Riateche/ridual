@@ -71,13 +71,12 @@ TEST(Bookmarks_file_parser, auto_update) {
                           Bookmarks_file_parser::format_gtk);
   File_info_list list = p.get_all();
   ASSERT_EQ(8, list.count());
-
+  QSignalSpy spy(&p, SIGNAL(changed()));
   QFile f(QDir(TEST_ENV_PATH).absoluteFilePath(".gtk-bookmarks"));
   ASSERT_TRUE(f.open(QFile::Append));
   f.write("file:///new/uri new name\n");
   f.close();
-  //QApplication::processEvents();
-  QTest::qWait(1000);
+  ASSERT_TRUE(wait_for_signal(&spy));
   list = p.get_all();
   ASSERT_EQ(9, list.count()) << "Bookmarks wasn't updated";
   EXPECT_EQ("/new/uri", list[8].uri);

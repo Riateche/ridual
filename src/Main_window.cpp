@@ -107,6 +107,11 @@ Main_window::Main_window(QWidget *parent) :
 }
 
 Main_window::~Main_window() {
+  foreach(gulong id, gio_connects) {
+    g_signal_handler_disconnect (volume_monitor, id);
+  }
+  gio_connects.clear();
+
   save_settings();
   tasks_thread->interrupt();
   delete tasks_thread;
@@ -172,17 +177,17 @@ void Main_window::init_gio_connects() {
   char** argv = QApplication::argv();
   gtk_init(&argc, &argv);
   volume_monitor = g_volume_monitor_get();
-  g_signal_connect(volume_monitor, "volume-added",
+  gio_connects << g_signal_connect(volume_monitor, "volume-added",
                    G_CALLBACK(gio_mount_changed), this);
-  g_signal_connect(volume_monitor, "volume-changed",
+  gio_connects << g_signal_connect(volume_monitor, "volume-changed",
                    G_CALLBACK(gio_mount_changed), this);
-  g_signal_connect(volume_monitor, "volume-removed",
+  gio_connects << g_signal_connect(volume_monitor, "volume-removed",
                    G_CALLBACK(gio_mount_changed), this);
-  g_signal_connect(volume_monitor, "mount-added",
+  gio_connects << g_signal_connect(volume_monitor, "mount-added",
                    G_CALLBACK(gio_mount_changed), this);
-  g_signal_connect(volume_monitor, "mount-changed",
+  gio_connects << g_signal_connect(volume_monitor, "mount-changed",
                    G_CALLBACK(gio_mount_changed), this);
-  g_signal_connect(volume_monitor, "mount-removed",
+  gio_connects << g_signal_connect(volume_monitor, "mount-removed",
                    G_CALLBACK(gio_mount_changed), this);
 }
 

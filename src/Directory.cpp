@@ -173,6 +173,7 @@ void Directory::refresh() {
       //convert uri e.g. "ftp://user@host/path"
       //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"
       QString real_dir = mount->path + "/" + uri.mid(mount->uri.length());
+      qDebug() << "This location is recognized as existing mount";
       create_task(real_dir);
       return;
     }
@@ -181,6 +182,7 @@ void Directory::refresh() {
   //address not recognized. try to pass it to gio
   GFile* file = g_file_new_for_uri(uri.toLocal8Bit());
   async_result_type = async_result_mount_location;
+  qDebug() << "Trying to mount this location";
   g_file_mount_enclosing_volume(file, GMountMountFlags(), 0, 0, async_result, this);
 }
 

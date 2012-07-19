@@ -65,6 +65,8 @@ private:
 
   void resizeEvent(QResizeEvent *);
 
+  QList<gulong> gio_connects;
+
   void view_or_edit_selected(bool edit);
 
 private slots:

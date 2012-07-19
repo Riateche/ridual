@@ -24,7 +24,7 @@ QMap<Column, QString> Columns::get_all() {
 
 Columns Columns::get_default() {
   Columns r;
-  r << column_full_name << column_type_description << column_date_modified <<
+  r << column_full_name << column_mime_type << column_type_description << column_date_modified <<
        column_owner << column_octal_permissions;
   return r;
 }

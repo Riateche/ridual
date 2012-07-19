@@ -1,5 +1,6 @@
 #include "Directory_list_task.h"
 #include <QDir>
+#include <QDebug>
 
 #include "qt_gtk.h"
 
@@ -25,6 +26,7 @@ void Directory_list_task::exec() {
     return;
   }
   QFileInfoList list = dir.entryInfoList(QStringList(), QDir::AllEntries | QDir::NoDotAndDotDot);
+  GError* gerror = 0;
   File_info_list r;
   foreach (QFileInfo info, list) {
     File_info item;
@@ -43,13 +45,25 @@ void Directory_list_task::exec() {
     item.date_created = info.created();
     item.is_executable = item.is_file && info.isExecutable();
 
-    GFile *file = g_file_new_for_path (info.absoluteFilePath().toLocal8Bit());
-    GFileInfo* gfileinfo = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, GFileQueryInfoFlags(), 0, 0);
-    const char* content_type = g_file_info_get_content_type(gfileinfo);
-    item.mime_type = QString::fromLocal8Bit(content_type);
-    g_object_unref(file);
-    g_object_unref(gfileinfo);
+    //qDebug() << "path for GFile: " << info.absoluteFilePath();
 
+    GFile *file = g_file_new_for_path (info.absoluteFilePath().toLocal8Bit());
+    //qDebug() << "GFile* file = " << file;
+    GFileInfo* gfileinfo = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, GFileQueryInfoFlags(), 0, &gerror);
+    if (gerror) {
+      emit error(QString::fromLocal8Bit(gerror->message));
+      g_error_free(gerror);
+      gerror = 0;
+      return;
+    }
+    if (gfileinfo) {
+      //qDebug() << "GFileInfo* gfileinfo = " << gfileinfo;
+      const char* content_type = g_file_info_get_content_type(gfileinfo);
+      item.mime_type = QString::fromLocal8Bit(content_type);
+      g_object_unref(gfileinfo);
+    }
+
+    g_object_unref(file);
 
 
     /*
