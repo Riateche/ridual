@@ -1,6 +1,6 @@
 #include "File_action_task.h"
 
-File_action_task::File_action_task(File_action_type p_action_type, QStringList p_target, QString p_destination):
+File_action_task::File_action_task(const File_action_type& p_action_type, File_info_list p_target, QString p_destination):
   action_type(p_action_type),
   target(p_target),
   destination(p_destination),

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QVariant>
+#include "File_info.h"
 
 class File_action_queue;
 
@@ -38,8 +39,8 @@ Q_DECLARE_METATYPE(File_action_state)
 class File_action_task : public QObject {
   Q_OBJECT
 public:
-  explicit File_action_task(File_action_type p_action_type,
-                            QStringList p_target,
+  explicit File_action_task(const File_action_type& p_action_type,
+                            File_info_list p_target,
                             QString p_destination);
 
   void run(File_action_queue* p_queue);
@@ -58,7 +59,7 @@ signals:
   
 private:
   File_action_type action_type;
-  QStringList target;
+  File_info_list target;
   QString destination;
   Recursive_fetch_option recursive_fetch_option;
   Link_type link_type;

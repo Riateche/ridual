@@ -45,7 +45,7 @@ public:
   App_info_list get_apps(const QString& mime_type);
   App_info get_default_app(const QString& mime_type);
 
-  Pane* destination_pane();
+  Pane* get_destination_pane();
 
   Ui::Main_window* get_ui() { return ui; }
 

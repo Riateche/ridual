@@ -182,7 +182,7 @@
      <item>
       <widget class="QLineEdit" name="max_speed">
        <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -203,6 +203,9 @@
      </item>
      <item>
       <widget class="QLabel" name="label_9">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>kbytes/s</string>
        </property>

@@ -4,7 +4,9 @@
 -- modify readme to reflect new script
 -- compile from gtest source
 
-
+- options when file exists:
+-- append ".orig" to existing file
+-- preserve original file, append "(1)" to new file
 
 - file size in File_info
 

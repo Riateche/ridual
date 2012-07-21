@@ -32,7 +32,7 @@ void Hotkey_editor::on_table_customContextMenuRequested(const QPoint &pos) {
   QMenu* menu = new QMenu(this);
   menu->addAction(tr("Set default value"), this, SLOT(set_default_value()));
   menu->addAction(tr("Disable shortcut"), this, SLOT(disable_shortcut()));
-  menu->exec(ui->table->mapToGlobal(pos));
+  menu->exec(ui->table->viewport()->mapToGlobal(pos) + QPoint(5, 5));
 }
 
 void Hotkey_editor::set_default_value() {

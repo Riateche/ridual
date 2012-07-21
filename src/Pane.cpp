@@ -319,7 +319,7 @@ void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
       a->setFont(f);
     }
   }
-  menu->exec(ui->list->mapToGlobal(pos));
+  menu->exec(ui->list->viewport()->mapToGlobal(pos) + QPoint(5, 5));
 }
 
 void Pane::action_launch_triggered() {

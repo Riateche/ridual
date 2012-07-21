@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "File_action_task.h"
+#include "File_info.h"
 
 namespace Ui {
   class Copy_dialog;
@@ -17,11 +18,12 @@ class Copy_dialog : public QWidget {
   
 public:
   explicit Copy_dialog(Main_window* mw,
-                       File_action_type p_action,
-                       QStringList p_target,
-                       QString p_destination);
+                       File_action_type p_action);
   ~Copy_dialog();
   
+  static const int max_files_in_description = 10;
+
+
 private slots:
   void on_start_clicked();
 
@@ -29,7 +31,7 @@ private:
   Ui::Copy_dialog *ui;
   Main_window* main_window;
   File_action_type action;
-  QStringList target;
+  File_info_list target;
   QString destination;
 };
 

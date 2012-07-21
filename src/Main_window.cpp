@@ -38,9 +38,9 @@ Main_window::Main_window(QWidget *parent) :
   ui->setupUi(this);
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
-  //ui->tasks_table->hide();
 
   tasks_model = new Tasks_model(this);
+  ui->tasks_table->hide();
   ui->tasks_table->setModel(tasks_model);
   connect(tasks_model, SIGNAL(layoutChanged()), this, SLOT(resize_tasks_table()));
 
@@ -173,7 +173,7 @@ App_info Main_window::get_default_app(const QString &mime_type) {
   return App_info(default_app);
 }
 
-Pane *Main_window::destination_pane() {
+Pane *Main_window::get_destination_pane() {
   return ui->left_pane == active_pane? ui->right_pane: ui->left_pane;
 }
 
@@ -482,5 +482,5 @@ void Main_window::on_action_edit_triggered() {
 
 void Main_window::on_action_copy_triggered() {
   File_info_list list = active_pane->get_selected_files();
-  new Copy_dialog(this, file_action_copy, list.paths(), destination_pane()->get_uri());
+  new Copy_dialog(this, file_action_copy);
 }
