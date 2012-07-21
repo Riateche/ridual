@@ -13,12 +13,14 @@ public:
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
   QVariant data(const QModelIndex &index, int role) const;
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 signals:
   
 private slots:
   void task_added(File_action_task* task);
   void task_state_changed(File_action_state state);
+  void task_destroyed();
 
 
 private:

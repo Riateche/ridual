@@ -5,13 +5,16 @@ File_action_task::File_action_task(File_action_type p_action_type, QStringList p
   target(p_target),
   destination(p_destination),
   recursive_fetch_option(recursive_fetch_auto),
-  link_type(link_type_soft_absolute)
+  link_type(link_type_soft_absolute),
+  queue(0)
 {
+  qRegisterMetaType<File_action_state>("File_action_state");
 
 }
 
-void File_action_task::run() {
-  int count = 1e6;
+void File_action_task::run(File_action_queue *p_queue) {
+  queue = p_queue;
+  int count = 1e8;
   for(int i = 0; i < count; i++) {
     if (i % 10000 == 0) {
       File_action_state state;

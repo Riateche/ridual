@@ -17,7 +17,7 @@
 #include <Copy_dialog.h>
 #include <QTextCodec>
 #include "File_action_queue.h"
-
+#include "Tasks_model.h"
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -36,10 +36,13 @@ Main_window::Main_window(QWidget *parent) :
   tasks_thread->start();
   qRegisterMetaType<File_info_list>("File_info_list");
   ui->setupUi(this);
-  delete ui->menu_task; //todo: undelete this
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
-  ui->tasks_table->hide();
+  //ui->tasks_table->hide();
+
+  tasks_model = new Tasks_model(this);
+  ui->tasks_table->setModel(tasks_model);
+  connect(tasks_model, SIGNAL(layoutChanged()), this, SLOT(resize_tasks_table()));
 
 
   //QLocale::Language language = QLocale::system().language();
@@ -176,6 +179,7 @@ Pane *Main_window::destination_pane() {
 
 File_action_queue *Main_window::create_queue() {
   static int last_id = 0;
+  qDebug() << "get_queues(): " << get_queues();
   if (get_queues().isEmpty()) last_id = 0;
   last_id++;
   File_action_queue* q = new File_action_queue(last_id);
@@ -429,6 +433,15 @@ void Main_window::slot_selection_changed() {
   ui->action_execute->setEnabled(can_execute);
   ui->action_view->setEnabled(can_edit);
   ui->action_edit->setEnabled(can_edit);
+}
+
+void Main_window::resize_tasks_table() {
+  ui->tasks_table->setVisible(tasks_model->rowCount() > 0);
+  if (tasks_model->rowCount() > 0) {
+    int h = ui->tasks_table->horizontalHeader()->height() +
+        ui->tasks_table->rowHeight(0) * tasks_model->rowCount();
+    ui->tasks_table->setFixedHeight(h);
+  }
 }
 
 void Main_window::on_action_go_places_triggered() {

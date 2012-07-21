@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QVariant>
+
+class File_action_queue;
 
 enum File_action_type {
   file_action_copy,
@@ -30,6 +33,7 @@ public:
   QString current_action;
   int errors_count;
 };
+Q_DECLARE_METATYPE(File_action_state)
 
 class File_action_task : public QObject {
   Q_OBJECT
@@ -38,7 +42,8 @@ public:
                             QStringList p_target,
                             QString p_destination);
 
-  void run();
+  void run(File_action_queue* p_queue);
+  inline File_action_queue* get_queue() { return queue; }
 
   inline void set_recursive_fetch(Recursive_fetch_option p) {
     recursive_fetch_option = p;
@@ -57,6 +62,7 @@ private:
   QString destination;
   Recursive_fetch_option recursive_fetch_option;
   Link_type link_type;
+  File_action_queue* queue;
 };
 
 #endif // FILE_ACTION_TASK_H

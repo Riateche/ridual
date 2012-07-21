@@ -8,6 +8,7 @@
 Copy_dialog::Copy_dialog(Main_window *mw, File_action_type p_action, QStringList p_target, QString p_destination) :
   QWidget(),
   ui(new Ui::Copy_dialog),
+  main_window(mw),
   action(p_action),
   target(p_target),
   destination(p_destination)
@@ -38,4 +39,5 @@ void Copy_dialog::on_start_clicked() {
   task->set_recursive_fetch(recursive_fetch_option);
   File_action_queue* queue = main_window->create_queue();
   queue->add_task(task);
+  deleteLater();
 }

@@ -20,6 +20,8 @@ class Pane;
 class Tasks_thread;
 class File_action_queue;
 class File_action_task;
+class Tasks_model;
+
 typedef struct _GVolumeMonitor GVolumeMonitor;
 typedef struct _GDrive GDrive;
 
@@ -65,14 +67,14 @@ private:
 
   File_info_list old_path_items;
 
+  QList<gulong> gio_connects;
+
+  Tasks_model* tasks_model;
+
   void init_gio_connects();
   void fetch_gio_mounts();
   static void gio_mount_changed(GVolumeMonitor *volume_monitor, GDrive *drive, Main_window* _this);
-
   void resizeEvent(QResizeEvent *);
-
-  QList<gulong> gio_connects;
-
   void view_or_edit_selected(bool edit);
 
 private slots:
@@ -83,6 +85,8 @@ private slots:
   void refresh_path_toolbar();
   void go_to(QString uri);
   void slot_selection_changed();
+
+  void resize_tasks_table();
 
 
   void on_action_go_places_triggered();

@@ -3,6 +3,7 @@
 
 File_action_queue::File_action_queue(int p_id) {
   id = p_id;
+  connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
 void File_action_queue::add_task(File_action_task *t) {
@@ -21,6 +22,6 @@ void File_action_queue::run() {
       task = tasks.first();
       tasks.removeFirst();
     }
-    task->run();
+    task->run(this);
   }
 }
