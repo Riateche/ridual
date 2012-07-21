@@ -3,6 +3,7 @@
 #include <QSettings>
 #include "File_action_queue.h"
 #include "File_action_task.h"
+#include "Main_window.h"
 
 Copy_dialog::Copy_dialog(Main_window *mw, File_action_type p_action, QStringList p_target, QString p_destination) :
   QWidget(),
@@ -33,7 +34,8 @@ void Copy_dialog::on_start_clicked() {
   else if (ui->recursive_fetch_off->isChecked()) recursive_fetch_option = recursive_fetch_off;
   else recursive_fetch_option = recursive_fetch_auto;
   settings.setValue("recursive_fetch_last_used", static_cast<int>(recursive_fetch_option));
-  File_action_task* task = new File_action_task(action, target, destination, recursive_fetch_option);
-  File_action_queue* queue = new File_action_queue(task);
-  queue->start();
+  File_action_task* task = new File_action_task(action, target, destination);
+  task->set_recursive_fetch(recursive_fetch_option);
+  File_action_queue* queue = main_window->create_queue();
+  queue->add_task(task);
 }

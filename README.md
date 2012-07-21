@@ -55,7 +55,8 @@ Ridual is written on C++/Qt and is distributed under MIT license (see LICENSE fi
 
 ### Running tests
 
-    cd test-build-directory
-    qmake path-to-project-dir CONFIG+=testing && make && ./ridual-test
+    cd project-dir
+    tests/run.sh
+
 
 

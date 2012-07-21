@@ -18,8 +18,11 @@ namespace Ui {
 class Pane;
 
 class Tasks_thread;
+class File_action_queue;
+class File_action_task;
 typedef struct _GVolumeMonitor GVolumeMonitor;
 typedef struct _GDrive GDrive;
+
 
 class Main_window : public QMainWindow {
   Q_OBJECT
@@ -43,6 +46,9 @@ public:
   Pane* destination_pane();
 
   Ui::Main_window* get_ui() { return ui; }
+
+  File_action_queue* create_queue();
+  QList<File_action_queue*> get_queues();
 
 private:
   Bookmarks_file_parser bookmarks, user_dirs;
@@ -104,6 +110,7 @@ signals:
   //void signal_add_task(Task task);
   void gio_mounts_changed();
   void selection_changed();
+  void file_action_task_added(File_action_task*);
 };
 
 #endif // MAIN_WINDOW_H

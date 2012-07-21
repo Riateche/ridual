@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>596</width>
-    <height>401</height>
+    <height>445</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,6 +27,9 @@
        <widget class="Pane" name="right_pane" native="true"/>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QTableView" name="tasks_table"/>
     </item>
    </layout>
   </widget>

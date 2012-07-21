@@ -7,6 +7,7 @@
 enum File_action_type {
   file_action_copy,
   file_action_move,
+  file_action_link,
   file_action_delete
 };
 
@@ -16,25 +17,46 @@ enum Recursive_fetch_option {
   recursive_fetch_auto = 3
 };
 
+enum Link_type {
+  link_type_soft_absolute,
+  link_type_soft_relative,
+  link_type_hard
+};
+
+class File_action_state {
+public:
+  File_action_state() : current_progress(0), total_progress(0), errors_count(0) {}
+  double current_progress, total_progress;
+  QString current_action;
+  int errors_count;
+};
+
 class File_action_task : public QObject {
   Q_OBJECT
 public:
-  explicit File_action_task(File_action_type p_action,
+  explicit File_action_task(File_action_type p_action_type,
                             QStringList p_target,
-                            QString p_destination,
-                            Recursive_fetch_option p_recursive_fetch_option);
+                            QString p_destination);
 
   void run();
+
+  inline void set_recursive_fetch(Recursive_fetch_option p) {
+    recursive_fetch_option = p;
+  }
+  inline void set_link_type(Link_type p) {
+    link_type = p;
+  }
   
 signals:
   void error(QString message);
-  void status(QString message, double progress);
+  void state_changed(File_action_state state);
   
 private:
-  File_action_type action;
+  File_action_type action_type;
   QStringList target;
   QString destination;
   Recursive_fetch_option recursive_fetch_option;
+  Link_type link_type;
 };
 
 #endif // FILE_ACTION_TASK_H

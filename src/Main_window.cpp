@@ -16,7 +16,7 @@
 #include "qt_gtk.h"
 #include <Copy_dialog.h>
 #include <QTextCodec>
-
+#include "File_action_queue.h"
 
 
 Main_window::Main_window(QWidget *parent) :
@@ -36,9 +36,11 @@ Main_window::Main_window(QWidget *parent) :
   tasks_thread->start();
   qRegisterMetaType<File_info_list>("File_info_list");
   ui->setupUi(this);
-  delete ui->menu_task;
+  delete ui->menu_task; //todo: undelete this
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
+  ui->tasks_table->hide();
+
 
   //QLocale::Language language = QLocale::system().language();
   //qDebug() << "language: " << QLocale::languageToString(language);
@@ -170,6 +172,20 @@ App_info Main_window::get_default_app(const QString &mime_type) {
 
 Pane *Main_window::destination_pane() {
   return ui->left_pane == active_pane? ui->right_pane: ui->left_pane;
+}
+
+File_action_queue *Main_window::create_queue() {
+  static int last_id = 0;
+  if (get_queues().isEmpty()) last_id = 0;
+  last_id++;
+  File_action_queue* q = new File_action_queue(last_id);
+  q->setParent(this);
+  connect(q, SIGNAL(task_added(File_action_task*)), this, SIGNAL(file_action_task_added(File_action_task*)));
+  return q;
+}
+
+QList<File_action_queue*> Main_window::get_queues() {
+  return findChildren<File_action_queue*>();
 }
 
 
