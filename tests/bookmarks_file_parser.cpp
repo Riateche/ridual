@@ -50,7 +50,7 @@ TEST(Bookmarks_file_parser, xdg_bookmarks) {
   EXPECT_EQ(home + "/Downloads", list[1].uri);
   EXPECT_EQ("/some/templates", list[2].uri);
   EXPECT_EQ(home, list[3].uri);
-  //EXPECT_EQ(home + "/\"Music\"", list[4].uri);
+  EXPECT_EQ(home + "/\"Music\"", list[4].uri);
   EXPECT_EQ(home + "/Pictures", list[5].uri);
   EXPECT_EQ(home, list[6].uri);
 

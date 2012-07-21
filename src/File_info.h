@@ -31,8 +31,7 @@ public:
 
 class File_info_list: public QList<File_info> {
 public:
-  File_info_list(): custom_columns_mode(false) {}
-  bool custom_columns_mode;
+  File_info_list() {}
   Columns columns;
   QStringList paths();
 };

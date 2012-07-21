@@ -10,7 +10,7 @@
 #include <QProcess>
 #include <QElapsedTimer>
 
-void test_dir_refresh(Directory* dir, File_info_list* result, bool do_refresh, int max_time = 3000) {
+void test_dir_refresh(Directory* dir, File_info_list* result, bool do_refresh, bool expect_error, int max_time = 3000) {
   QSignalSpy spy1(dir, SIGNAL(ready(File_info_list)));
   QSignalSpy spy2(dir, SIGNAL(error(QString)));
   if (do_refresh) dir->refresh();
@@ -23,9 +23,11 @@ void test_dir_refresh(Directory* dir, File_info_list* result, bool do_refresh, i
   }
 
   if (spy2.count() > 0) qDebug() << "error signal: " << spy2[0][0].toString();
-  ASSERT_EQ(1, spy1.count()) << "Ready signal was not emitted";
-  ASSERT_EQ(0, spy2.count()) << "Error signal was emitted";
-  *result = spy1.takeFirst().first().value<File_info_list>();
+  ASSERT_EQ(expect_error? 0: 1, spy1.count());
+  ASSERT_EQ(expect_error? 1: 0, spy2.count());
+  if (spy1.count() > 0 && spy1[0].count() > 0) {
+    *result = spy1[0][0].value<File_info_list>();
+  }
 }
 
 TEST(Directory, files_list) {
@@ -36,7 +38,7 @@ TEST(Directory, files_list) {
   EXPECT_FALSE(uri.endsWith("/"));
 
   File_info_list list;
-  test_dir_refresh(&d, &list, true);
+  test_dir_refresh(&d, &list, true, false);
   ASSERT_EQ(4, list.count());
   EXPECT_EQ("file1.txt", list[0].full_name);
   EXPECT_EQ("file2.png", list[1].full_name);
@@ -90,7 +92,7 @@ TEST(Directory, files_list) {
   file.write("test");
   file.close();
 
-  test_dir_refresh(&d, &list, false);
+  test_dir_refresh(&d, &list, false, false);
   ASSERT_EQ(5, list.count());
   EXPECT_EQ("new_file.txt", list[4].full_name);
 }
@@ -111,7 +113,7 @@ TEST(Directory, ftp_list) {
 
   Directory dir1(&mw, uri);
   File_info_list list;
-  test_dir_refresh(&dir1, &list, true, 10000);
+  test_dir_refresh(&dir1, &list, true, false, 10000);
   ASSERT_TRUE(list.count() > 0);
 
   bool found = false;
@@ -121,8 +123,66 @@ TEST(Directory, ftp_list) {
   EXPECT_TRUE(found) << "Testing location must be mounted here.";
 
   Directory dir2(&mw, uri);
-  test_dir_refresh(&dir1, &list, true, 10000);
+  test_dir_refresh(&dir2, &list, true, false, 10000);
   ASSERT_TRUE(list.count() > 0) << "Fetching dir from already mounted location failed.";
 
 }
 
+
+TEST(Directory, error_reporting) {
+  Main_window mw;
+  Directory dir1(&mw, "/non-existent-dir");
+  File_info_list list;
+  test_dir_refresh(&dir1, &list, true, true);
+}
+
+void test_normalization(Main_window* mw, QString uri, QString expected_result) {
+  Directory d(mw, uri);
+  EXPECT_EQ(expected_result, d.get_uri());
+}
+
+TEST(Directory, uri_normalization) {
+  Main_window mw;
+  QStringList tests;
+  tests << "/" << "/";
+  tests << "~" << QDir::homePath();
+  tests << "~/something/" << QDir::home().absoluteFilePath("something");
+  tests << "/some/path/" << "/some/path";
+  tests << "/some/path" << "/some/path";
+  tests << "/some/~/not_home" << "/some/~/not_home";
+  tests << "/some//path" << "/some/path";
+  tests << "/some/path//" << "/some/path";
+  tests << "ftp://user@host.com/test" << "ftp://user@host.com/test";
+  tests << "ftp://user@host.com/test/" << "ftp://user@host.com/test";
+  tests << "ftp://user@host.com////test/" << "ftp://user@host.com/test";
+  tests << "ftp://user@host.com/" << "ftp://user@host.com/";
+  tests << "ftp://user@host.com" << "ftp://user@host.com/";
+
+  for(int i = 0; i < tests.count(); i+=2) {
+    test_normalization(&mw, tests[i], tests[i+1]);
+  }
+
+}
+
+void test_parent_uri(Main_window* mw, QString uri, QString expected_result) {
+  Directory d(mw, uri);
+  EXPECT_EQ(expected_result, d.get_parent_uri());
+}
+
+TEST(Directory, get_parent_uri) {
+  Main_window mw;
+  QStringList tests;
+  tests << "/home/user/" << "/home";
+  tests << "/home" << "/";
+  tests << "/" << "places";
+  tests << "places" << "places";
+  tests << "places/mounts" << "places";
+  tests << "ftp://user@host.com" << "places/mounts";
+  tests << "ftp://user@host.com/something" << "ftp://user@host.com/";
+  tests << "ftp://user@host.com/something/else" << "ftp://user@host.com/something";
+
+  for(int i = 0; i < tests.count(); i+=2) {
+    test_parent_uri(&mw, tests[i], tests[i+1]);
+  }
+
+}

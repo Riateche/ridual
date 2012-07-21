@@ -140,13 +140,13 @@ QModelIndex File_list_model::index_for_uri(QString uri) {
   return QModelIndex();
 }
 
-File_info File_list_model::info(const QModelIndex &index) {
+File_info File_list_model::get_file_info(const QModelIndex &index) {
   if (index.row() < 0 || index.row() >= list.count()) return File_info();
   return list[index.row()];
 }
 
 Columns File_list_model::get_current_columns() const {
-  if (list.custom_columns_mode) {
+  if (!list.columns.isEmpty()) {
     return list.columns;
   } else {
     return columns;
@@ -187,7 +187,7 @@ QString File_list_model::format_octal_permissions(QFile::Permissions permissions
   if (permissions & QFile::ReadOther)   r += 0004;
   if (permissions & QFile::WriteOther)  r += 0002;
   if (permissions & QFile::ExeOther)    r += 0001;
-  return QString("%1").arg(r, 0, 8);
+  return QString("%1").arg(r, 3, 8, QLatin1Char('0'));
 }
 
 QHash<QString, QString> File_list_model::mime_descriptions;

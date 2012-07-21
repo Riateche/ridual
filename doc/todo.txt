@@ -3,10 +3,7 @@
 -- correct getting project dir
 -- modify readme to reflect new script
 -- compile from gtest source
--- continue writing tests for Directory
----- test error reporting
----- test parent_uri
----- test uri normalization
+
 
 
 - file size in File_info

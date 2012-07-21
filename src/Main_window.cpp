@@ -120,6 +120,10 @@ Main_window::~Main_window() {
 
 void Main_window::set_active_pane(Pane *pane) {
   if (active_pane == pane) return;
+  if (pane != ui->left_pane && pane != ui->right_pane) {
+    qWarning("Main_window::set_active_pane called with wrong argument");
+    return;
+  }
   active_pane = pane;
   emit active_pane_changed();
 }

@@ -27,10 +27,12 @@ enum Column {
 
 class Columns: public QList<Column> {
 public:
-  static QMap<Column, QString> get_all();
+  static const QMap<Column, QString> &get_all();
   static Columns get_default();
   QVariant serialize();
   static Columns deserialize(QVariant data);
+
+  QString to_string() const;
 
 
 };

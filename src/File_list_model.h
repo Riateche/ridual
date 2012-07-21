@@ -21,10 +21,11 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const;
   QModelIndex index_for_uri(QString uri);
 
-  File_info info(const QModelIndex &index);
+  File_info get_file_info(const QModelIndex &index);
   Columns get_current_columns() const;
 
   static QString get_mime_description(QString mime_type);
+  static QString format_octal_permissions(QFile::Permissions permissions);
 
   void set_current_index(const QModelIndex& index);
 
@@ -34,7 +35,6 @@ private:
   Columns columns;
 
   void emit_row_changed(int row);
-  static QString format_octal_permissions(QFile::Permissions permissions);
 
   static QHash<QString, QString> mime_descriptions;
 

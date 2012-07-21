@@ -22,6 +22,22 @@ Directory::Directory(Main_window* mw, QString p_uri) :
     uri = QDir::homePath() + uri.mid(1);
   }
 
+  if (uri.contains("//")) {
+    if (uri.startsWith("/")) {
+      uri = "/" + uri.split("/", QString::SkipEmptyParts).join("/");
+    } else {
+      int start_index = uri.indexOf("//") + 2;
+      uri = uri.left(start_index) +
+          uri.mid(start_index).split("/", QString::SkipEmptyParts).join("/");
+    }
+  }
+
+
+
+
+
+
+
   QRegExp network_root("^[^\\:]*\\://[^/]*/$");
   if (network_root.indexIn(uri) < 0 && uri.endsWith("/") && uri != "/") {
     // remove trailing slash
@@ -110,7 +126,6 @@ void Directory::refresh() {
     fi.name = Special_uri(Special_uri::userdirs).caption();
     fi.uri = Special_uri(Special_uri::userdirs).uri();
     r << fi;
-    r.custom_columns_mode = true;
     r.columns << column_name << column_uri;
     emit ready(r);
     return;
@@ -135,7 +150,6 @@ void Directory::refresh() {
       }
       id++;
     }
-    r.custom_columns_mode = true;
     r.columns << column_name << column_uri;
     emit ready(r);
     return;
@@ -155,14 +169,12 @@ void Directory::refresh() {
 
   if (special_uri.name() == Special_uri::bookmarks) { // list of bookmarks
     File_info_list list = main_window->get_bookmarks()->get_all();
-    list.custom_columns_mode = true;
     list.columns << column_name << column_uri;
     emit ready(list);
     return;
   }
   if (special_uri.name() == Special_uri::userdirs) { // list of xdg bookmarks
     File_info_list list = main_window->get_user_dirs()->get_all();
-    list.custom_columns_mode = true;
     list.columns << column_name << column_uri;
     emit ready(list);
     return;

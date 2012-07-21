@@ -145,7 +145,7 @@ QString Pane::get_uri() {
 File_info_list Pane::get_selected_files() {
   QModelIndexList indexes = ui->list->selectionModel()->selection().indexes();
   if (indexes.isEmpty()) {
-    File_info info = file_list_model.info(ui->list->currentIndex());
+    File_info info = file_list_model.get_file_info(ui->list->currentIndex());
     if (info.uri.isEmpty()) {
       return File_info_list();
     } else {
@@ -157,7 +157,7 @@ File_info_list Pane::get_selected_files() {
     File_info_list list;
     foreach (QModelIndex i, indexes) {
       if (i.column() == 0) {
-        list << file_list_model.info(i);
+        list << file_list_model.get_file_info(i);
       }
     }
     return list;
@@ -165,7 +165,7 @@ File_info_list Pane::get_selected_files() {
 }
 
 File_info Pane::get_current_file() {
-  return file_list_model.info(ui->list->currentIndex());
+  return file_list_model.get_file_info(ui->list->currentIndex());
 }
 
 void Pane::go_parent() {
@@ -293,7 +293,7 @@ void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
 
 
 void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
-  File_info file = file_list_model.info(ui->list->indexAt(pos));
+  File_info file = file_list_model.get_file_info(ui->list->indexAt(pos));
   App_info_list apps = main_window->get_apps(file.mime_type);
   QMenu* menu = new QMenu(this);
   if (file.is_folder()) {

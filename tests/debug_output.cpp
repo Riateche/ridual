@@ -16,3 +16,8 @@ bool wait_for_signal(QSignalSpy* spy, int max_time) {
   }
   return true;
 }
+
+::std::ostream& operator<<(::std::ostream& os, const Columns& c) {
+  return os << qPrintable(c.to_string());
+}
+
