@@ -8,6 +8,8 @@
 -- append ".orig" to existing file
 -- preserve original file, append "(1)" to new file
 
+- show count of files instead of percents if no percents available
+
 - file size in File_info
 
 F5 - copy with last used settings

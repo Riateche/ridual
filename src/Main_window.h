@@ -36,7 +36,10 @@ public:
   inline Pane* get_active_pane() { return active_pane; }
   void add_task(Task* task);
 
-  QList<gio::Mount*> get_gio_mounts();
+  /*! Get all currently active mounts.
+    This function is thread-safe.
+    */
+  QList<gio::Mount> get_gio_mounts();
   QList<gio::Volume*> get_gio_volumes() { return volumes; }
 
   inline Bookmarks_file_parser* get_bookmarks() { return &bookmarks; }
@@ -62,7 +65,7 @@ private:
   Hotkeys hotkeys;
 
   QList<gio::Volume*> volumes;
-  QList<gio::Mount*> mounts;
+  QList<gio::Mount> mounts;
   Tasks_thread* tasks_thread;
 
   File_info_list old_path_items;

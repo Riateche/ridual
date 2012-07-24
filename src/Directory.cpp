@@ -32,12 +32,6 @@ Directory::Directory(Main_window* mw, QString p_uri) :
     }
   }
 
-
-
-
-
-
-
   QRegExp network_root("^[^\\:]*\\://[^/]*/$");
   if (network_root.indexIn(uri) < 0 && uri.endsWith("/") && uri != "/") {
     // remove trailing slash
@@ -92,6 +86,8 @@ QString Directory::get_parent_uri() {
   return s;
 }
 
+
+
 void Directory::refresh() {
   if (uri.isEmpty()) {
     emit error(tr("Address is empty"));
@@ -132,10 +128,10 @@ void Directory::refresh() {
   }
   if (special_uri.name() == Special_uri::mounts) { // list of mounts
     File_info_list r;
-    foreach (gio::Mount* m, main_window->get_gio_mounts()) {
+    foreach (gio::Mount m, main_window->get_gio_mounts()) {
       File_info i;
-      i.name = m->name;
-      i.uri = m->default_location;
+      i.name = m.name;
+      i.uri = m.default_location;
       r << i;
     }
     int id = 0;
@@ -180,11 +176,11 @@ void Directory::refresh() {
     return;
   }
 
-  foreach(gio::Mount* mount, main_window->get_gio_mounts()) {
-    if (!mount->uri.isEmpty() && uri.startsWith(mount->uri)) {
+  foreach(gio::Mount mount, main_window->get_gio_mounts()) {
+    if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
       //convert uri e.g. "ftp://user@host/path"
       //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"
-      QString real_dir = mount->path + "/" + uri.mid(mount->uri.length());
+      QString real_dir = mount.path + "/" + uri.mid(mount.uri.length());
       qDebug() << "This location is recognized as existing mount";
       create_task(real_dir);
       return;
