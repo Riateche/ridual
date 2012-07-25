@@ -4,6 +4,8 @@
 #include <QDir>
 #include <QQueue>
 
+#define BUFFER_SIZE 65536
+
 File_action_task::File_action_task(Main_window *mw, const File_action_type &p_action_type, File_info_list p_targets, QString p_destination):
   main_window(mw),
   action_type(p_action_type),
@@ -18,7 +20,12 @@ File_action_task::File_action_task(Main_window *mw, const File_action_type &p_ac
   current_size(0)
 {
   qRegisterMetaType<File_action_state>("File_action_state");
+  connect(this, SIGNAL(error(QString)), main_window, SLOT(fatal_error(QString)));
+}
 
+File_action_task::~File_action_task() {
+  foreach(Directory_tree_item* i, trees) delete i;
+  trees.clear();
 }
 
 void File_action_task::run(File_action_queue *p_queue) {
@@ -27,100 +34,127 @@ void File_action_task::run(File_action_queue *p_queue) {
   mounts = main_window->get_gio_mounts(); //thread-safe
   File_action_state state;
   signal_timer.start();
+
+  foreach(File_info target, targets) {
+    Directory_tree_item* item = new Directory_tree_item();
+    item->is_folder = target.is_folder();
+    item->parent_path = target.parent_folder;
+    item->name = target.full_name;
+    trees << item;
+  }
+
   if (recursive_fetch_option == recursive_fetch_on ||
       recursive_fetch_option == recursive_fetch_auto) {
-    QQueue<QString> paths_queue;
-    foreach(File_info target, targets) {
-      paths_queue.enqueue(get_real_dir(target.full_path));
-    }
-    while(!paths_queue.isEmpty()) {
-      if (recursive_fetch_option == recursive_fetch_auto &&
-          total_count > 1000) {
-        total_count = 0;
-        total_size = 0;
-        break;
-      }
+    foreach(Directory_tree_item* tree, trees) {
+      Directory_tree_item* item = 0;
+      while(item = item? item->find_next(): tree) {
+        if (recursive_fetch_option == recursive_fetch_auto &&
+            total_count > auto_recursive_fetch_max) {
+          total_count = 0;
+          total_size = 0;
+          break;
+        }
 
-      QString path = paths_queue.dequeue();
+        QString path = item->get_absolute_path();
+        if (signal_timer.elapsed() > signal_interval) {
+          state.current_action = tr("Getting file list at '%1'").arg(path);
+          state.current_progress = tr("Files count: %1").arg(total_count);
+          state.total_progress = tr("Unknown");
+          emit state_changed(state);
+          signal_timer.restart();
+        }
+        if (item->is_folder && item->error == error_cannot_read) {
+          emit error(tr("Directory '%1' is not readable").arg(path));
+          //todo: error reports
+          return;
+        }
+        if (!item->is_folder) {
+          QFile file(path);
+          //if (file.isReadable()) {
+            total_count++;
+            total_size += file.size();
+          //} else {
+          //  emit error(tr("File '%1' is not readable").arg(path));
+          //  return;
+          //}
+        }
+      }
+    }
+  }
+
+  if (action_type != file_action_copy) {
+    emit error("not implemented");
+  }
+
+  foreach(Directory_tree_item* tree, trees) {
+    Directory_tree_item* item = 0;
+    while(item = item? item->find_next(): tree) {
+      QString path = item->get_absolute_path();
       if (signal_timer.elapsed() > signal_interval) {
-        state.current_action = tr("Getting file list at '%1'").arg(path);
-        state.current_progress = -1;
-        state.total_progress = -1;
+        state.current_action = tr("Copying '%1'").arg(path);
+        state.current_progress = tr("%1%").arg(0);
+        if (total_size > 0) {
+          state.total_progress = tr("%1%").arg(100.0 * current_size / total_size, 0, 'f', 1);
+        } else {
+          state.total_progress = tr("Files count: %1").arg(current_count);
+        }
         emit state_changed(state);
         signal_timer.restart();
       }
-      QDir dir(path);
-      if (dir.exists()) {
-        if (!dir.isReadable()) {
-          emit error(tr("Directory '%1'' is not readable").arg(path));
+      QString new_path = destination + "/" + item->get_relative_path();
+      if (item->is_folder) {
+        if (QDir(new_path).exists()) {
+          emit error(tr("Directory '%1' already exists").arg(new_path));
           return;
         }
-        total_count++;
-        foreach(QFileInfo fi, dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Name)) {
-          paths_queue.enqueue(fi.absoluteFilePath());
+        if (!QDir().mkdir(new_path)) {
+          emit error(tr("Failed to create directory '%1'").arg(new_path));
+          return;
         }
       } else {
-        QFile file(path);
-        if (file.exists()) {
-          if (file.isReadable()) {
-            total_count++;
-            total_size += file.size();
+        QFile file1(path);
+        QFile file2(new_path);
+        if (file2.exists()) {
+          emit error(tr("File '%1' already exists").arg(new_path));
+          return;
+        }
+        if (!file2.open(QFile::WriteOnly)) {
+          emit error(tr("Failed to open file '%1' for writing").arg(new_path));
+          return;
+        }
+        if (!file1.open(QFile::ReadOnly)) {
+          emit error(tr("Failed to open file '%1' for reading").arg(path));
+          return;
+        }
+        char buffer[BUFFER_SIZE];
+        while(!file1.atEnd()) {
+          if (signal_timer.elapsed() > signal_interval) {
+            state.current_action = tr("Copying '%1'").arg(path);
+            state.current_progress = tr("%1%").arg(100.0 * file1.pos() / file1.size(), 0, 'f', 1);
+            if (total_size > 0) {
+              state.total_progress = tr("%1%").arg(100.0 * current_size / total_size, 0, 'f', 1);
+            } else {
+              state.total_progress = tr("Files count: %1").arg(current_count);
+            }
+            emit state_changed(state);
+            signal_timer.restart();
+          }
+          int count = file1.read(buffer, BUFFER_SIZE);
+          if (count > 0) {
+            current_size += count;
+            file2.write(buffer, count);
           } else {
-            emit error(tr("File '%1'' is not readable").arg(path));
+            emit error(tr("Failed to read from file '%1': %2")
+                       .arg(path)
+                       .arg(file1.errorString()));
             return;
           }
-        } else {
-          emit error(tr("File or directory '%1' not found").arg(path));
-          return;
         }
       }
+      current_count++;
     }
   }
 
-  QQueue<QString> paths_queue;
-  foreach(File_info target, targets) {
-    paths_queue.enqueue(get_real_dir(target.full_path));
-  }
-  while(!paths_queue.isEmpty()) {
-    QString path = paths_queue.dequeue();
-    if (signal_timer.elapsed() > signal_interval) {
-      state.current_action = tr("Copying '%1'").arg(path);
-      state.current_progress = 0;
-      state.total_progress = 1.0 * current_size / total_size;
-      emit state_changed(state);
-      signal_timer.restart();
-    }
-    QDir dir(path);
-    if (dir.exists()) {
-      if (!dir.isReadable()) {
-        emit error(tr("Directory '%1'' is not readable").arg(path));
-        return;
-      }
-      total_count++;
-      foreach(QFileInfo fi, dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Name)) {
-        paths_queue.enqueue(fi.absoluteFilePath());
-      }
-    } else {
-      QFile file(path);
-      if (file.exists()) {
-        if (file.isReadable()) {
-          total_count++;
-          total_size += file.size();
-        } else {
-          emit error(tr("File '%1'' is not readable").arg(path));
-          return;
-        }
-      } else {
-        emit error(tr("File or directory '%1' not found").arg(path));
-        return;
-      }
-    }
-  }
-
-
-
-
-  emit error("not implemented");
   deleteLater();
 }
 

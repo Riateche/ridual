@@ -17,7 +17,28 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   async_result_type = async_result_unexpected;
   need_update = false;
   watcher_created = false;
+  uri = canonize(uri);
 
+  Special_uri special_uri(uri);
+  if (special_uri.name() == Special_uri::mounts) {
+    connect(main_window, SIGNAL(gio_mounts_changed()), this, SLOT(refresh()));
+  }
+
+  if (special_uri.name() == Special_uri::bookmarks) {
+    connect(main_window->get_bookmarks(), SIGNAL(changed()), this, SLOT(refresh()));
+  }
+
+  if (special_uri.name() == Special_uri::userdirs) {
+    connect(main_window->get_user_dirs(), SIGNAL(changed()), this, SLOT(refresh()));
+  }
+
+
+  QTimer* t = new QTimer(this);
+  connect(t, SIGNAL(timeout()), this, SLOT(refresh_timeout()));
+  t->start(watcher_refresh_timeout);
+}
+
+QString Directory::canonize(QString uri) {
   if (uri.startsWith("~")) {
     uri = QDir::homePath() + uri.mid(1);
   }
@@ -45,24 +66,7 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   if (uri.startsWith("file://")) {
     uri = uri.mid(7);
   }
-
-  Special_uri special_uri(uri);
-  if (special_uri.name() == Special_uri::mounts) {
-    connect(main_window, SIGNAL(gio_mounts_changed()), this, SLOT(refresh()));
-  }
-
-  if (special_uri.name() == Special_uri::bookmarks) {
-    connect(main_window->get_bookmarks(), SIGNAL(changed()), this, SLOT(refresh()));
-  }
-
-  if (special_uri.name() == Special_uri::userdirs) {
-    connect(main_window->get_user_dirs(), SIGNAL(changed()), this, SLOT(refresh()));
-  }
-
-
-  QTimer* t = new QTimer(this);
-  connect(t, SIGNAL(timeout()), this, SLOT(refresh_timeout()));
-  t->start(watcher_refresh_timeout);
+  return uri;
 }
 
 QString Directory::get_parent_uri() {

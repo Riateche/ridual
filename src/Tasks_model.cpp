@@ -21,6 +21,9 @@ int Tasks_model::columnCount(const QModelIndex &parent) const {
 QVariant Tasks_model::data(const QModelIndex &index, int role) const {
   int i = index.row();
   if (i < 0 || i >= items.count()) return QVariant();
+  if (role == Qt::ToolTipRole && index.column() == 1) {
+    return items[i].second.current_action;
+  }
   //return QVariant();
   if (role == Qt::DisplayRole) {
     switch(index.column()) {
@@ -29,8 +32,12 @@ QVariant Tasks_model::data(const QModelIndex &index, int role) const {
           return items[i].first->get_queue()->get_id();
         }
         break;
-      case 1:
+      case 1: {
+        //QString s = items[i].second.current_action;
+        //if (s.length() > 20) s = s.left(20) + "...";
+        //return s;
         return items[i].second.current_action;
+      }
       case 2:
         return items[i].second.current_progress;
       case 3:

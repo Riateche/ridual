@@ -7,6 +7,7 @@
 #include <QElapsedTimer>
 #include "File_info.h"
 #include "gio/Mount.h"
+#include "Directory_tree_item.h"
 
 class File_action_queue;
 class Main_window;
@@ -32,9 +33,8 @@ enum Link_type {
 
 class File_action_state {
 public:
-  File_action_state() : current_progress(0), total_progress(0), errors_count(0) {}
-  double current_progress, total_progress;
-  QString current_action;
+  File_action_state() : errors_count(0) {}
+  QString current_action, current_progress, total_progress;
   int errors_count;
 };
 Q_DECLARE_METATYPE(File_action_state)
@@ -45,6 +45,8 @@ public:
   explicit File_action_task(Main_window* mw, const File_action_type& p_action_type,
                             File_info_list p_targets,
                             QString p_destination);
+
+  ~File_action_task();
 
   void run(File_action_queue* p_queue);
   inline File_action_queue* get_queue() { return queue; }
@@ -80,6 +82,8 @@ private:
 
 
   QString get_real_dir(QString uri);
+
+  QList<Directory_tree_item*> trees;
 };
 
 #endif // FILE_ACTION_TASK_H

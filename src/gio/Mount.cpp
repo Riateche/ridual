@@ -2,6 +2,7 @@
 #include <QDebug>
 
 #include "qt_gtk.h"
+#include "Directory.h"
 
 
 
@@ -21,9 +22,6 @@ Mount::Mount(GMount *src) {
   char* p_uri = g_file_get_uri(file);
   if (p_uri) {
     uri = QString::fromLocal8Bit(p_uri);
-    if (uri.startsWith("file://")) {
-      uri.remove(0, 7);
-    }
     g_free(p_uri);
   }
   g_object_unref(file);
@@ -32,11 +30,6 @@ Mount::Mount(GMount *src) {
   char* p_dl = g_file_get_uri(file);
   if (p_dl) {
     default_location = QString::fromLocal8Bit(p_dl);
-    if (default_location.startsWith("file://")) {
-      //modify uri accordingly to our 'uri rules':
-      //local files are represented by their normal paths without 'file://'
-      default_location.remove(0, 7);
-    }
     g_free(p_dl);
   }
   GVolume* volume = g_mount_get_volume(src);
@@ -48,6 +41,8 @@ Mount::Mount(GMount *src) {
   //qDebug() << "path" << path;
   //qDebug() << "default_location" << default_location;
   //qDebug() << "uri" << uri;
+  uri = Directory::canonize(uri);
+  default_location = Directory::canonize(default_location);
   g_object_unref(file);
 }
 

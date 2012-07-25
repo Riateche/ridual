@@ -18,6 +18,7 @@
 #include <QTextCodec>
 #include "File_action_queue.h"
 #include "Tasks_model.h"
+#include <QMessageBox>
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -32,10 +33,11 @@ Main_window::Main_window(QWidget *parent) :
   fetch_gio_mounts();
 
   tasks_thread = new Tasks_thread(this);
-  //connect(this, SIGNAL(signal_add_task(Task)), tasks_thread, SLOT(add_task(Task)));
   tasks_thread->start();
   qRegisterMetaType<File_info_list>("File_info_list");
   ui->setupUi(this);
+  //ui->tasks_table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  //ui->tasks_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
 
@@ -435,6 +437,10 @@ void Main_window::slot_selection_changed() {
   ui->action_execute->setEnabled(can_execute);
   ui->action_view->setEnabled(can_edit);
   ui->action_edit->setEnabled(can_edit);
+}
+
+void Main_window::fatal_error(QString message) {
+  QMessageBox::critical(0, "", message);
 }
 
 void Main_window::resize_tasks_table() {

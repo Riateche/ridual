@@ -89,6 +89,8 @@ private slots:
   void go_to(QString uri);
   void slot_selection_changed();
 
+  void fatal_error(QString message);
+
   void resize_tasks_table();
 
 

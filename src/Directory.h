@@ -56,6 +56,8 @@ public:
   */
   explicit Directory(Main_window* mw, QString uri);
 
+  static QString canonize(QString uri);
+
   /*! Get current URI. It can differ from URI passed to constructor. But once constructor
     is executed, URI will not be changed.
   */

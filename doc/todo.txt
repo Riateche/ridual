@@ -9,6 +9,10 @@
 -- preserve original file, append "(1)" to new file
 
 - show count of files instead of percents if no percents available
+- execute each Directory in separate thread
+- deny closing main window when tasks are executing
+- remove "gio" folder and namespace
+- remove File_info::parent_folder, get parent folder manually
 
 - file size in File_info
 
