@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QMenu>
 #include <QScrollBar>
+#include "Special_uri.h"
 
 Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   directory = 0;
@@ -126,7 +127,11 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
 }
 
 void Pane::load_state(QSettings *s) {
-  set_uri(s->value("path", QDir::current().absolutePath()).toString());
+  QString uri = s->value("path", "").toString();
+  if (uri.isEmpty()) {
+    uri = Special_uri(Special_uri::places).uri();
+  }
+  set_uri(uri);
 }
 
 void Pane::save_state(QSettings *s) {
