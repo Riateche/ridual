@@ -10,6 +10,7 @@
 #include "Task.h"
 #include "Bookmarks_file_parser.h"
 #include "App_info.h"
+#include "File_action_task.h"
 
 namespace Ui {
   class Main_window;
@@ -55,6 +56,8 @@ public:
   File_action_queue* create_queue();
   QList<File_action_queue*> get_queues();
 
+  Recursive_fetch_option get_recursive_fetch_option();
+
 private:
   Bookmarks_file_parser bookmarks, user_dirs;
   GVolumeMonitor* volume_monitor;
@@ -88,6 +91,7 @@ private slots:
   void refresh_path_toolbar();
   void go_to(QString uri);
   void slot_selection_changed();
+  void slot_actions_recursive_fetch_triggered();
 
   void fatal_error(QString message);
 

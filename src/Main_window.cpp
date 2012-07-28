@@ -45,6 +45,12 @@ Main_window::Main_window(QWidget *parent) :
   ui->tasks_table->hide();
   ui->tasks_table->setModel(tasks_model);
   connect(tasks_model, SIGNAL(layoutChanged()), this, SLOT(resize_tasks_table()));
+  foreach(QAction* a, QList<QAction*>() << ui->action_recursive_fetch_auto
+          << ui->action_recursive_fetch_off << ui->action_recursive_fetch_on) {
+    connect(a, SIGNAL(triggered()), this, SLOT(slot_actions_recursive_fetch_triggered()));
+  }
+
+
 
 
   //QLocale::Language language = QLocale::system().language();
@@ -60,6 +66,16 @@ Main_window::Main_window(QWidget *parent) :
   s.beginGroup("right_pane");
   ui->right_pane->load_state(&s);
   s.endGroup();
+
+  int option = s.value("recursive_fetch_option", static_cast<int>(recursive_fetch_auto)).toInt();
+  switch(static_cast<Recursive_fetch_option>(option)) {
+    case recursive_fetch_on: ui->action_recursive_fetch_on->setChecked(true); break;
+    case recursive_fetch_off: ui->action_recursive_fetch_off->setChecked(true); break;
+    case recursive_fetch_auto: ui->action_recursive_fetch_auto->setChecked(true); break;
+  }
+
+
+
   //todo: load columns
   Columns columns = Columns::get_default();
   ui->left_pane->set_columns(columns);
@@ -196,6 +212,14 @@ QList<File_action_queue*> Main_window::get_queues() {
   return findChildren<File_action_queue*>();
 }
 
+Recursive_fetch_option Main_window::get_recursive_fetch_option() {
+  if (ui->action_recursive_fetch_auto->isChecked()) return recursive_fetch_auto;
+  if (ui->action_recursive_fetch_on->isChecked()) return recursive_fetch_on;
+  if (ui->action_recursive_fetch_off->isChecked()) return recursive_fetch_off;
+  qWarning("Main_window::get_recursive_fetch_option failed");
+  return recursive_fetch_auto;
+}
+
 
 void Main_window::init_gio_connects() {
   //qRegisterMetaType< QList<gio::Volume> >("QList<gio::Volume>");
@@ -281,6 +305,7 @@ void Main_window::save_settings() {
   s.endGroup();
   s.setValue("main_window/state", saveState());
   s.setValue("main_window/geometry", saveGeometry());
+  s.setValue("recursive_fetch_option", static_cast<int>(get_recursive_fetch_option()));
 }
 
 
@@ -437,6 +462,17 @@ void Main_window::slot_selection_changed() {
   ui->action_execute->setEnabled(can_execute);
   ui->action_view->setEnabled(can_edit);
   ui->action_edit->setEnabled(can_edit);
+}
+
+void Main_window::slot_actions_recursive_fetch_triggered() {
+  foreach(QAction* a, QList<QAction*>() << ui->action_recursive_fetch_auto
+          << ui->action_recursive_fetch_off << ui->action_recursive_fetch_on) {
+    if (a == sender()) {
+      a->setChecked(true);
+    } else {
+      a->setChecked(false);
+    }
+  }
 }
 
 void Main_window::fatal_error(QString message) {
