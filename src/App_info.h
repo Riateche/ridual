@@ -12,8 +12,11 @@ public:
   QString name();
   QString command() const;
   bool operator==(const App_info& other);
-  void launch(QString filename);
+
   void launch(QStringList filenames);
+  void launch(QString filename);
+
+  void launch_uris(QStringList filenames); //not recommended
 
 private:
   GAppInfo* object;

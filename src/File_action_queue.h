@@ -4,23 +4,23 @@
 #include <QThread>
 #include <QMutex>
 
-class File_action_task;
+class Action;
 
-class File_action_queue : public QThread {
+class Action_queue : public QThread {
   Q_OBJECT
 public:
-  void add_task(File_action_task* t);
+  void add_action(Action* t);
   inline int get_id() { return id; }
 
   friend class Main_window;
   
 signals:
-  void task_added(File_action_task* task);
+  void task_added(Action* task);
   
 private:
-  explicit File_action_queue(int p_id);
+  explicit Action_queue(int p_id);
   void run();
-  QList<File_action_task*> tasks;
+  QList<Action*> actions;
   QMutex access_mutex;
   int id; // id must be accessed only from gui thread
 };

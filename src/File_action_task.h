@@ -9,14 +9,16 @@
 #include "gio/Mount.h"
 #include "Directory_tree_item.h"
 
-class File_action_queue;
+class Action_queue;
 class Main_window;
 
-enum File_action_type {
-  file_action_copy,
-  file_action_move,
-  file_action_link,
-  file_action_delete
+
+enum Action_type {
+  action_copy,
+  action_move,
+  action_link,
+  action_delete,
+  action_create_folder
 };
 
 enum Recursive_fetch_option {
@@ -31,45 +33,45 @@ enum Link_type {
   link_type_hard
 };
 
-class File_action_state {
+class Action_data {
 public:
-  File_action_state() : errors_count(0) {}
+  Action_type type;
+  Recursive_fetch_option recursive_fetch_option;
+  Link_type link_type;
+  File_info_list targets;
+  QString destination;
+};
+
+
+
+
+
+
+class Action_state {
+public:
+  Action_state() : errors_count(0) {}
   QString current_action, current_progress, total_progress;
   int errors_count;
 };
-Q_DECLARE_METATYPE(File_action_state)
+Q_DECLARE_METATYPE(Action_state)
 
-class File_action_task : public QObject {
+class Action : public QObject {
   Q_OBJECT
 public:
-  explicit File_action_task(Main_window* mw, const File_action_type& p_action_type,
-                            File_info_list p_targets,
-                            QString p_destination);
+  explicit Action(Main_window* mw, const Action_data& p_data);
+  ~Action();
 
-  ~File_action_task();
-
-  void run(File_action_queue* p_queue);
-  inline File_action_queue* get_queue() { return queue; }
-
-  inline void set_recursive_fetch(Recursive_fetch_option p) {
-    recursive_fetch_option = p;
-  }
-  inline void set_link_type(Link_type p) {
-    link_type = p;
-  }
+  void run(Action_queue* p_queue);
+  inline Action_queue* get_queue() { return queue; }
   
 signals:
   void error(QString message);
-  void state_changed(File_action_state state);
+  void state_changed(Action_state state);
   
 private:
   Main_window* main_window;
-  File_action_type action_type;
-  File_info_list targets;
-  QString destination;
-  Recursive_fetch_option recursive_fetch_option;
-  Link_type link_type;
-  File_action_queue* queue;
+  Action_data data;
+  Action_queue* queue;
   QList<gio::Mount> mounts;
 
   qint64 total_count, total_size;

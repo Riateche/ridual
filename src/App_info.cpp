@@ -34,6 +34,21 @@ void App_info::launch(QString filename) {
   launch( QStringList() << filename );
 }
 
+void App_info::launch_uris(QStringList filenames) {
+  GList* list = 0;
+  GError* error = 0;
+  foreach(QString filename, filenames) {
+    list = g_list_append(list, filename.toLocal8Bit().data());
+  }
+  g_app_info_launch_uris(object, list, 0, &error);
+  g_list_free(list);
+  if (error) {
+    qDebug() << "error: " << error->message;
+    g_error_free(error);
+    //todo: display message to user
+  }
+}
+
 void App_info::launch(QStringList filenames) {
   GList* list = 0;
   GError* error = 0;

@@ -19,8 +19,8 @@ namespace Ui {
 class Pane;
 
 class Tasks_thread;
-class File_action_queue;
-class File_action_task;
+class Action_queue;
+class Action;
 class Tasks_model;
 
 typedef struct _GVolumeMonitor GVolumeMonitor;
@@ -53,8 +53,31 @@ public:
 
   Ui::Main_window* get_ui() { return ui; }
 
-  File_action_queue* create_queue();
-  QList<File_action_queue*> get_queues();
+  Action_queue* create_queue();
+
+  /*! Get all currently existing queues. Note that any queue is deleted
+    when it becomes empty.
+    */
+  QList<Action_queue*> get_queues();
+
+  /*! Return the current queue e.g. the queue for new task to be placed at.
+    If there is no current queue this function calls Main_window::create_queue
+    and returns a pointer to new queue.
+    */
+  Action_queue* get_current_queue();
+
+  /*! Create new action based on passed data. Several values in data are replaced
+    accordingly to current application state:
+    - recursive_fetch_option
+    - targets
+    - destination
+    This fields should not be filled before calling this function.
+
+    Created task is placed in the current queue (new queue is created if necessary).
+    The action might be launched before or after this function is finished,
+    depending on current queue state.
+    */
+  Action* create_action(Action_data data);
 
   Recursive_fetch_option get_recursive_fetch_option();
 
@@ -77,6 +100,8 @@ private:
 
   Tasks_model* tasks_model;
 
+  int current_queue_id;
+
   void init_gio_connects();
   void fetch_gio_mounts();
   static void gio_mount_changed(GVolumeMonitor *volume_monitor, GDrive *drive, Main_window* _this);
@@ -92,6 +117,7 @@ private slots:
   void go_to(QString uri);
   void slot_selection_changed();
   void slot_actions_recursive_fetch_triggered();
+  void slot_actions_queue_triggered();
 
   void fatal_error(QString message);
 
@@ -123,7 +149,7 @@ signals:
   //void signal_add_task(Task task);
   void gio_mounts_changed();
   void selection_changed();
-  void file_action_task_added(File_action_task*);
+  void file_action_task_added(Action*);
 };
 
 #endif // MAIN_WINDOW_H

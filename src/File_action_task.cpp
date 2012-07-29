@@ -6,36 +6,32 @@
 
 #define BUFFER_SIZE 65536
 
-File_action_task::File_action_task(Main_window *mw, const File_action_type &p_action_type, File_info_list p_targets, QString p_destination):
+Action::Action(Main_window *mw, const Action_data &p_data):
   main_window(mw),
-  action_type(p_action_type),
-  targets(p_targets),
-  destination(p_destination),
-  recursive_fetch_option(recursive_fetch_auto),
-  link_type(link_type_soft_absolute),
+  data(p_data),
   queue(0),
   total_count(0),
   total_size(0),
   current_count(0),
   current_size(0)
 {
-  qRegisterMetaType<File_action_state>("File_action_state");
+  qRegisterMetaType<Action_state>("Action_state");
   connect(this, SIGNAL(error(QString)), main_window, SLOT(fatal_error(QString)));
 }
 
-File_action_task::~File_action_task() {
+Action::~Action() {
   foreach(Directory_tree_item* i, trees) delete i;
   trees.clear();
 }
 
-void File_action_task::run(File_action_queue *p_queue) {
+void Action::run(Action_queue *p_queue) {
   queue = p_queue;
 
   mounts = main_window->get_gio_mounts(); //thread-safe
-  File_action_state state;
+  Action_state state;
   signal_timer.start();
 
-  foreach(File_info target, targets) {
+  foreach(File_info target, data.targets) {
     Directory_tree_item* item = new Directory_tree_item();
     item->is_folder = target.is_folder();
     item->parent_path = target.parent_folder;
@@ -43,12 +39,12 @@ void File_action_task::run(File_action_queue *p_queue) {
     trees << item;
   }
 
-  if (recursive_fetch_option == recursive_fetch_on ||
-      recursive_fetch_option == recursive_fetch_auto) {
+  if (data.recursive_fetch_option == recursive_fetch_on ||
+      data.recursive_fetch_option == recursive_fetch_auto) {
     foreach(Directory_tree_item* tree, trees) {
       Directory_tree_item* item = 0;
       while(item = item? item->find_next(): tree) {
-        if (recursive_fetch_option == recursive_fetch_auto &&
+        if (data.recursive_fetch_option == recursive_fetch_auto &&
             total_count > auto_recursive_fetch_max) {
           total_count = 0;
           total_size = 0;
@@ -82,7 +78,7 @@ void File_action_task::run(File_action_queue *p_queue) {
     }
   }
 
-  if (action_type != file_action_copy) {
+  if (data.type != action_copy) {
     emit error("not implemented");
   }
 
@@ -101,7 +97,7 @@ void File_action_task::run(File_action_queue *p_queue) {
         emit state_changed(state);
         signal_timer.restart();
       }
-      QString new_path = destination + "/" + item->get_relative_path();
+      QString new_path = data.destination + "/" + item->get_relative_path();
       if (item->is_folder) {
         if (QDir(new_path).exists()) {
           emit error(tr("Directory '%1' already exists").arg(new_path));
@@ -158,7 +154,7 @@ void File_action_task::run(File_action_queue *p_queue) {
   deleteLater();
 }
 
-QString File_action_task::get_real_dir(QString uri) {
+QString Action::get_real_dir(QString uri) {
   if (uri.startsWith("/")) return uri;
   foreach(gio::Mount mount, mounts) {
     if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {

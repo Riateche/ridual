@@ -6,8 +6,8 @@ Tasks_model::Tasks_model(Main_window *mw) :
   QAbstractTableModel(),
   main_window(mw)
 {
-  connect(main_window, SIGNAL(file_action_task_added(File_action_task*)),
-          this, SLOT(task_added(File_action_task*)));
+  connect(main_window, SIGNAL(file_action_task_added(Action*)),
+          this, SLOT(task_added(Action*)));
 }
 
 int Tasks_model::rowCount(const QModelIndex &parent) const {
@@ -62,15 +62,15 @@ QVariant Tasks_model::headerData(int section, Qt::Orientation orientation, int r
   return QVariant();
 }
 
-void Tasks_model::task_added(File_action_task *task) {
+void Tasks_model::task_added(Action *task) {
   emit layoutAboutToBeChanged();
-  connect(task, SIGNAL(state_changed(File_action_state)), this, SLOT(task_state_changed(File_action_state)));
+  connect(task, SIGNAL(state_changed(Action_state)), this, SLOT(task_state_changed(Action_state)));
   connect(task, SIGNAL(destroyed()), this, SLOT(task_destroyed()));
-  items << qMakePair(task, File_action_state());
+  items << qMakePair(task, Action_state());
   emit layoutChanged();
 }
 
-void Tasks_model::task_state_changed(File_action_state state) {
+void Tasks_model::task_state_changed(Action_state state) {
   for(int i = 0; i < items.count(); i++) {
     if (items[i].first == sender()) {
       items[i].second = state;

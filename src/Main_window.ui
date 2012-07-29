@@ -69,7 +69,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QWidget" name="next_task_queue_notice" native="true">
+     <widget class="QWidget" name="current_queue_notice" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <property name="spacing">
         <number>0</number>
@@ -85,7 +85,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="next_task_queue_number">
+        <widget class="QLabel" name="current_queue_id">
          <property name="text">
           <string>1</string>
          </property>

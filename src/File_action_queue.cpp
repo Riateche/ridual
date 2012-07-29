@@ -1,26 +1,26 @@
 #include "File_action_queue.h"
 #include "File_action_task.h"
 
-File_action_queue::File_action_queue(int p_id) {
+Action_queue::Action_queue(int p_id) {
   id = p_id;
   connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
-void File_action_queue::add_task(File_action_task *t) {
+void Action_queue::add_action(Action *t) {
   QMutexLocker locker(&access_mutex);
-  tasks << t;
+  actions << t;
   emit task_added(t);
   if (!isRunning()) start();
 }
 
-void File_action_queue::run() {
+void Action_queue::run() {
   while(true) {
-    File_action_task* task = 0;
+    Action* task = 0;
     {
       QMutexLocker locker(&access_mutex);
-      if (tasks.isEmpty()) return;
-      task = tasks.first();
-      tasks.removeFirst();
+      if (actions.isEmpty()) return;
+      task = actions.first();
+      actions.removeFirst();
     }
     task->run(this);
   }

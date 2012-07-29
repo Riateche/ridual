@@ -19,14 +19,14 @@ public:
 signals:
   
 private slots:
-  void task_added(File_action_task* task);
-  void task_state_changed(File_action_state state);
+  void task_added(Action* task);
+  void task_state_changed(Action_state state);
   void task_destroyed();
 
 
 private:
   Main_window* main_window;
-  QList< QPair<File_action_task*, File_action_state> > items;
+  QList< QPair<Action*, Action_state> > items;
   
 };
 

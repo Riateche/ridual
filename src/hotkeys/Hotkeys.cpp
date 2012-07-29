@@ -19,10 +19,15 @@ Hotkeys::~Hotkeys() {
 
 
 void Hotkeys::add(QString name, QAction *action) {
+  add(name, QString(), action);
+}
+
+void Hotkeys::add(QString name, QString text, QAction *action) {
   QSettings settings;
   settings.beginGroup(group_name);
   QString default_value = action->shortcut().toString();
-  hotkeys << new Hotkey(name, action->text(), settings.value(name, default_value).toString(), default_value, action);
+  if (text.isEmpty()) text = action->text();
+  hotkeys << new Hotkey(name, text, settings.value(name, default_value).toString(), default_value, action);
   settings.endGroup();
 }
 

@@ -35,6 +35,9 @@ public:
     */
   void add(QString name, QAction *action);
 
+  void add(QString name, QString text, QAction *action);
+
+
   /*! Helper method. Add QAction and connect it to specified slot.
     \param name           Untranslatable name used for storing value.
     \param text           The name displayed in hotkey editor.

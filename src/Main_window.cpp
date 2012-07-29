@@ -14,7 +14,6 @@
 #include <QProcess>
 #include "Settings_dialog.h"
 #include "qt_gtk.h"
-#include <Copy_dialog.h>
 #include <QTextCodec>
 #include "File_action_queue.h"
 #include "Tasks_model.h"
@@ -25,7 +24,8 @@ Main_window::Main_window(QWidget *parent) :
   bookmarks(QDir::home().absoluteFilePath(".gtk-bookmarks"), Bookmarks_file_parser::format_gtk),
   user_dirs(QDir::home().absoluteFilePath(".config/user-dirs.dirs"), Bookmarks_file_parser::format_xdg),
   ui(new Ui::Main_window),
-  hotkeys(this)
+  hotkeys(this),
+  current_queue_id(0)
 {
   QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
 
@@ -50,8 +50,15 @@ Main_window::Main_window(QWidget *parent) :
     connect(a, SIGNAL(triggered()), this, SLOT(slot_actions_recursive_fetch_triggered()));
   }
 
-
-
+  foreach(QAction* a, QList<QAction*>() << ui->action_queue1 << ui->action_queue2
+                                        << ui->action_queue3 << ui->action_queue_cancel) {
+    connect(a, SIGNAL(triggered()), this, SLOT(slot_actions_queue_triggered()));
+  }
+  ui->action_queue1->setData(1);
+  ui->action_queue2->setData(2);
+  ui->action_queue3->setData(3);
+  ui->action_queue_cancel->setData(0);
+  ui->current_queue_notice->hide();
 
   //QLocale::Language language = QLocale::system().language();
   //qDebug() << "language: " << QLocale::languageToString(language);
@@ -105,14 +112,18 @@ Main_window::Main_window(QWidget *parent) :
               this, SLOT(focus_address_line())
               );
 
-  hotkeys.add("Go to parent directory", ui->action_go_parent_directory);
-  hotkeys.add("Go to filesystem root",  ui->action_go_root);
-  hotkeys.add("Go to places",           ui->action_go_places);
-  hotkeys.add("Execute", ui->action_execute);
-  hotkeys.add("View", ui->action_view);
-  hotkeys.add("Edit", ui->action_edit);
-  hotkeys.add("Copy", ui->action_copy);
-  hotkeys.add("Move", ui->action_move);
+  hotkeys.add("go_parent_directory", tr("Go to parent directory"), ui->action_go_parent_directory);
+  hotkeys.add("go_root",             tr("Go to filesystem root"),  ui->action_go_root);
+  hotkeys.add("go_places",           tr("Go to places"),           ui->action_go_places);
+  hotkeys.add("execute",  ui->action_execute);
+  hotkeys.add("view",     ui->action_view);
+  hotkeys.add("edit",     ui->action_edit);
+  hotkeys.add("copy",     ui->action_copy);
+  hotkeys.add("move",     ui->action_move);
+  hotkeys.add("queue1", tr("Add to queue 1"), ui->action_queue1);
+  hotkeys.add("queue2", tr("Add to queue 2"), ui->action_queue2);
+  hotkeys.add("queue3", tr("Add to queue 3"), ui->action_queue3);
+  hotkeys.add("queue_cancel", tr("Cancel queueing"), ui->action_queue_cancel);
 
   connect(ui->action_go_parent_directory, SIGNAL(triggered()),
           this, SLOT(go_parent()));
@@ -197,19 +208,36 @@ Pane *Main_window::get_destination_pane() {
   return ui->left_pane == active_pane? ui->right_pane: ui->left_pane;
 }
 
-File_action_queue *Main_window::create_queue() {
-  static int last_id = 0;
-  qDebug() << "get_queues(): " << get_queues();
-  if (get_queues().isEmpty()) last_id = 0;
-  last_id++;
-  File_action_queue* q = new File_action_queue(last_id);
+Action_queue *Main_window::create_queue() {
+  QSet<int> ids;
+  foreach(Action_queue* q, get_queues()) ids << q->get_id();
+  int id = 1;
+  while(ids.contains(id)) id++;
+  Action_queue* q = new Action_queue(id);
   q->setParent(this);
-  connect(q, SIGNAL(task_added(File_action_task*)), this, SIGNAL(file_action_task_added(File_action_task*)));
+  connect(q, SIGNAL(task_added(Action*)), this, SIGNAL(file_action_task_added(Action*)));
   return q;
 }
 
-QList<File_action_queue*> Main_window::get_queues() {
-  return findChildren<File_action_queue*>();
+QList<Action_queue*> Main_window::get_queues() {
+  return findChildren<Action_queue*>();
+}
+
+Action_queue *Main_window::get_current_queue() {
+  if (current_queue_id > 0) {
+    foreach(Action_queue* q, get_queues()) {
+      if (q->get_id() == current_queue_id) return q;
+    }
+  }
+  return create_queue();
+}
+
+Action* Main_window::create_action(Action_data data) {
+  data.recursive_fetch_option = get_recursive_fetch_option();
+  data.targets = active_pane->get_selected_files();
+  data.destination = get_destination_pane()->get_uri();
+  Action* a = new Action(this, data);
+  get_current_queue()->add_action(a);
 }
 
 Recursive_fetch_option Main_window::get_recursive_fetch_option() {
@@ -332,7 +360,8 @@ void Main_window::open_current() {
   QMap<QString, QStringList> types;
   foreach (File_info i, files) {
     if (i.is_file && !i.uri.isEmpty() && !i.mime_type.isEmpty()) {
-      types[i.mime_type] << i.uri;
+//      types[i.mime_type] << i.uri;
+      types[i.mime_type] << i.full_path;
     }
   }
   foreach (QString mime_type, types.keys()) {
@@ -475,6 +504,13 @@ void Main_window::slot_actions_recursive_fetch_triggered() {
   }
 }
 
+void Main_window::slot_actions_queue_triggered() {
+  QAction* a = dynamic_cast<QAction*>(sender());
+  current_queue_id = a->data().toInt();
+  ui->current_queue_notice->setVisible(current_queue_id > 0);
+  ui->current_queue_id->setText(QString("%1").arg(current_queue_id));
+}
+
 void Main_window::fatal_error(QString message) {
   QMessageBox::critical(0, "", message);
 }
@@ -525,6 +561,7 @@ void Main_window::on_action_edit_triggered() {
 }
 
 void Main_window::on_action_copy_triggered() {
-  File_info_list list = active_pane->get_selected_files();
-  new Copy_dialog(this, file_action_copy);
+  Action_data data;
+  data.type = action_copy;
+  create_action(data);
 }
