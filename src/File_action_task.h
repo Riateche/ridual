@@ -5,9 +5,12 @@
 #include <QStringList>
 #include <QVariant>
 #include <QElapsedTimer>
+#include <QTimer>
 #include "File_info.h"
 #include "gio/Mount.h"
 #include "Directory_tree_item.h"
+
+#define BUFFER_SIZE 65536
 
 class Action_queue;
 class Main_window;
@@ -42,16 +45,12 @@ public:
   QString destination;
 };
 
-
-
-
-
-
 class Action_state {
 public:
-  Action_state() : errors_count(0) {}
+  Action_state() : errors_count(0), queue_id(0) {}
   QString current_action, current_progress, total_progress;
   int errors_count;
+  int queue_id;
 };
 Q_DECLARE_METATYPE(Action_state)
 
@@ -61,17 +60,20 @@ public:
   explicit Action(Main_window* mw, const Action_data& p_data);
   ~Action();
 
-  void run(Action_queue* p_queue);
-  inline Action_queue* get_queue() { return queue; }
+  //inline void set_queue(Action_queue* p_queue) { queue = p_queue; }
+  //inline Action_queue* get_queue() { return queue; }
+  inline void set_queue_id(int v) { queue_id = v; }
   
 signals:
   void error(QString message);
   void state_changed(Action_state state);
+  void finished();
   
 private:
   Main_window* main_window;
   Action_data data;
-  Action_queue* queue;
+  //Action_queue* queue;
+  int queue_id;
   QList<gio::Mount> mounts;
 
   qint64 total_count, total_size;
@@ -85,7 +87,29 @@ private:
 
   QString get_real_dir(QString uri);
 
-  QList<Directory_tree_item*> trees;
+  Directory_tree_item* tree;
+
+  QTimer iteration_timer;
+
+
+  enum Run_state {
+    run_state_preparing,
+    run_state_main,
+    run_state_copy_file
+  };
+
+  Run_state run_state;
+  Directory_tree_item* current_item;
+  QFile* file1;
+  QFile* file2;
+  char copy_buffer[BUFFER_SIZE];
+
+
+
+private slots:
+  void run();
+  void iteration();
+
 };
 
 #endif // FILE_ACTION_TASK_H

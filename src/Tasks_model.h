@@ -21,7 +21,7 @@ signals:
 private slots:
   void task_added(Action* task);
   void task_state_changed(Action_state state);
-  void task_destroyed();
+  void task_destroyed(QObject *obj);
 
 
 private:

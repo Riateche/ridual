@@ -284,15 +284,12 @@ void Pane::directory_error(QString message) {
 }
 
 void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
-  //if (current.column() != 0) {
-  //  ui->list->selectionModel()->setCurrentIndex(file_list_model.index(current.row(), 0),
-  //                            QItemSelectionModel::NoUpdate);
-  //}
   if (is_active()) {
     file_list_model.set_current_index(current);
   } else {
     file_list_model.set_current_index(file_list_model.index(-1 , -1));
   }
+  Q_UNUSED(previous);
 }
 
 

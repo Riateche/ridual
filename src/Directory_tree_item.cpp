@@ -37,7 +37,10 @@ QString Directory_tree_item::get_path(bool absolute) {
   Directory_tree_item* item = this;
   while(item) {
     list.prepend(item->name);
-    if (absolute && item->parent == 0) list.prepend(item->parent_path);
+    if (!item->parent_path.isEmpty()) {
+      if (absolute) list.prepend(item->parent_path);
+      break;
+    }
     item = item->parent;
   }
   return list.join("/");

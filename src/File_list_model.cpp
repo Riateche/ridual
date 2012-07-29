@@ -31,6 +31,7 @@ int File_list_model::rowCount(const QModelIndex &parent) const {
 int File_list_model::columnCount(const QModelIndex &parent) const {
   if (list.isEmpty()) return 1;
   return get_current_columns().count();
+  Q_UNUSED(parent);
 }
 
 QVariant File_list_model::headerData(int section, Qt::Orientation orientation, int role) const {

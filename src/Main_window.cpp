@@ -238,6 +238,7 @@ Action* Main_window::create_action(Action_data data) {
   data.destination = get_destination_pane()->get_uri();
   Action* a = new Action(this, data);
   get_current_queue()->add_action(a);
+  return a;
 }
 
 Recursive_fetch_option Main_window::get_recursive_fetch_option() {

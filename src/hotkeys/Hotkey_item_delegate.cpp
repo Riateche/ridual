@@ -5,6 +5,8 @@
 
 QWidget *Hotkey_item_delegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
   return new Hotkey_text_edit(parent);
+  Q_UNUSED(option);
+  Q_UNUSED(index);
 }
 
 bool Hotkey_item_delegate::eventFilter(QObject *object, QEvent *event) {

@@ -1,6 +1,7 @@
 #include "Tasks_model.h"
 #include "Main_window.h"
 #include "File_action_queue.h"
+#include <QDebug>
 
 Tasks_model::Tasks_model(Main_window *mw) :
   QAbstractTableModel(),
@@ -12,10 +13,12 @@ Tasks_model::Tasks_model(Main_window *mw) :
 
 int Tasks_model::rowCount(const QModelIndex &parent) const {
   return items.count();
+  Q_UNUSED(parent);
 }
 
 int Tasks_model::columnCount(const QModelIndex &parent) const {
   return 5;
+  Q_UNUSED(parent);
 }
 
 QVariant Tasks_model::data(const QModelIndex &index, int role) const {
@@ -28,14 +31,9 @@ QVariant Tasks_model::data(const QModelIndex &index, int role) const {
   if (role == Qt::DisplayRole) {
     switch(index.column()) {
       case 0:
-        if (items[i].first->get_queue()) {
-          return items[i].first->get_queue()->get_id();
-        }
-        break;
+        if (!items[i].second.queue_id) return tr("—");
+        return items[i].second.queue_id;
       case 1: {
-        //QString s = items[i].second.current_action;
-        //if (s.length() > 20) s = s.left(20) + "...";
-        //return s;
         return items[i].second.current_action;
       }
       case 2:
@@ -65,7 +63,7 @@ QVariant Tasks_model::headerData(int section, Qt::Orientation orientation, int r
 void Tasks_model::task_added(Action *task) {
   emit layoutAboutToBeChanged();
   connect(task, SIGNAL(state_changed(Action_state)), this, SLOT(task_state_changed(Action_state)));
-  connect(task, SIGNAL(destroyed()), this, SLOT(task_destroyed()));
+  connect(task, SIGNAL(destroyed(QObject*)), this, SLOT(task_destroyed(QObject*)));
   items << qMakePair(task, Action_state());
   emit layoutChanged();
 }
@@ -80,9 +78,9 @@ void Tasks_model::task_state_changed(Action_state state) {
   }
 }
 
-void Tasks_model::task_destroyed() {
+void Tasks_model::task_destroyed(QObject* obj) {
   for(int i = 0; i < items.count(); i++) {
-    if (items[i].first == sender()) {
+    if (items[i].first == obj) {
       emit layoutAboutToBeChanged();
       items.removeAt(i);
       emit layoutChanged();
