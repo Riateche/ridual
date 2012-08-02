@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>596</width>
-    <height>445</height>
+    <width>623</width>
+    <height>460</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
     <item>
      <widget class="QTableView" name="tasks_table">
       <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAlwaysOff</enum>
+       <enum>Qt::ScrollBarAsNeeded</enum>
       </property>
       <property name="horizontalScrollBarPolicy">
        <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -66,6 +66,77 @@
       <attribute name="verticalHeaderStretchLastSection">
        <bool>false</bool>
       </attribute>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="question_frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="question_message">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="question_buttons_layout"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Press a button or type a number to choose your answer:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="question_answer_editor">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -114,7 +185,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>596</width>
+     <width>623</width>
      <height>27</height>
     </rect>
    </property>
@@ -168,12 +239,7 @@
     <property name="title">
      <string>Queue</string>
     </property>
-    <addaction name="action_queue_explanation"/>
-    <addaction name="action_queue1"/>
-    <addaction name="action_queue2"/>
-    <addaction name="action_queue3"/>
-    <addaction name="separator"/>
-    <addaction name="action_queue_cancel"/>
+    <addaction name="action_queue_choose"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_task"/>
@@ -181,7 +247,6 @@
    <addaction name="menu_queue"/>
    <addaction name="menu_settings"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="action_hotkeys">
    <property name="text">
     <string>Hotkeys</string>
@@ -334,44 +399,15 @@
     <string>Off</string>
    </property>
   </action>
-  <action name="action_queue_explanation">
+  <action name="action_queue_choose">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
-    <string>Choose a queue for next task:</string>
-   </property>
-  </action>
-  <action name="action_queue1">
-   <property name="text">
-    <string>Queue 1</string>
+    <string>Choose a queue for next task</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+1</string>
-   </property>
-  </action>
-  <action name="action_queue2">
-   <property name="text">
-    <string>Queue 2</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+2</string>
-   </property>
-  </action>
-  <action name="action_queue3">
-   <property name="text">
-    <string>Queue 3</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+3</string>
-   </property>
-  </action>
-  <action name="action_queue_cancel">
-   <property name="text">
-    <string>Cancel</string>
-   </property>
-   <property name="shortcut">
-    <string>Esc</string>
+    <string>Ctrl+Q</string>
    </property>
   </action>
  </widget>

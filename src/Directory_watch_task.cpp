@@ -18,6 +18,10 @@ void Directory_watch_task::exec() {
     qDebug() << "Failed to create watcher for " << path << " (dir doesn't exist).";
     return;
   }
+  if (!QDir(path).isReadable()) {
+    qDebug() << "Failed to create watcher for " << path << " (dir is not readable).";
+    return;
+  }
   QMutexLocker locker(&access_mutex);
   watcher.addPath(path);
   if (QDir(path).exists()) {

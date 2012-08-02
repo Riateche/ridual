@@ -101,6 +101,9 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
       }
     } else if (event->type() == QEvent::FocusIn) {
       if (main_window) main_window->set_active_pane(this);
+      update_model_current_index();
+    } else if (event->type() == QEvent::FocusOut) {
+      update_model_current_index();
     }
   }
   if (object == ui->address) {
@@ -173,6 +176,10 @@ File_info Pane::get_current_file() {
   return file_list_model.get_file_info(ui->list->currentIndex());
 }
 
+void Pane::setFocus() {
+  ui->list->setFocus();
+}
+
 void Pane::go_parent() {
   set_uri(directory->get_parent_uri());
 }
@@ -200,12 +207,7 @@ void Pane::active_pane_changed() {
   if (is_active()) {
     ui->list->setFocus();
   }
-
-  if (is_active()) {
-    file_list_model.set_current_index(ui->list->selectionModel()->currentIndex());
-  } else {
-    file_list_model.set_current_index(file_list_model.index(-1 , -1));
-  }
+  update_model_current_index();
 }
 
 void Pane::show_loading_indicator() {
@@ -336,3 +338,13 @@ void Pane::action_launch_triggered() {
   File_info file = data[1].value<File_info>();
   app.launch(file.full_path);
 }
+
+void Pane::update_model_current_index() {
+  if (ui->list->hasFocus()) {
+    file_list_model.set_current_index(ui->list->selectionModel()->currentIndex());
+  } else {
+    file_list_model.set_current_index(file_list_model.index(-1 , -1));
+  }
+}
+
+

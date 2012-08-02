@@ -11,6 +11,7 @@
 #include "Bookmarks_file_parser.h"
 #include "App_info.h"
 #include "File_action_task.h"
+#include <QPushButton>
 
 namespace Ui {
   class Main_window;
@@ -25,6 +26,20 @@ class Tasks_model;
 
 typedef struct _GVolumeMonitor GVolumeMonitor;
 typedef struct _GDrive GDrive;
+
+class Button_settings {
+public:
+  Button_settings(int _number, QString _caption, QVariant _data = QVariant(), bool _enabled = true) :
+    number(_number),
+    caption(_caption),
+    data(_data),
+    enabled(_enabled)
+  {}
+  int number;
+  QString caption;
+  QVariant data;
+  bool enabled;
+};
 
 
 class Main_window : public QMainWindow {
@@ -81,6 +96,8 @@ public:
 
   Recursive_fetch_option get_recursive_fetch_option();
 
+  void show_question(QString message, QList<Button_settings> buttons, QObject* receiver, const char* slot);
+
 private:
   Bookmarks_file_parser bookmarks, user_dirs;
   GVolumeMonitor* volume_monitor;
@@ -102,43 +119,43 @@ private:
 
   int current_queue_id;
 
+  QList<Button_settings> answer_buttons;
+  QList<QPushButton*> answer_buttons_widgets;
+
   void init_gio_connects();
   void fetch_gio_mounts();
   static void gio_mount_changed(GVolumeMonitor *volume_monitor, GDrive *drive, Main_window* _this);
   void resizeEvent(QResizeEvent *);
   void view_or_edit_selected(bool edit);
+  void update_answer_buttons();
+  void send_answer(int index);
+
+  bool eventFilter(QObject *object, QEvent *event);
 
 private slots:
-  void save_settings();
   void on_action_hotkeys_triggered();
+  void on_action_go_places_triggered();
+  void on_action_go_root_triggered();
+  void on_action_refresh_triggered();
+  void on_action_execute_triggered();
+  void on_action_general_settings_triggered();
+  void on_action_view_triggered();
+  void on_action_edit_triggered();
+  void on_action_copy_triggered();
+  void on_action_queue_choose_triggered();
+  void on_question_answer_editor_textEdited(const QString &text);
+
+  void save_settings();
   void go_parent();
   void focus_address_line();
   void refresh_path_toolbar();
   void go_to(QString uri);
   void slot_selection_changed();
   void slot_actions_recursive_fetch_triggered();
-  void slot_actions_queue_triggered();
-
+  void slot_queue_chosen(QVariant data);
   void fatal_error(QString message);
-
   void resize_tasks_table();
-
-
-  void on_action_go_places_triggered();
-
-  void on_action_go_root_triggered();
-
-  void on_action_refresh_triggered();
-
-  void on_action_execute_triggered();
-
-  void on_action_general_settings_triggered();
-
-  void on_action_view_triggered();
-
-  void on_action_edit_triggered();
-
-  void on_action_copy_triggered();
+  void slot_answer_buttons_clicked();
 
 public slots:
   void open_current();
@@ -150,6 +167,9 @@ signals:
   void gio_mounts_changed();
   void selection_changed();
   void file_action_task_added(Action*);
+
+  void question_answered(QVariant data, int number);
+
 };
 
 #endif // MAIN_WINDOW_H

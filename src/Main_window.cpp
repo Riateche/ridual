@@ -40,6 +40,8 @@ Main_window::Main_window(QWidget *parent) :
   //ui->tasks_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
+  ui->question_frame->hide();
+  ui->question_answer_editor->installEventFilter(this);
 
   tasks_model = new Tasks_model(this);
   ui->tasks_table->hide();
@@ -50,14 +52,7 @@ Main_window::Main_window(QWidget *parent) :
     connect(a, SIGNAL(triggered()), this, SLOT(slot_actions_recursive_fetch_triggered()));
   }
 
-  foreach(QAction* a, QList<QAction*>() << ui->action_queue1 << ui->action_queue2
-                                        << ui->action_queue3 << ui->action_queue_cancel) {
-    connect(a, SIGNAL(triggered()), this, SLOT(slot_actions_queue_triggered()));
-  }
-  ui->action_queue1->setData(1);
-  ui->action_queue2->setData(2);
-  ui->action_queue3->setData(3);
-  ui->action_queue_cancel->setData(0);
+
   ui->current_queue_notice->hide();
 
   //QLocale::Language language = QLocale::system().language();
@@ -120,10 +115,7 @@ Main_window::Main_window(QWidget *parent) :
   hotkeys.add("edit",     ui->action_edit);
   hotkeys.add("copy",     ui->action_copy);
   hotkeys.add("move",     ui->action_move);
-  hotkeys.add("queue1", tr("Add to queue 1"), ui->action_queue1);
-  hotkeys.add("queue2", tr("Add to queue 2"), ui->action_queue2);
-  hotkeys.add("queue3", tr("Add to queue 3"), ui->action_queue3);
-  hotkeys.add("queue_cancel", tr("Cancel queueing"), ui->action_queue_cancel);
+  hotkeys.add("choose_queue", tr("Choose queue"), ui->action_queue_choose);
 
   connect(ui->action_go_parent_directory, SIGNAL(triggered()),
           this, SLOT(go_parent()));
@@ -138,6 +130,8 @@ Main_window::Main_window(QWidget *parent) :
   connect(ui->right_pane, SIGNAL(selection_changed()),   this, SIGNAL(selection_changed()));
   connect(this,           SIGNAL(active_pane_changed()), this, SIGNAL(selection_changed()));
   connect(this, SIGNAL(selection_changed()), this, SLOT(slot_selection_changed()));
+
+
 }
 
 Main_window::~Main_window() {
@@ -249,6 +243,17 @@ Recursive_fetch_option Main_window::get_recursive_fetch_option() {
   return recursive_fetch_auto;
 }
 
+void Main_window::show_question(QString message, QList<Button_settings> buttons,
+                                QObject *receiver, const char *slot) {
+
+  connect(this, SIGNAL(question_answered(QVariant,int)), receiver, slot);
+  answer_buttons = buttons;
+  ui->question_frame->show();
+  ui->question_message->setText(message);
+  ui->question_answer_editor->clear();
+  update_answer_buttons();
+}
+
 
 void Main_window::init_gio_connects() {
   //qRegisterMetaType< QList<gio::Volume> >("QList<gio::Volume>");
@@ -302,6 +307,7 @@ void Main_window::gio_mount_changed(GVolumeMonitor*, GDrive*, Main_window* _this
 
 void Main_window::resizeEvent(QResizeEvent *) {
   ui->path_widget->refresh();
+  update_answer_buttons();
 }
 
 void Main_window::view_or_edit_selected(bool edit) {
@@ -318,6 +324,56 @@ void Main_window::view_or_edit_selected(bool edit) {
     //todo: run in tasks thread
   }
 
+}
+
+void Main_window::update_answer_buttons() {
+  static int preferred_button_width = 250;
+  if (!ui->question_frame->isVisible()) return;
+  foreach(QPushButton* b, answer_buttons_widgets) {
+    b->deleteLater();
+  }
+  answer_buttons_widgets.clear();
+  int columns = width() / preferred_button_width;
+  int i = 0;
+  foreach(Button_settings s, answer_buttons) {
+    QPushButton* b = new QPushButton(tr("%1) %2").arg(s.number < 0? i+1 : s.number).arg(s.caption), this);
+    b->setEnabled(s.enabled);
+    b->setMaximumWidth(preferred_button_width);
+    connect(b, SIGNAL(clicked()), this, SLOT(slot_answer_buttons_clicked()));
+    ui->question_buttons_layout->addWidget(b, i / columns, i % columns);
+    i++;
+    answer_buttons_widgets << b;
+  }
+
+}
+
+void Main_window::send_answer(int index) {
+  if (index < 0 || index >= answer_buttons.count()) return;
+  emit question_answered(answer_buttons[index].data, index);
+  disconnect(this, SIGNAL(question_answered(QVariant,int)), 0, 0);
+  ui->question_frame->hide();
+  get_active_pane()->setFocus();
+}
+
+bool Main_window::eventFilter(QObject *object, QEvent *event) {
+  if (object == ui->question_answer_editor) {
+    if (event->type() == QEvent::KeyPress &&
+        static_cast<QKeyEvent*>(event)->key() == Qt::Key_Escape) {
+      get_active_pane()->setFocus();
+    }
+  }
+  return false;
+}
+
+void Main_window::on_question_answer_editor_textEdited(const QString &text) {
+  if (text.length() != 1) return;
+  int number = text.toInt();
+  for(int i = 0; i < answer_buttons.count(); i++) {
+    if (answer_buttons[i].number == number) {
+      send_answer(i);
+      return;
+    }
+  }
 }
 
 void Main_window::switch_active_pane() {
@@ -505,9 +561,8 @@ void Main_window::slot_actions_recursive_fetch_triggered() {
   }
 }
 
-void Main_window::slot_actions_queue_triggered() {
-  QAction* a = dynamic_cast<QAction*>(sender());
-  current_queue_id = a->data().toInt();
+void Main_window::slot_queue_chosen(QVariant data) {
+  current_queue_id = data.toInt();
   ui->current_queue_notice->setVisible(current_queue_id > 0);
   ui->current_queue_id->setText(QString("%1").arg(current_queue_id));
 }
@@ -519,11 +574,23 @@ void Main_window::fatal_error(QString message) {
 void Main_window::resize_tasks_table() {
   ui->tasks_table->setVisible(tasks_model->rowCount() > 0);
   if (tasks_model->rowCount() > 0) {
-    int h = ui->tasks_table->horizontalHeader()->height() +
-        ui->tasks_table->rowHeight(0) * tasks_model->rowCount();
+    int h = ui->tasks_table->horizontalHeader()->height() + 3 +
+        ui->tasks_table->rowHeight(0) * qMin(5, tasks_model->rowCount());
     ui->tasks_table->setFixedHeight(h);
   }
 }
+
+void Main_window::on_action_queue_choose_triggered() {
+  QList<Button_settings> list;
+  list << Button_settings(0, tr("New queue (default)"), 0);
+  foreach(Action_queue* queue, get_queues()) {
+    int id = queue->get_id();
+    list << Button_settings(id, tr("Queue %1").arg(id), id);
+  }
+  show_question(tr("Choose a queue for the next task:"), list, this, SLOT(slot_queue_chosen(QVariant)));
+  ui->question_answer_editor->setFocus();
+}
+
 
 void Main_window::on_action_go_places_triggered() {
   go_to(Special_uri(Special_uri::places).uri());
@@ -565,4 +632,11 @@ void Main_window::on_action_copy_triggered() {
   Action_data data;
   data.type = action_copy;
   create_action(data);
+}
+
+void Main_window::slot_answer_buttons_clicked() {
+  QPushButton* b = dynamic_cast<QPushButton*>(sender());
+  if (!b) return;
+  int index = answer_buttons_widgets.indexOf(b);
+  send_answer(index);
 }

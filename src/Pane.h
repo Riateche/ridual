@@ -38,6 +38,8 @@ public:
   File_info_list get_selected_files();
   File_info get_current_file();
 
+  void setFocus();
+
 signals:
   void uri_changed();
   void selection_changed();
@@ -59,12 +61,16 @@ private slots:
   void on_list_customContextMenuRequested(const QPoint &pos);
   void action_launch_triggered();
 
+
+
 private:
   Ui::Pane *ui;
   bool ready;
   File_list_model file_list_model;
   Main_window* main_window;
   Directory* directory, *pending_directory;
+
+  void update_model_current_index();
 
 };
 

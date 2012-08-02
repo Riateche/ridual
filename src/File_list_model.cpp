@@ -114,14 +114,14 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
   if (role == Qt::DecorationRole && column == 0) {
     return file_info.icon;
   }
-  if (role == Qt::FontRole) {
+  /*if (role == Qt::FontRole) {
     QFont font;
     if (row == current_index.row()) {
       font.setBold(true);
       //if (column == 0) font.setUnderline(true);
     }
     return font;
-  }
+  }*/
   return QVariant();
 }
 

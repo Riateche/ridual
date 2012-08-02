@@ -17,6 +17,9 @@ class Action_queue : public QThread {
 public:
   virtual ~Action_queue();
   void add_action(Action* t);
+
+  /*! Get the id of queue. Id is an unique positive number.
+    */
   inline int get_id() { return id; }
   QQueue<Action*> get_actions();
 
