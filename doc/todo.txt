@@ -4,11 +4,13 @@
 -- modify readme to reflect new script
 -- compile from gtest source
 
-- options when file exists:
--- append ".orig" to existing file
--- preserve original file, append "(1)" to new file
+- q/a system:
+  - add slot for answer in Action
+  - add signal/slot in main window for interacting with q/a
+  - auto actions accordingly to settings
 
-- show count of files instead of percents if no percents available
+
+
 - execute each Directory in separate thread
 - deny closing main window when tasks are executing
 - remove "gio" folder and namespace

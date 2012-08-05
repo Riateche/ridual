@@ -35,6 +35,7 @@ Main_window::Main_window(QWidget *parent) :
   tasks_thread = new Tasks_thread(this);
   tasks_thread->start();
   qRegisterMetaType<File_info_list>("File_info_list");
+  qRegisterMetaType<Error_type>("Error_type");
   ui->setupUi(this);
   //ui->tasks_table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   //ui->tasks_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
@@ -231,7 +232,9 @@ Action* Main_window::create_action(Action_data data) {
   data.targets = active_pane->get_selected_files();
   data.destination = get_destination_pane()->get_uri();
   Action* a = new Action(this, data);
-  get_current_queue()->add_action(a);
+  Action_queue* q = get_current_queue();
+  a->set_queue_id(q->get_id());
+  q->add_action(a);
   return a;
 }
 
@@ -327,24 +330,38 @@ void Main_window::view_or_edit_selected(bool edit) {
 }
 
 void Main_window::update_answer_buttons() {
-  static int preferred_button_width = 250;
+  //static int preferred_button_width = 250;
   if (!ui->question_frame->isVisible()) return;
   foreach(QPushButton* b, answer_buttons_widgets) {
     b->deleteLater();
   }
   answer_buttons_widgets.clear();
-  int columns = width() / preferred_button_width;
-  int i = 0;
-  foreach(Button_settings s, answer_buttons) {
+  int button_width = 0;
+  for(int i = 0; i < answer_buttons.count(); i++) {
+    Button_settings s = answer_buttons[i];
     QPushButton* b = new QPushButton(tr("%1) %2").arg(s.number < 0? i+1 : s.number).arg(s.caption), this);
     b->setEnabled(s.enabled);
-    b->setMaximumWidth(preferred_button_width);
+    b->setStyleSheet("text-align: left; padding: 3px");
+    int w = b->sizeHint().width();
+    if (w > button_width) button_width = w;
+    //b->setFixedWidth(qMin(width() / columns, preferred_button_width));
     connect(b, SIGNAL(clicked()), this, SLOT(slot_answer_buttons_clicked()));
-    ui->question_buttons_layout->addWidget(b, i / columns, i % columns);
-    i++;
     answer_buttons_widgets << b;
   }
-
+  int margin_left, margin_right;
+  ui->question_frame_layout->getContentsMargins(&margin_left, 0, &margin_right, 0);
+  int columns = (ui->question_frame->width() - margin_left - margin_right + ui->question_buttons_layout->horizontalSpacing())
+      / (button_width + ui->question_buttons_layout->horizontalSpacing());
+  for(int i = 0; i < answer_buttons_widgets.count(); i++) {
+    QPushButton* b = answer_buttons_widgets[i];
+    b->setFixedWidth(button_width);
+    ui->question_buttons_layout->addWidget(b, i / columns, i % columns);
+  }
+  //ui->question_buttons_layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Fixed), 0, columns);
+  for(int i = 0; i < columns; i++) {
+    ui->question_buttons_layout->setColumnStretch(i, 0);
+  }
+  ui->question_buttons_layout->setColumnStretch(columns, 1);
 }
 
 void Main_window::send_answer(int index) {

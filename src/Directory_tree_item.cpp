@@ -5,7 +5,7 @@ Directory_tree_item::Directory_tree_item() :
   is_folder(false),
   is_folder_read(false),
   is_processed(false),
-  error(no_error),
+  error_type(no_error),
   iterator(0),
   parent(0)
 {
@@ -53,7 +53,9 @@ Directory_tree_item *Directory_tree_item::read_next_child() {
     return 0;
   }
   if (!iterator) {
-    iterator = new QDirIterator(get_path(true), QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+    QString path = get_absolute_path();
+    if (!QDir(path).isReadable()) return 0;
+    iterator = new QDirIterator(path, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
 //    qDebug() << "create iterator for " << get_path(true) << iterator->hasNext();
   }
   if (!iterator->hasNext()) {
@@ -67,7 +69,7 @@ Directory_tree_item *Directory_tree_item::read_next_child() {
   new_item->name = fi.fileName();
   new_item->is_folder = fi.isDir();
   if (!fi.isReadable()) {
-    new_item->error = error_cannot_read;
+    new_item->error_type = error_type_read_failed;
   }
   new_item->parent = this;
   children << new_item;

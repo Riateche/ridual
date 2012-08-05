@@ -62,23 +62,22 @@ public:
 
   //inline void set_queue(Action_queue* p_queue) { queue = p_queue; }
   //inline Action_queue* get_queue() { return queue; }
-  inline void set_queue_id(int v) { queue_id = v; }
+  inline void set_queue_id(int v) { tmp_state.queue_id = v; }
   
 signals:
   void error(QString message);
   void state_changed(Action_state state);
   void finished();
-  
+
+  void question(QString message, Error_type error_type, bool is_dir);
+
 private:
   Main_window* main_window;
   Action_data data;
-  //Action_queue* queue;
-  int queue_id;
   QList<gio::Mount> mounts;
 
-  qint64 total_count, total_size;
-
-  qint64 current_count, current_size;
+  qint64 total_size, current_size;
+  int total_count, current_count;
 
   QElapsedTimer signal_timer;
   static const int signal_interval = 300; //ms
@@ -104,11 +103,25 @@ private:
   QFile* file2;
   char copy_buffer[BUFFER_SIZE];
 
+  Directory_tree_item* questioned_item;
+
+  void file_copy_iteration();
+  void preparing_iteration();
+  void main_iteration();
+
+  void delete_file_objects();
+  void send_question(Directory_tree_item* item);
+
+  Action_state tmp_state;
+
 
 
 private slots:
   void run();
   void iteration();
+
+public slots:
+  void question_answered(Error_reaction reaction);
 
 };
 

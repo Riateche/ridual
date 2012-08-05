@@ -31,7 +31,7 @@ void Action_queue::launch_action() {
     return;
   }
   Action* action = actions.dequeue();
-  action->set_queue_id(id);
+  //action->set_queue_id(id);
   //action->set_queue(this);
   QTimer::singleShot(0, action, SLOT(run()));
 }

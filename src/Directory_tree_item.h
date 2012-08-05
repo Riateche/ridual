@@ -4,13 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QDirIterator>
-
-enum Action_error {
-  no_error,
-  error_cannot_read,
-  error_file_exists
-  //etc
-};
+#include "Error_reaction.h"
 
 class Directory_tree_item {
 public:
@@ -19,7 +13,7 @@ public:
   bool is_folder;
   bool is_folder_read;
   bool is_processed;
-  Action_error error;
+  Error_type error_type;
   QDirIterator* iterator;
   Directory_tree_item* parent;
 

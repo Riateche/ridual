@@ -50,7 +50,7 @@ SOURCES += src/Main_window.cpp \
     src/Tasks_model.cpp \
     src/Directory_tree_item.cpp \
     src/Task_details.cpp \
-    Error_reaction.cpp
+    src/Error_reaction.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -82,7 +82,7 @@ HEADERS  += src/Main_window.h \
     src/Tasks_model.h \
     src/Directory_tree_item.h \
     src/Task_details.h \
-    Error_reaction.h
+    src/Error_reaction.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \

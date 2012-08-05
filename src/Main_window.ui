@@ -82,7 +82,7 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="question_frame_layout">
        <item>
         <widget class="QLabel" name="question_message">
          <property name="text">
