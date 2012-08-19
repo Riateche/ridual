@@ -59,16 +59,12 @@ class Action : public QObject {
 public:
   explicit Action(Main_window* mw, const Action_data& p_data);
   ~Action();
-
-  //inline void set_queue(Action_queue* p_queue) { queue = p_queue; }
-  //inline Action_queue* get_queue() { return queue; }
   inline void set_queue_id(int v) { tmp_state.queue_id = v; }
   
 signals:
   void error(QString message);
   void state_changed(Action_state state);
   void finished();
-
   void question(QString message, Error_type error_type, bool is_dir);
 
 private:
@@ -98,12 +94,41 @@ private:
   };
 
   Run_state run_state;
+
+  /* Preparing_errors_skipped indicates that there are some errors while
+    reading file list. If it's true then after reaching the end of the tree
+    new iteration will be preparing stage. Else it will be main stage.
+    This value is cleared every time we start preparing stage.
+    */
+  bool preparing_errors_skipped;
+
   Directory_tree_item* current_item;
+
   QFile* file1;
   QFile* file2;
   char copy_buffer[BUFFER_SIZE];
 
   Directory_tree_item* questioned_item;
+  Directory_tree_item* pending_answer;
+
+  /*
+    Current_iteration_errors is empty on first lookup. New errors are pushed in
+    next_iteration_errors list. After we reach the end of the tree,
+    if next_iteration_errors is empty, the task is considered is done. Else
+    next_iteration_errors contents is moved to current_iteration_errors and we start
+    from the first element of current_iteration_errors. There we iterate through the tree,
+    not current_iteration_errors list. Again, new errors are pushed in
+    next_iteration_errors list. Answers contained by current_iteration_errors are used
+    in the operation. If we reach unanswered item of current_iteration_errors,
+    this item and the following contents of current_iteration_errors are moved to the end of
+    next_iteration_errors. After that we consider the iteration completed and
+    repeat the actions as if we reach the end of the tree.
+    If on iteration start the first item of current_iteration_errors is unanswered,
+    the action is stopped until the answer is given.
+    */
+  QList<Directory_tree_item*> current_iteration_errors, next_iteration_errors;
+
+  void add_error(Directory_tree_item* item);
 
   void file_copy_iteration();
   void preparing_iteration();

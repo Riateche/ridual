@@ -7,18 +7,21 @@
 
 Action::Action(Main_window *mw, const Action_data &p_data):
   main_window(mw),
-  data(p_data),
-  total_size(0),
-  current_size(0),
-  total_count(0),
-  current_count(0),
-  tree(0),
-  current_item(0),
-  file1(0),
-  file2(0),
-  questioned_item(0)
+  data(p_data)
 {
+  total_size = 0;
+  current_size = 0;
+  total_count = 0;
+  current_count = 0;
+  tree = 0;
+  current_item = 0;
+  file1 = 0;
+  file2 = 0;
+  questioned_item = 0;
   run_state = run_state_preparing;
+  preparing_errors_skipped = false;
+  pending_answer = 0;
+
   qRegisterMetaType<Action_state>("Action_state");
   connect(this, SIGNAL(error(QString)), main_window, SLOT(fatal_error(QString)));
   connect(this, SIGNAL(error(QString)), this, SIGNAL(finished()));
@@ -45,6 +48,11 @@ QString Action::get_real_dir(QString uri) {
   return uri;
 }
 
+void Action::add_error(Directory_tree_item *item) {
+  //next_iteration_errors << item;
+  //if (!questioned_item)
+}
+
 void Action::file_copy_iteration() {
   if (file1->atEnd()) {
     delete_file_objects();
@@ -68,7 +76,6 @@ void Action::file_copy_iteration() {
   if (count < 0) {
     current_item->error_type = error_type_read_failed;
     if (!questioned_item) {
-      questioned_item = current_item;
       send_question(current_item);
     }
     delete_file_objects();
@@ -80,7 +87,6 @@ void Action::file_copy_iteration() {
   if (count2 < count) {
     current_item->error_type = error_type_write_failed;
     if (!questioned_item) {
-      questioned_item = current_item;
       send_question(current_item);
     }
     delete_file_objects();
@@ -91,7 +97,6 @@ void Action::file_copy_iteration() {
 }
 
 void Action::preparing_iteration() {
-  current_item = current_item->find_next();
   if (!current_item) {
     run_state = run_state_main; // preparing iteration ended
     current_item = tree; //moving cursor to the start
@@ -115,27 +120,24 @@ void Action::preparing_iteration() {
     signal_timer.restart();
   }
   if (current_item->is_folder && current_item->error_type == error_type_read_failed) {
+    preparing_errors_skipped = true;
     if (!questioned_item) {
-      questioned_item = current_item;
       send_question(current_item);
-      tmp_state.errors_count++;
     }
+    tmp_state.errors_count++;
     return;
   }
   if (!current_item->is_folder) {
-    QFile file(path);
-    total_count++;
-    total_size += file.size();
+    if (!current_item->is_prepared) {
+      QFile file(path);
+      total_count++;
+      total_size += file.size();
+      current_item->is_prepared = true;
+    }
   }
 }
 
 void Action::main_iteration() {
-  current_item = current_item->find_next();
-  if (data.type != action_copy) {
-    emit error("not implemented");
-    iteration_timer.stop();
-    return;
-  }
   if (!current_item) {
     iteration_timer.stop();
     if (!questioned_item) {
@@ -166,7 +168,6 @@ void Action::main_iteration() {
     if (QDir(new_path).exists()) {
       current_item->error_type = error_type_exists;
       if (!questioned_item) {
-        questioned_item = current_item;
         send_question(current_item);
       }
       tmp_state.errors_count++;
@@ -175,7 +176,6 @@ void Action::main_iteration() {
     if (!QDir().mkdir(new_path)) {
       current_item->error_type = error_type_create_failed;
       if (!questioned_item) {
-        questioned_item = current_item;
         send_question(current_item);
       }
       tmp_state.errors_count++;
@@ -190,7 +190,6 @@ void Action::main_iteration() {
     if (file2->exists()) {
       current_item->error_type = error_type_exists;
       if (!questioned_item) {
-        questioned_item = current_item;
         send_question(current_item);
       }
       tmp_state.errors_count++;
@@ -200,7 +199,6 @@ void Action::main_iteration() {
     if (!file2->open(QFile::WriteOnly)) {
       current_item->error_type = error_type_create_failed;
       if (!questioned_item) {
-        questioned_item = current_item;
         send_question(current_item);
       }
       tmp_state.errors_count++;
@@ -210,7 +208,6 @@ void Action::main_iteration() {
     if (!file1->open(QFile::ReadOnly)) {
       current_item->error_type = error_type_read_failed;
       if (!questioned_item) {
-        questioned_item = current_item;
         send_question(current_item);
       }
       tmp_state.errors_count++;
@@ -238,6 +235,7 @@ void Action::send_question(Directory_tree_item *item) {
     qWarning("Action::send_question: no error given");
     return;
   }
+  questioned_item = item;
   if (item->error_type == error_type_not_found) {
     error_string = tr("%1 '%2' not found.").arg(file_or_dir).arg(path);
   } else if (item->error_type == error_type_read_failed) {
@@ -257,16 +255,17 @@ void Action::send_question(Directory_tree_item *item) {
     error_string = tr("%1 '%2' already exists.").arg(file_or_dir).arg(new_path);
   }
   emit question(error_string, item->error_type, item->is_folder);
-
 }
 
 void Action::run() {
   mounts = main_window->get_gio_mounts(); //thread-safe
   signal_timer.start();
 
-  tree = new Directory_tree_item();
-  tree->is_folder = true;
-  tree->is_folder_read = true;
+  if (data.type != action_copy) {
+    emit error("not implemented");
+    iteration_timer.stop();
+    return;
+  }
 
   QList<Directory_tree_item*> trees;
   foreach(File_info target, data.targets) {
@@ -274,9 +273,11 @@ void Action::run() {
     item->is_folder = target.is_folder();
     item->parent_path = target.parent_folder;
     item->name = target.full_name;
-    item->parent = tree;
-    tree->children << item;
+    trees << item;
   }
+
+  tree = new Directory_tree_item();
+  tree->set_children(trees);
   current_item = tree;
 
   tmp_state.current_action = tr("Starting");
@@ -286,6 +287,20 @@ void Action::run() {
 
 void Action::iteration() {
   if (!iteration_timer.isActive()) return;
+
+  if (run_state != run_state_copy_file) {
+    //finding next current_item
+
+    if (pending_answer) {
+      if (preparing_errors_skipped && run_state == run_state_main) {
+        preparing_errors_skipped = false;
+        run_state = run_state_preparing;
+      }
+      current_item = pending_answer;
+    } else {
+      current_item = current_item->find_next();
+    }
+  }
 
   if (run_state == run_state_preparing) {
     if (data.recursive_fetch_option == recursive_fetch_off) {
@@ -301,10 +316,34 @@ void Action::iteration() {
 }
 
 void Action::question_answered(Error_reaction reaction) {
+  Directory_tree_item* item = questioned_item;
   if (!questioned_item) {
     qWarning("warning: Action::question_answered called when there is no questioned_item");
     return;
   }
+  questioned_item = 0;
+  item->error_reaction = reaction;
+  item->error_type = no_error;
+  tmp_state.errors_count--;
+  if (!pending_answer) {
+    pending_answer = item;
+  }
+  if (reaction != error_reaction_skip) {
+    //find next error and ask new question immediately
+    if (tmp_state.errors_count > 0) {
+      Directory_tree_item* i = item;
+      while(true) {
+        i = i->find_next();
+        if (i) {
+          qWarning("warning: Action::question_answered: failed to find next error but errors_count > 0");
+          return;
+        }
+        if (i->error_type != no_error) break;
+      }
+      send_question(i);
+    }
+  }
+
   //...
 
 }

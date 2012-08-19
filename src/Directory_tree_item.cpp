@@ -2,12 +2,14 @@
 #include <QDebug>
 
 Directory_tree_item::Directory_tree_item() :
-  is_folder(false),
-  is_folder_read(false),
+  is_prepared(false),
   is_processed(false),
   error_type(no_error),
+  error_reaction(error_reaction_undefined),
   iterator(0),
-  parent(0)
+  parent(0),
+  is_folder(false),
+  is_folder_read(false)
 {
   //qDebug() << "   Directory_tree_item constructor";
 }
@@ -30,6 +32,15 @@ Directory_tree_item* Directory_tree_item::find_next() {
     p = p->parent;
   }
   return 0;
+}
+
+void Directory_tree_item::set_children(const QList<Directory_tree_item *> &v) {
+  children = v;
+  is_folder = true;
+  is_folder_read = true;
+  foreach(Directory_tree_item* item, children) {
+    item->parent = this;
+  }
 }
 
 QString Directory_tree_item::get_path(bool absolute) {
