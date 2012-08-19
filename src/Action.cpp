@@ -6,6 +6,7 @@
 #include <QDebug>
 #include "Action_queue.h"
 #include <QApplication>
+#include <QStack>
 
 Action::Action(Main_window *mw, const Action_data &p_data):
   main_window(mw),
@@ -21,10 +22,10 @@ Action::Action(Main_window *mw, const Action_data &p_data):
   queue = 0;
 
   qRegisterMetaType<Action_state>("Action_state");
-  connect(this, SIGNAL(error(QString)), main_window, SLOT(fatal_error(QString)));
-  connect(this, SIGNAL(error(QString)), this, SIGNAL(finished()));
-  //connect(&iteration_timer, SIGNAL(timeout()), this, SLOT(iteration()));
-  connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
+  qRegisterMetaType<Question_data>("Question_data");
+  //connect(this, SIGNAL(error(QString)), main_window, SLOT(fatal_error(QString)));
+  //connect(this, SIGNAL(error(QString)), this, SIGNAL(finished()));
+  //connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
 Action::~Action()
@@ -48,9 +49,10 @@ QString Action::get_real_dir(QString uri) {
   return uri;
 }
 
-Error_reaction Action::ask_question(QString message, Error_type error_type, bool is_dir) {
+Error_reaction Action::ask_question(Question_data data) {
   error_reaction = error_reaction_undefined;
-  emit question(message, error_type, is_dir);
+  data.action = this;
+  emit question(data);
   while(error_reaction == error_reaction_undefined) {
     if (cancelled) throw Action_abort_exception();
     queue->msleep(sleep_interval);
@@ -77,12 +79,16 @@ void Action::run() {
 
   mounts = main_window->get_gio_mounts(); //thread-safe
   if (!data.destination.isEmpty()) {
-    data.destination = get_real_dir(data.destination);
+    normalized_destination = get_real_dir(data.destination);
+    if (normalized_destination.endsWith("/")) {
+      normalized_destination = normalized_destination.left(normalized_destination.length() - 1);
+    }
   }
 
   if (data.type != action_copy) {
-    emit error("not implemented");
+    //emit error("not implemented");
     //iteration_timer.stop();
+    qWarning("Action: unknown data.type");
     return;
   }
 
@@ -93,12 +99,27 @@ void Action::run() {
     foreach(File_info target, data.targets) {
       QString root_path = get_real_dir(target.full_path);
       if (root_path.endsWith("/")) root_path = root_path.left(root_path.length() - 1);
-      process_one(root_path, root_path, state);
+      QStack<QDirIterator*> stack;
+      try {
+        process_one(root_path, root_path, state);
+      } catch(Action_skip_exception) {
+        continue;
+      }
       if (QDir(root_path).exists()) {
-        QDirIterator iterator(root_path, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-        //main operation
-        while(iterator.hasNext()) {
-          process_one(iterator.next(), root_path, state);
+        stack.push(new QDirIterator(root_path, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags));
+        while(!stack.isEmpty()) {
+          while(stack.top()->hasNext()) {
+            QString path = stack.top()->next();
+            try {
+              process_one(path, root_path, state);
+            } catch(Action_skip_exception) {
+              continue;
+            }
+            if (QDir(path).exists()) {
+              stack.push(new QDirIterator(path, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags));
+            }
+          }
+          delete stack.pop();
         }
       }
 
@@ -106,16 +127,22 @@ void Action::run() {
   } catch (Action_abort_exception) {
     return;
   }
+
+  deleteLater();
 }
 
 void Action::process_one(const QString& path, const QString& root_path, Action_state& state) {
+  bool is_folder = QDir(path).exists();
   try {
     process_events();
     qDebug() << "path: " << path;
     int index = root_path.lastIndexOf("/");
     QString relative_path = path.mid(index + 1);
-    QString new_path = data.destination + "/" + relative_path;
+    QString new_path = normalized_destination + "/" + relative_path;
     qDebug() << "new_path: " << new_path;
+    if (normalized_destination.startsWith(path)) {
+      ask_question(Question_data(tr("Failed to copy '%1' to '%2': can't copy folder inside itself.").arg(path).arg(new_path), error_type_destination_inside_source, is_folder));
+    }
 
     bool retry_asked = false;
     do { //for retry
@@ -132,33 +159,33 @@ void Action::process_one(const QString& path, const QString& root_path, Action_s
           signal_timer.restart();
         }
 
-        if (QDir(path).exists()) {
+        if (is_folder) {
           if (!QDir(path).isReadable()) {
             //Error_reaction r =
-            ask_question(tr("Directory '%1' is not readable").arg(path), error_type_read_failed, true);
+            ask_question(Question_data(tr("Directory '%1' is not readable").arg(path), error_type_read_failed, true));
 
           }
           bool failure1 = QDir(new_path).exists();
           bool failure2 = QFile(new_path).exists();
           if (failure1 || failure2) {
             //Error_reaction r =
-            ask_question(tr("%1 '%2' already exists").arg(failure1? "Directory": "File").arg(new_path), error_type_exists, true);
+            ask_question(Question_data(tr("%1 '%2' already exists").arg(failure1? "Directory": "File").arg(new_path), error_type_exists, true));
           }
           if (!QDir().mkdir(new_path)) {
             //Error_reaction r =
-            ask_question(tr("Failed to create directory '%1'.").arg(new_path), error_type_create_failed, true);
+            ask_question(Question_data(tr("Failed to create directory '%1'.").arg(new_path), error_type_create_failed, true));
           }
         } else {
           QFile file1(path);
           QFile file2(new_path);
           if (file2.exists()) {
-            ask_question(tr("File '%1' already exists").arg(new_path), error_type_exists, false);
+            ask_question(Question_data(tr("File '%1' already exists").arg(new_path), error_type_exists, false));
           }
           if (!file1.open(QFile::ReadOnly)) {
-            ask_question(tr("Failed to read from file '%1'.").arg(path), error_type_read_failed, false);
+            ask_question(Question_data(tr("Failed to read from file '%1'.").arg(path), error_type_read_failed, false));
           }
           if (!file2.open(QFile::WriteOnly)) {
-            ask_question(tr("Failed to create file '%1'.").arg(new_path), error_type_create_failed, false);
+            ask_question(Question_data(tr("Failed to create file '%1'.").arg(new_path), error_type_create_failed, false));
           }
           while(!file1.atEnd()) {
             process_events();
@@ -176,11 +203,11 @@ void Action::process_one(const QString& path, const QString& root_path, Action_s
             char copy_buffer[BUFFER_SIZE];
             int count = file1.read(copy_buffer, BUFFER_SIZE);
             if (count < 0) {
-              ask_question(tr("Failed to read from file '%1'.").arg(path), error_type_read_failed, false);
+              ask_question(Question_data(tr("Failed to read from file '%1'.").arg(path), error_type_read_failed, false));
             }
             int count2 = file2.write(copy_buffer, count);
             if (count2 < count) {
-              ask_question(tr("Failed to write to file '%1'.").arg(new_path), error_type_write_failed, false);
+              ask_question(Question_data(tr("Failed to write to file '%1'.").arg(new_path), error_type_write_failed, false));
             }
             current_size += count;
           }
@@ -191,6 +218,7 @@ void Action::process_one(const QString& path, const QString& root_path, Action_s
       }
     } while(retry_asked);
   } catch (Action_skip_exception) {
+    if (is_folder) throw;
     return;
   }
 }

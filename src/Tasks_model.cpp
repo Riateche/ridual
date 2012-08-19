@@ -7,8 +7,8 @@ Tasks_model::Tasks_model(Main_window *mw) :
   QAbstractTableModel(),
   main_window(mw)
 {
-  connect(main_window, SIGNAL(file_action_task_added(Action*)),
-          this, SLOT(task_added(Action*)));
+  connect(main_window, SIGNAL(action_added(Action*)),
+          this, SLOT(action_added(Action*)));
 }
 
 int Tasks_model::rowCount(const QModelIndex &parent) const {
@@ -60,7 +60,7 @@ QVariant Tasks_model::headerData(int section, Qt::Orientation orientation, int r
   return QVariant();
 }
 
-void Tasks_model::task_added(Action *task) {
+void Tasks_model::action_added(Action *task) {
   emit layoutAboutToBeChanged();
   connect(task, SIGNAL(state_changed(Action_state)), this, SLOT(task_state_changed(Action_state)));
   connect(task, SIGNAL(destroyed(QObject*)), this, SLOT(task_destroyed(QObject*)));

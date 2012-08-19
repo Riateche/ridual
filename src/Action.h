@@ -58,24 +58,37 @@ class Action_abort_exception { };
 class Action_retry_exception { };
 class Action_skip_exception { };
 
+class Action;
+
+class Question_data {
+public:
+  Question_data() {}
+  Question_data(QString m, Error_type t, bool d) :
+    message(m)
+  , error_type(t)
+  , is_dir(d) {}
+
+  QString message;
+  Error_type error_type;
+  bool is_dir;
+  Action* action;
+};
+Q_DECLARE_METATYPE(Question_data)
+
 class Action: public QObject {
   Q_OBJECT
 public:
   explicit Action(Main_window* mw, const Action_data& p_data);
   ~Action();
   void set_queue(Action_queue* q);
+  void run();
 
-
-signals:
-  void error(QString message);
-  void state_changed(Action_state state);
-  void finished();
-  void question(QString message, Error_type error_type, bool is_dir);
 
 
 private:
   Main_window* main_window;
   Action_data data;
+  QString normalized_destination;
   Action_queue* queue;
   QList<gio::Mount> mounts;
 
@@ -93,19 +106,23 @@ private:
   bool cancelled;
   Error_reaction error_reaction;
 
-  Error_reaction ask_question(QString message, Error_type error_type, bool is_dir);
+  Error_reaction ask_question(Question_data data);
   void process_events();
 
   void process_one(const QString& path, const QString& root_path, Action_state& state);
-
-
-private slots:
-  void run();
 
 public slots:
   void question_answered(Error_reaction reaction);
   void toggle_pause();
   void abort();
+
+signals:
+  //void error(QString message);
+  void state_changed(Action_state state);
+  //void finished();
+  void question(Question_data data);
+
+
 
 };
 

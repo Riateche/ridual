@@ -30,7 +30,7 @@ public:
 
   
 signals:
-  void task_added(Action* task);
+  //void task_added(Action* task);
   
 private:
   explicit Action_queue(int p_id);
@@ -38,9 +38,7 @@ private:
   QQueue<Action*> actions;
   QMutex access_mutex;
   int id;
-
-private slots:
-  void launch_action();
+  void run();
 
 };
 

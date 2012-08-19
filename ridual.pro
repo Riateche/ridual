@@ -50,7 +50,8 @@ SOURCES += src/Main_window.cpp \
     src/File_leaf.cpp \
     src/Directory_watcher.cpp \
     src/Action_queue.cpp \
-    src/Action.cpp
+    src/Action.cpp \
+    src/Action_answerer.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -82,7 +83,8 @@ HEADERS  += src/Main_window.h \
     src/File_leaf.h \
     src/Directory_watcher.h \
     src/Action.h \
-    src/Action_queue.h
+    src/Action_queue.h \
+    src/Action_answerer.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \

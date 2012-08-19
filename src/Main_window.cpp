@@ -20,6 +20,7 @@
 #include "Tasks_model.h"
 #include <QMessageBox>
 #include "Directory_watcher.h"
+#include "Action_answerer.h"
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -35,6 +36,8 @@ Main_window::Main_window(QWidget *parent) :
   watcher_thread = new QThread();
   watcher_thread->start();
   watcher->moveToThread(watcher_thread);
+
+  new Action_answerer(this);
 
   init_gio_connects();
   fetch_gio_mounts();
@@ -216,7 +219,7 @@ Action_queue *Main_window::create_queue() {
   while(ids.contains(id)) id++;
   Action_queue* q = new Action_queue(id);
   q->setParent(this);
-  connect(q, SIGNAL(task_added(Action*)), this, SIGNAL(file_action_task_added(Action*)));
+  //connect(q, SIGNAL(task_added(Action*)), this, SIGNAL(file_action_task_added(Action*)));
   return q;
 }
 
@@ -233,14 +236,14 @@ Action_queue *Main_window::get_current_queue() {
   return create_queue();
 }
 
-Action* Main_window::create_action(Action_data data) {
+void Main_window::create_action(Action_data data) {
   data.recursive_fetch_option = get_recursive_fetch_option();
   data.targets = active_pane->get_selected_files();
   data.destination = get_destination_pane()->get_uri();
   Action* a = new Action(this, data);
   Action_queue* q = get_current_queue();
   q->add_action(a);
-  return a;
+  emit action_added(a);
 }
 
 Recursive_fetch_option Main_window::get_recursive_fetch_option() {
@@ -254,8 +257,10 @@ Recursive_fetch_option Main_window::get_recursive_fetch_option() {
 void Main_window::show_question(QString message, QList<Button_settings> buttons,
                                 QObject *receiver, const char *slot) {
 
-  connect(this, SIGNAL(question_answered(QVariant,int)), receiver, slot);
+  //connect(this, SIGNAL(question_answered(QVariant,int)), receiver, slot);
   answer_buttons = buttons;
+  answer_receiver = receiver;
+  answer_slot = slot;
   ui->question_frame->show();
   ui->question_message->setText(message);
   ui->question_answer_editor->clear();
@@ -371,8 +376,8 @@ void Main_window::update_answer_buttons() {
 
 void Main_window::send_answer(int index) {
   if (index < 0 || index >= answer_buttons.count()) return;
-  emit question_answered(answer_buttons[index].data, index);
-  disconnect(this, SIGNAL(question_answered(QVariant,int)), 0, 0);
+  QMetaObject::invokeMethod(answer_receiver, answer_slot,
+                            Q_ARG(QVariant, answer_buttons[index].data));
   ui->question_frame->hide();
   get_active_pane()->setFocus();
 }
@@ -609,7 +614,7 @@ void Main_window::on_action_queue_choose_triggered() {
     int id = queue->get_id();
     list << Button_settings(id, tr("Queue %1").arg(id), id);
   }
-  show_question(tr("Choose a queue for the next task:"), list, this, SLOT(slot_queue_chosen(QVariant)));
+  show_question(tr("Choose a queue for the next task:"), list, this, "slot_queue_chosen");
   ui->question_answer_editor->setFocus();
 }
 

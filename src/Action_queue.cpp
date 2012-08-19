@@ -8,31 +8,29 @@ Action_queue::Action_queue(int p_id) {
   connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
+void Action_queue::run() {
+  while(!actions.isEmpty()) {
+    QMutexLocker locker(&access_mutex);
+    Action* a = actions.dequeue();
+    a->run();
+    delete a;
+  }
+}
+
 void Action_queue::add_action(Action *t) {
-  //QMutexLocker locker(&access_mutex);
+  QMutexLocker locker(&access_mutex);
   actions.enqueue(t);
   t->set_queue(this);
   t->moveToThread(this);
-  connect(t, SIGNAL(finished()), this, SLOT(launch_action()));
-  emit task_added(t);
+  //connect(t, SIGNAL(finished()), this, SLOT(launch_action()));
+  //emit task_added(t);
   if (!isRunning()) {
-    QTimer::singleShot(0, this, SLOT(launch_action()));
     start();
   }
 }
 
 QQueue<Action *> Action_queue::get_actions() {
   return actions;
-}
-
-void Action_queue::launch_action() {
-  //QMutexLocker locker(&access_mutex);
-  if (actions.isEmpty()) {
-    quit();
-    return;
-  }
-  Action* action = actions.dequeue();
-  QTimer::singleShot(0, action, SLOT(run()));
 }
 
 Action_queue::~Action_queue() {

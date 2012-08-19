@@ -95,7 +95,7 @@ public:
     The action might be launched before or after this function is finished,
     depending on current queue state.
     */
-  Action* create_action(Action_data data);
+  void create_action(Action_data data);
 
   Recursive_fetch_option get_recursive_fetch_option();
 
@@ -124,6 +124,8 @@ private:
 
   QList<Button_settings> answer_buttons;
   QList<QPushButton*> answer_buttons_widgets;
+  QObject* answer_receiver;
+  const char* answer_slot;
 
   Directory_watcher* watcher;
   QThread* watcher_thread;
@@ -172,9 +174,8 @@ signals:
   //void signal_add_task(Task task);
   void gio_mounts_changed();
   void selection_changed();
-  void file_action_task_added(Action*);
-
-  void question_answered(QVariant data, int number);
+  void action_added(Action*);
+  //void question_answered(QVariant data, int number);
 
 };
 

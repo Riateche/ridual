@@ -11,7 +11,8 @@ enum Error_type {
   error_type_create_failed,
   error_type_write_failed,
   error_type_delete_failed,
-  error_type_exists
+  error_type_exists,
+  error_type_destination_inside_source
 };
 Q_DECLARE_METATYPE(Error_type)
 
@@ -27,6 +28,7 @@ enum Error_reaction {
   error_reaction_rename_existing,
   error_reaction_rename_new
 };
+Q_DECLARE_METATYPE(Error_reaction)
 
 QList<Error_reaction> get_error_reactions(Error_type error_type,
                                      bool is_dir,
