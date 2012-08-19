@@ -19,9 +19,14 @@ public:
   void add_action(Action* t);
 
   /*! Get the id of queue. Id is an unique positive number.
+    This function must be called only from the thread
+    represented by this object.
     */
   inline int get_id() { return id; }
   QQueue<Action*> get_actions();
+
+  // public morozov pattern
+  void msleep(unsigned long time) { QThread::msleep(time); }
 
   
 signals:

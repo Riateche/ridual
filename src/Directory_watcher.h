@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QFileSystemWatcher>
+#include <QHash>
 
 class Directory_watcher : public QObject {
   Q_OBJECT
@@ -18,6 +19,7 @@ public slots:
 
 private:
   QFileSystemWatcher watcher;
+  QHash<QString, int> counter;
   
 };
 

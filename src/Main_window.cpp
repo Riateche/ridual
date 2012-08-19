@@ -239,7 +239,6 @@ Action* Main_window::create_action(Action_data data) {
   data.destination = get_destination_pane()->get_uri();
   Action* a = new Action(this, data);
   Action_queue* q = get_current_queue();
-  a->set_queue_id(q->get_id());
   q->add_action(a);
   return a;
 }

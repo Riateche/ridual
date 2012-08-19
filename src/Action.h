@@ -54,12 +54,16 @@ public:
 };
 Q_DECLARE_METATYPE(Action_state)
 
+class Action_abort_exception { };
+class Action_retry_exception { };
+class Action_skip_exception { };
+
 class Action: public QObject {
   Q_OBJECT
 public:
   explicit Action(Main_window* mw, const Action_data& p_data);
   ~Action();
-  inline void set_queue_id(int v) { state.queue_id = v; }
+  void set_queue(Action_queue* q);
 
 
 signals:
@@ -72,30 +76,36 @@ signals:
 private:
   Main_window* main_window;
   Action_data data;
+  Action_queue* queue;
   QList<gio::Mount> mounts;
 
   qint64 total_size, current_size;
   int total_count, current_count;
 
-  //QList<File_leaf*> roots;
-
-
   QElapsedTimer signal_timer;
   static const int signal_interval = 300; //ms
   static const int auto_recursive_fetch_max = 1000;
+  static const int sleep_interval = 100; //ms
 
   QString get_real_dir(QString uri);
 
-  //File_leaf* current_root;
-  //File_leaf* current_item;
+  bool paused;
+  bool cancelled;
+  Error_reaction error_reaction;
 
-  Action_state state;
+  Error_reaction ask_question(QString message, Error_type error_type, bool is_dir);
+  void process_events();
+
+  void process_one(const QString& path, const QString& root_path, Action_state& state);
+
 
 private slots:
   void run();
 
 public slots:
   void question_answered(Error_reaction reaction);
+  void toggle_pause();
+  void abort();
 
 };
 

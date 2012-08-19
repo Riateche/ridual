@@ -11,6 +11,7 @@ Action_queue::Action_queue(int p_id) {
 void Action_queue::add_action(Action *t) {
   //QMutexLocker locker(&access_mutex);
   actions.enqueue(t);
+  t->set_queue(this);
   t->moveToThread(this);
   connect(t, SIGNAL(finished()), this, SLOT(launch_action()));
   emit task_added(t);
@@ -31,8 +32,6 @@ void Action_queue::launch_action() {
     return;
   }
   Action* action = actions.dequeue();
-  //action->set_queue_id(id);
-  //action->set_queue(this);
   QTimer::singleShot(0, action, SLOT(run()));
 }
 
