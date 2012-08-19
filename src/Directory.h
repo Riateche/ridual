@@ -55,6 +55,7 @@ public:
     the end to satisfy 'uri rules', etc. use Directory::get_uri to get canonical URI.
   */
   explicit Directory(Main_window* mw, QString uri);
+  ~Directory();
 
   static QString canonize(QString uri);
 
@@ -83,6 +84,10 @@ signals:
   */
   void error(QString message);
 
+
+  void watch(QString path);
+  void unwatch(QString path);
+
   
 public slots:
   /*!
@@ -101,12 +106,14 @@ public slots:
 
 private slots:
   void task_ready(File_info_list result);
-  void watcher_event();
   void refresh_timeout();
+
+  void directory_changed(QString path);
 
 private:
   Main_window* main_window;
   QString uri;
+  QString path; //real path
   QFileIconProvider icon_provider;
 
   void create_task(QString path);

@@ -1,11 +1,12 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
+
+#include <QThreadPool>
 #include <QKeyEvent>
 #include <QSystemLocale>
 #include <QDebug>
 #include <QShortcut>
 #include "File_info.h"
-#include "Tasks_thread.h"
 #include <QToolButton>
 #include <QLabel>
 #include "Path_button.h"
@@ -18,6 +19,7 @@
 #include "File_action_queue.h"
 #include "Tasks_model.h"
 #include <QMessageBox>
+#include "Directory_watcher.h"
 
 Main_window::Main_window(QWidget *parent) :
   QMainWindow(parent),
@@ -29,11 +31,17 @@ Main_window::Main_window(QWidget *parent) :
 {
   QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
 
+  watcher = new Directory_watcher();
+  watcher_thread = new QThread();
+  watcher_thread->start();
+  watcher->moveToThread(watcher_thread);
+
   init_gio_connects();
   fetch_gio_mounts();
 
-  tasks_thread = new Tasks_thread(this);
-  tasks_thread->start();
+
+  QThreadPool::globalInstance()->setMaxThreadCount(5);
+
   qRegisterMetaType<File_info_list>("File_info_list");
   qRegisterMetaType<Error_type>("Error_type");
   ui->setupUi(this);
@@ -142,8 +150,10 @@ Main_window::~Main_window() {
   gio_connects.clear();
 
   save_settings();
-  tasks_thread->interrupt();
-  delete tasks_thread;
+  //tasks_thread->interrupt();
+  watcher_thread->quit();
+  watcher_thread->wait();
+  //delete tasks_thread;
   delete ui;
 }
 
@@ -155,10 +165,6 @@ void Main_window::set_active_pane(Pane *pane) {
   }
   active_pane = pane;
   emit active_pane_changed();
-}
-
-void Main_window::add_task(Task* task) {
-  tasks_thread->add_task(task);
 }
 
 QList<gio::Mount> Main_window::get_gio_mounts() {

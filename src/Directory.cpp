@@ -3,10 +3,9 @@
 #include <QDebug>
 #include "Main_window.h"
 #include "Directory_list_task.h"
-#include "Directory_watch_task.h"
 #include "Special_uri.h"
-
-
+#include "Directory_watcher.h"
+#include <QThreadPool>
 #include "qt_gtk.h"
 
 
@@ -14,6 +13,10 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   main_window(mw),
   uri(p_uri)
 {
+  connect(this, SIGNAL(watch(QString)), main_window->get_watcher(), SLOT(add(QString)));
+  connect(this, SIGNAL(unwatch(QString)), main_window->get_watcher(), SLOT(remove(QString)));
+  connect(main_window->get_watcher(), SIGNAL(directory_changed(QString)), this, SLOT(directory_changed(QString)));
+
   async_result_type = async_result_unexpected;
   need_update = false;
   watcher_created = false;
@@ -36,6 +39,12 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   QTimer* t = new QTimer(this);
   connect(t, SIGNAL(timeout()), this, SLOT(refresh_timeout()));
   t->start(watcher_refresh_timeout);
+}
+
+Directory::~Directory() {
+  if (watcher_created) {
+    emit unwatch(path);
+  }
 }
 
 QString Directory::canonize(QString uri) {
@@ -99,6 +108,7 @@ void Directory::refresh() {
   }
   if (uri.startsWith("/")) {
     // regular directory
+    path = uri;
     create_task(uri);
     return;
   }
@@ -184,9 +194,9 @@ void Directory::refresh() {
     if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
       //convert uri e.g. "ftp://user@host/path"
       //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"
-      QString real_dir = mount.path + "/" + uri.mid(mount.uri.length());
-      qDebug() << "This location is recognized as existing mount";
-      create_task(real_dir);
+      path = mount.path + "/" + uri.mid(mount.uri.length());
+      //qDebug() << "This location is recognized as existing mount";
+      create_task(path);
       return;
     }
   }
@@ -211,14 +221,17 @@ void Directory::task_ready(File_info_list r) {
   emit ready(r);
 }
 
-void Directory::watcher_event() {
-  need_update = true;
-}
-
 void Directory::refresh_timeout() {
   if (!need_update) return;
   need_update = false;
   refresh();
+}
+
+void Directory::directory_changed(QString changed_path) {
+  qDebug() << "directory_changed" << path << changed_path;
+  if (!path.isEmpty() && path == changed_path) {
+    need_update = true;
+  }
 }
 
 void Directory::create_task(QString path) {
@@ -226,12 +239,16 @@ void Directory::create_task(QString path) {
   connect(task, SIGNAL(ready(File_info_list)), this, SLOT(task_ready(File_info_list)));
   connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
   //connect(task, SIGNAL(error(QString)), this, SLOT(test(QString)));
-  main_window->add_task(task);
+  //main_window->add_task(task);
+
+  QThreadPool::globalInstance()->start(task);
+
 
   if (!watcher_created) {
-    Directory_watch_task* task2 = new Directory_watch_task(path);
-    connect(task2, SIGNAL(changed()), this, SLOT(watcher_event()));
-    main_window->add_task(task2);
+    //Directory_watch_task* task2 = new Directory_watch_task(path);
+    //connect(task2, SIGNAL(changed()), this, SLOT(watcher_event()));
+    //main_window->add_task(task2);
+    emit watch(path);
     watcher_created = true;
   }
 }

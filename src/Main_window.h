@@ -23,6 +23,7 @@ class Tasks_thread;
 class Action_queue;
 class Action;
 class Tasks_model;
+class Directory_watcher;
 
 typedef struct _GVolumeMonitor GVolumeMonitor;
 typedef struct _GDrive GDrive;
@@ -50,7 +51,7 @@ public:
   ~Main_window();
   void set_active_pane(Pane* pane);
   inline Pane* get_active_pane() { return active_pane; }
-  void add_task(Task* task);
+  //void add_task(Task* task);
 
   /*! Get all currently active mounts.
     This function is thread-safe.
@@ -69,6 +70,8 @@ public:
   Ui::Main_window* get_ui() { return ui; }
 
   Action_queue* create_queue();
+
+  Directory_watcher* get_watcher() { return watcher; }
 
   /*! Get all currently existing queues. Note that any queue is deleted
     when it becomes empty.
@@ -109,7 +112,7 @@ private:
 
   QList<gio::Volume*> volumes;
   QList<gio::Mount> mounts;
-  Tasks_thread* tasks_thread;
+  //Tasks_thread* tasks_thread;
 
   File_info_list old_path_items;
 
@@ -121,6 +124,9 @@ private:
 
   QList<Button_settings> answer_buttons;
   QList<QPushButton*> answer_buttons_widgets;
+
+  Directory_watcher* watcher;
+  QThread* watcher_thread;
 
   void init_gio_connects();
   void fetch_gio_mounts();

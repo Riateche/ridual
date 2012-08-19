@@ -1,16 +1,15 @@
 #ifndef DIRECTORY_LIST_TASK_H
 #define DIRECTORY_LIST_TASK_H
 
-#include "Task.h"
 #include "File_info.h"
+#include <QRunnable>
 
-
-class Directory_list_task : public Task {
+class Directory_list_task : public QObject, public QRunnable {
   Q_OBJECT
 public:
   explicit Directory_list_task(QString p_path);
   ~Directory_list_task();
-  void exec();
+  void run();
   
 signals:
   /*!

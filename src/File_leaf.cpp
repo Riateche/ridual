@@ -11,9 +11,7 @@ File_leaf::File_leaf(const QString &_name, bool is_folder, const File_leaf *_par
 {
 }
 
-File_leaf *File_leaf::find_next() {
 
-}
 
 QString File_leaf::get_path(bool absolute) const {
   QStringList list;

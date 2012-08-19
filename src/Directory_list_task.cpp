@@ -13,7 +13,7 @@ Directory_list_task::Directory_list_task(QString p_path) :
 Directory_list_task::~Directory_list_task() {
 }
 
-void Directory_list_task::exec() {
+void Directory_list_task::run() {
   QDir dir(path);
   if (!dir.exists()) {
     emit error(tr("Directory %1 does not exist.").arg(dir.absolutePath()));
@@ -64,34 +64,7 @@ void Directory_list_task::exec() {
     }
 
     g_object_unref(file);
-
-
-    /*
-    //todo: check for null pointers; add gerror for debug output
-    GFileInfo *file_info = g_file_query_info (file, "standard::*", (GFileQueryInfoFlags) 0, 0, 0);
-    GIcon *icon = g_file_info_get_icon (file_info);
-    qDebug() << "is_loadable" << G_IS_LOADABLE_ICON(icon);
-    qDebug() << "is_themed" << G_IS_THEMED_ICON(icon);
-    qDebug() << "is_emblem" << G_IS_EMBLEM(icon);
-    qDebug() << "is_emblemed_icon" << G_IS_EMBLEMED_ICON(icon);
-    qDebug() << "is_file_icon" << G_IS_FILE_ICON(icon);
-
-    GError* error = 0;
-    GInputStream* icon_stream = g_loadable_icon_load( (GLoadableIcon*) icon, 16, 0, 0, &error);
-    if (error) qDebug() << error->message;
-    char buffer[ICON_BUFFER_SIZE];
-    gsize bytes_read;
-    error = 0;
-    gboolean b = g_input_stream_read_all(icon_stream, buffer, ICON_BUFFER_SIZE, &bytes_read, 0, &error);
-    if (b) {
-      //QString s = QString::fromAscii(buffer, bytes_read);
-      qDebug() << "g_input_stream_read_all bytes read: " << bytes_read;
-    } else {
-      qDebug() << "g_input_stream_read_all failed";
-    }
-*/
     r << item;
   }
   emit ready(r);
-  deleteLater();
 }

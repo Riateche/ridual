@@ -12,7 +12,6 @@ public:
   inline QString get_absolute_path() const { return get_path(true); }
   inline bool is_folder() const { return _is_folder; }
 
-  File_leaf* find_next();
 
 private:
   QString name;

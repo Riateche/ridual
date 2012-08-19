@@ -1,4 +1,6 @@
 #include "Task.h"
+#include "Main_window.h"
+#include <QDebug>
 
 Task::Task(Main_window *mw, const Action_data &p_data):
   main_window(mw),
@@ -8,13 +10,11 @@ Task::Task(Main_window *mw, const Action_data &p_data):
   current_size = 0;
   total_count = 0;
   current_count = 0;
-  current_root = 0;
-  current_item = 0;
 
   qRegisterMetaType<Action_state>("Action_state");
   connect(this, SIGNAL(error(QString)), main_window, SLOT(fatal_error(QString)));
   connect(this, SIGNAL(error(QString)), this, SIGNAL(finished()));
-  connect(&iteration_timer, SIGNAL(timeout()), this, SLOT(iteration()));
+  //connect(&iteration_timer, SIGNAL(timeout()), this, SLOT(iteration()));
   connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
@@ -43,15 +43,32 @@ void Task::run() {
 
   if (data.type != action_copy) {
     emit error("not implemented");
-    iteration_timer.stop();
+    //iteration_timer.stop();
     return;
   }
 
+  state.current_action = tr("Starting");
+  emit state_changed(state);
+
   foreach(File_info target, data.targets) {
-//    leafs << new File_leaf(target.full_name, target.is_folder(), target.parent_folder);
+    QString root_path = get_real_dir(target.full_path);
+    QDirIterator iterator(root_path, QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while(iterator.hasNext()) {
+      QString path = iterator.next();
+      if (QDir(path).exists()) {
+        qDebug() << "dir: " << path;
+        if (!QDir(path).isReadable()) {
+          qDebug() << "not readable!";
+        }
+      } else {
+        qDebug() << "file: " << path;
+      }
+    }
+    //    leafs << new File_leaf(target.full_name, target.is_folder(), target.parent_folder);
   }
 
-  state.current_action = tr("Starting");
-  emit state_changed(tmp_state);
   //...
+}
+
+void Task::question_answered(Error_reaction reaction) {
 }

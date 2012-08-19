@@ -34,11 +34,9 @@ SOURCES += src/Main_window.cpp \
     src/gio/Volume.cpp \
     src/gio/Mount.cpp \
     src/Directory.cpp \
-    src/Tasks_thread.cpp \
     src/Task.cpp \
     src/Path_button.cpp \
     src/Directory_list_task.cpp \
-    src/Directory_watch_task.cpp \
     src/Path_widget.cpp \
     src/Special_uri.cpp \
     src/Columns.cpp \
@@ -51,7 +49,8 @@ SOURCES += src/Main_window.cpp \
     src/Directory_tree_item.cpp \
     src/Task_details.cpp \
     src/Error_reaction.cpp \
-    src/File_leaf.cpp
+    src/File_leaf.cpp \
+    src/Directory_watcher.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -66,12 +65,10 @@ HEADERS  += src/Main_window.h \
     src/gio/Volume.h \
     src/gio/Mount.h \
     src/Directory.h \
-    src/Tasks_thread.h \
     src/Task.h \
     src/Path_button.h \
     src/qt_gtk.h \
     src/Directory_list_task.h \
-    src/Directory_watch_task.h \
     src/Path_widget.h \
     src/Special_uri.h \
     src/Columns.h \
@@ -84,7 +81,8 @@ HEADERS  += src/Main_window.h \
     src/Directory_tree_item.h \
     src/Task_details.h \
     src/Error_reaction.h \
-    src/File_leaf.h
+    src/File_leaf.h \
+    src/Directory_watcher.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \
@@ -110,7 +108,10 @@ enable_profiler { # gprof profiler
 
 testing {
   QT += testlib
-  LIBS += -lgtest
+#  LIBS += -lgtest
+  INCLUDEPATH += $$_PRO_FILE_PWD_/tests/gtest-1.6.0
+  INCLUDEPATH += $$_PRO_FILE_PWD_/tests/gtest-1.6.0/include
+  SOURCES += $$_PRO_FILE_PWD_/tests/gtest-1.6.0/src/gtest-all.cc
   SOURCES += $$_PRO_FILE_PWD_/tests/*.cpp
   HEADERS += $$_PRO_FILE_PWD_/tests/*.h
   TARGET = ridual-test
