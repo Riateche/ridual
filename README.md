@@ -37,9 +37,9 @@ that aren't implemented yet. The following features will be implemented soon:
 - Featured file search.
 - Operating drives and resources (unmount, eject etc.)
 - Displaying progress in Unity taskbar.
-- Settings maximal copy speed.
+- Setting maximal copy speed.
 - Undoing operations.
-- Using vavigation history.
+- Using navigation history.
 
 ### Installing Ridual
 
