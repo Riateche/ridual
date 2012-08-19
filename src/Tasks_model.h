@@ -2,7 +2,7 @@
 #define TASKS_MODEL_H
 
 #include <QAbstractTableModel>
-#include "File_action_task.h"
+#include "Action.h"
 
 class Main_window;
 

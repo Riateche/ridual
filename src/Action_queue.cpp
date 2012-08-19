@@ -1,5 +1,5 @@
-#include "File_action_queue.h"
-#include "File_action_task.h"
+#include "Action_queue.h"
+#include "Action.h"
 #include <QTimer>
 #include <QDebug>
 

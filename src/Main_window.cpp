@@ -16,7 +16,7 @@
 #include "Settings_dialog.h"
 #include "qt_gtk.h"
 #include <QTextCodec>
-#include "File_action_queue.h"
+#include "Action_queue.h"
 #include "Tasks_model.h"
 #include <QMessageBox>
 #include "Directory_watcher.h"

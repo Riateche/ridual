@@ -1,6 +1,6 @@
 #include "Tasks_model.h"
 #include "Main_window.h"
-#include "File_action_queue.h"
+#include "Action_queue.h"
 #include <QDebug>
 
 Tasks_model::Tasks_model(Main_window *mw) :
