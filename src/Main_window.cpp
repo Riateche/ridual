@@ -1,6 +1,8 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
+#include <QUrl>
+#include <QDesktopServices>
 #include <QThreadPool>
 #include <QKeyEvent>
 #include <QSystemLocale>
@@ -398,6 +400,10 @@ void Main_window::on_question_answer_editor_textEdited(const QString &text) {
       return;
     }
   }
+}
+
+void Main_window::on_action_about_triggered() {
+  QDesktopServices::openUrl(QUrl("https://github.com/Riateche/ridual"));
 }
 
 void Main_window::switch_active_pane() {

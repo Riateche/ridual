@@ -152,6 +152,7 @@ private slots:
   void on_action_copy_triggered();
   void on_action_queue_choose_triggered();
   void on_question_answer_editor_textEdited(const QString &text);
+  void on_action_about_triggered();
 
   void save_settings();
   void go_parent();

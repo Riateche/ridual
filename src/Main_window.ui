@@ -241,11 +241,18 @@
     </property>
     <addaction name="action_queue_choose"/>
    </widget>
+   <widget class="QMenu" name="menu_help">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="action_about"/>
+   </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_task"/>
    <addaction name="menu_go"/>
    <addaction name="menu_queue"/>
    <addaction name="menu_settings"/>
+   <addaction name="menu_help"/>
   </widget>
   <action name="action_hotkeys">
    <property name="text">
@@ -408,6 +415,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="action_about">
+   <property name="text">
+    <string>Github page</string>
    </property>
   </action>
  </widget>
