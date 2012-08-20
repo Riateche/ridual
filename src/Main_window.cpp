@@ -46,7 +46,7 @@ Main_window::Main_window(QWidget *parent) :
   QThreadPool::globalInstance()->setMaxThreadCount(5);
 
   qRegisterMetaType<File_info_list>("File_info_list");
-  qRegisterMetaType<Error_type>("Error_type");
+  qRegisterMetaType<Error_type::Enum>("Error_type::Enum");
   ui->setupUi(this);
   //ui->tasks_table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
   //ui->tasks_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
@@ -269,9 +269,6 @@ void Main_window::show_question(QString message, QList<Button_settings> buttons,
 
 
 void Main_window::init_gio_connects() {
-  //qRegisterMetaType< QList<gio::Volume> >("QList<gio::Volume>");
-  //qRegisterMetaType< QList<gio::Mount> >("QList<gio::Mount>");
-
   int argc = QApplication::argc();
   char** argv = QApplication::argv();
   gtk_init(&argc, &argv);
@@ -657,7 +654,7 @@ void Main_window::on_action_edit_triggered() {
 
 void Main_window::on_action_copy_triggered() {
   Action_data data;
-  data.type = action_copy;
+  data.type = Action_type::copy;
   create_action(data);
 }
 

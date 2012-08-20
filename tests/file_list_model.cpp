@@ -23,13 +23,13 @@ TEST(File_list_model, format_octal_permissions) {
 TEST(File_list_model, columns) {
   File_list_model model;
   Columns columns1;
-  columns1 << column_uri << column_mime_type;
+  columns1 << Column::uri << Column::mime_type;
   model.set_columns(columns1);
   File_info_list list;
   model.set_data(list);
   EXPECT_EQ(columns1, model.get_current_columns());
 
-  list.columns << column_name << column_type_description;
+  list.columns << Column::name << Column::type_description;
   model.set_data(list);
   EXPECT_NE(columns1, model.get_current_columns());
   EXPECT_EQ(list.columns, model.get_current_columns());
@@ -49,7 +49,7 @@ TEST(File_list_model, cell_count) {
   EXPECT_EQ(3, model.rowCount());
   EXPECT_EQ(model.get_current_columns().count(), model.columnCount());
 
-  list.columns << column_name << column_extension;
+  list.columns << Column::name << Column::extension;
   model.set_data(list);
   EXPECT_EQ(3, model.rowCount());
   EXPECT_EQ(2, model.columnCount());

@@ -10,7 +10,11 @@ typedef _GVolume GVolume;
 /*!
   This class represents GIO volume. We must use it to
   mount unmounted partitions. For mounted partitions
-  we can use gio::Mount.
+  Gio_mount can be used.
+
+  This class keeps GVolume pointer because we need it to
+  request volume mount. This operation is performed by
+  calling g_volume_mount in Directory::refresh.
   */
 class Gio_volume {
 public:

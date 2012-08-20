@@ -8,27 +8,30 @@
   An object of this class holds QAction and
   updates its state to hotkey value.
 
-  \sa Hotkeys
-
+  \sa Hotkeys (main class for this system)
   */
 class Hotkey {
 public:
   /*! Constructs a hotkey based on QAction.
-    \param p_name Displayed name of hotkey
-    \param p_value String representation of shortcut as returned from QKeySequence::toString
-    \param action Action to set up.
+    \param _name The name as latin untranslatable string  used for storing settings.
+    \param _text The text displayed in hotkeys editor.
+    \param _value String representation of current shortcut as returned from QKeySequence::toString
+    \param _default_value String representation of default shortcut value.
+    \param _action Accosiated action. The passed _value will be assigned as shortcut for the action.
   */
-  Hotkey(QString p_name, QString p_text, QString p_value, QString p_default_value, QAction* p_action);
+  Hotkey(QString _name, QString _text, QString _value,
+         QString _default_value, QAction* _action);
+
   inline QString get_name() const { return name; }
   inline QString get_text() const { return text; }
   inline QString get_value() const { return value; }
   inline QString get_default_value() const { return default_value; }
 
 
-  /*! Set new value and update QAction accordingly.
+  /*! Set new value of shortcut (as returned from QKeySequence::toString)
+      and update QAction accordingly.
     */
   void set_value(QString new_value);
-
 
   /*! This property holds current state of hotkey editor widget.
     */

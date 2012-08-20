@@ -4,6 +4,7 @@
 #include <QObject>
 #include "File_info.h"
 #include <QFileIconProvider>
+#include <QElapsedTimer>
 
 typedef struct _GObject GObject;
 typedef struct _GAsyncResult GAsyncResult;
@@ -115,6 +116,7 @@ private:
   QString uri;
   QString path; //real path
   QFileIconProvider icon_provider;
+  QElapsedTimer refresh_timer;
 
   void create_task(QString path);
 

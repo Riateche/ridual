@@ -21,7 +21,7 @@ Action::Action(Main_window *mw, const Action_data &p_data):
   current_count = 0;
   paused = false;
   cancelled = false;
-  error_reaction = error_reaction_undefined;
+  error_reaction = Error_reaction::undefined;
   queue = 0;
 
   qRegisterMetaType<Action_state>("Action_state");
@@ -52,18 +52,18 @@ QString Action::get_real_dir(QString uri) {
   return uri;
 }
 
-Error_reaction Action::ask_question(Question_data data) {
-  error_reaction = error_reaction_undefined;
+Error_reaction::Enum Action::ask_question(Question_data data) {
+  error_reaction = Error_reaction::undefined;
   data.action = this;
   emit question(data);
-  while(error_reaction == error_reaction_undefined) {
+  while(error_reaction == Error_reaction::undefined) {
     if (cancelled) throw Abort_exception();
     queue->msleep(sleep_interval);
     QApplication::processEvents();
   }
-  if (error_reaction == error_reaction_abort) throw Abort_exception();
-  if (error_reaction == error_reaction_retry) throw Retry_exception();
-  if (error_reaction == error_reaction_skip)  throw Skip_exception();
+  if (error_reaction == Error_reaction::abort) throw Abort_exception();
+  if (error_reaction == Error_reaction::retry) throw Retry_exception();
+  if (error_reaction == Error_reaction::skip)  throw Skip_exception();
   return error_reaction;
 }
 
@@ -147,7 +147,7 @@ void Action::run() {
     }
   }
 
-  if (data.type != action_copy) {
+  if (data.type != Action_type::copy) {
     //emit error("not implemented");
     //iteration_timer.stop();
     qWarning("Action: unknown data.type");
@@ -177,7 +177,7 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
     QString new_path = normalized_destination + "/" + relative_path;
     qDebug() << "new_path: " << new_path;
     if (normalized_destination.startsWith(path)) {
-      ask_question(Question_data(tr("Failed to copy '%1' to '%2': can't copy folder inside itself.").arg(path).arg(new_path), error_type_destination_inside_source, is_dir));
+      ask_question(Question_data(tr("Failed to copy '%1' to '%2': can't copy folder inside itself.").arg(path).arg(new_path), Error_type::destination_inside_source, is_dir));
     }
 
     bool retry_asked = false;
@@ -198,31 +198,31 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
         if (is_dir) {
           if (!QDir(path).isReadable()) {
             //Error_reaction r =
-            ask_question(Question_data(tr("Directory '%1' is not readable").arg(path), error_type_read_failed, true));
+            ask_question(Question_data(tr("Directory '%1' is not readable").arg(path), Error_type::read_failed, true));
 
           }
           bool failure1 = QDir(new_path).exists();
           bool failure2 = QFile(new_path).exists();
           if (failure1 || failure2) {
             //Error_reaction r =
-            ask_question(Question_data(tr("%1 '%2' already exists").arg(failure1? "Directory": "File").arg(new_path), error_type_exists, true));
+            ask_question(Question_data(tr("%1 '%2' already exists").arg(failure1? "Directory": "File").arg(new_path), Error_type::exists, true));
           }
           QString mkdir_error;
           if (!ridual_mkdir(new_path, mkdir_error)) {
             //Error_reaction r =
-            ask_question(Question_data(tr("Failed to create directory '%1': %2").arg(new_path).arg(mkdir_error), error_type_create_failed, true));
+            ask_question(Question_data(tr("Failed to create directory '%1': %2").arg(new_path).arg(mkdir_error), Error_type::create_failed, true));
           }
         } else {
           QFile file1(path);
           QFile file2(new_path);
           if (file2.exists()) {
-            ask_question(Question_data(tr("File '%1' already exists").arg(new_path), error_type_exists, false));
+            ask_question(Question_data(tr("File '%1' already exists").arg(new_path), Error_type::exists, false));
           }
           if (!file1.open(QFile::ReadOnly)) {
-            ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(file1.errorString()), error_type_read_failed, false));
+            ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(file1.errorString()), Error_type::read_failed, false));
           }
           if (!file2.open(QFile::WriteOnly)) {
-            ask_question(Question_data(tr("Failed to create file '%1': %2").arg(new_path).arg(file2.errorString()), error_type_create_failed, false));
+            ask_question(Question_data(tr("Failed to create file '%1': %2").arg(new_path).arg(file2.errorString()), Error_type::create_failed, false));
           }
           while(!file1.atEnd()) {
             process_events();
@@ -240,11 +240,11 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
             char copy_buffer[BUFFER_SIZE];
             int count = file1.read(copy_buffer, BUFFER_SIZE);
             if (count < 0) {
-              ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(file1.errorString()), error_type_read_failed, false));
+              ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(file1.errorString()), Error_type::read_failed, false));
             }
             int count2 = file2.write(copy_buffer, count);
             if (count2 < count) {
-              ask_question(Question_data(tr("Failed to write to file '%1': %2").arg(new_path).arg(file2.errorString()), error_type_write_failed, false));
+              ask_question(Question_data(tr("Failed to write to file '%1': %2").arg(new_path).arg(file2.errorString()), Error_type::write_failed, false));
             }
             current_size += count;
           }
@@ -261,7 +261,7 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
 }
 
 
-void Action::question_answered(Error_reaction reaction) {
+void Action::question_answered(Error_reaction::Enum reaction) {
   error_reaction = reaction;
 }
 

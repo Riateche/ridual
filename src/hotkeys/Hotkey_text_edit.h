@@ -3,9 +3,9 @@
 
 #include <QTextEdit>
 
-/*! Hotkey editing widget. It's a text box. if you press a hotkey
-  inside this text box, its text will represent pressed hotkey
-  as returned by QKeySequence::toString.
+/*! Hotkey editing widget. It's a text box. Each key event happened
+  with the editor is catched by it, and string representation of
+  pressed key combinations replaces editor contents.
   */
 class Hotkey_text_edit : public QTextEdit {
   Q_OBJECT

@@ -39,7 +39,7 @@ QVariant File_list_model::headerData(int section, Qt::Orientation orientation, i
   if (list.isEmpty()) return QVariant();
   if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
     if (section < 0 || section >= current_columns.count()) return QVariant();
-    Column column = current_columns.at(section);
+    Column::Enum column = current_columns.at(section);
     return Columns::get_all()[column];
   }
   if (role == Qt::DisplayRole && orientation == Qt::Vertical) {
@@ -63,46 +63,46 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
   if (role == Qt::DisplayRole) {
     if (column < 0 || column >= current_columns.count()) return QVariant();
     switch (current_columns[column]) {
-      case column_full_name: {
+      case Column::full_name: {
         return file_info.full_name;
       }
-      case column_name: {
+      case Column::name: {
         return file_info.name;
       }
-      case column_extension: {
+      case Column::extension: {
         return file_info.extension;
       }
-      case column_parent_folder: {
+      case Column::parent_folder: {
         return file_info.parent_folder;
       }
-      case column_full_path: {
+      case Column::full_path: {
         return file_info.full_path;
       }
-      case column_owner: {
+      case Column::owner: {
         return file_info.owner;
       }
-      case column_group: {
+      case Column::group: {
         return file_info.group;
       }
-      case column_octal_permissions: {
+      case Column::octal_permissions: {
         return format_octal_permissions(file_info.permissions);
       }
-      case column_date_modified: {
+      case Column::date_modified: {
         return file_info.date_modified.toString(Qt::SystemLocaleShortDate);
       }
-      case column_date_created: {
+      case Column::date_created: {
         return file_info.date_created.toString(Qt::SystemLocaleShortDate);
       }
-      case column_date_accessed: {
+      case Column::date_accessed: {
         return file_info.date_accessed.toString(Qt::SystemLocaleShortDate);
       }
-      case column_mime_type: {
+      case Column::mime_type: {
         return file_info.mime_type;
       }
-      case column_type_description: {
+      case Column::type_description: {
         return get_mime_description(file_info.mime_type);
       }
-      case column_uri: {
+      case Column::uri: {
         return file_info.uri;
       }
       default: {

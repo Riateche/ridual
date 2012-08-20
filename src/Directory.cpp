@@ -39,6 +39,7 @@ Directory::Directory(Main_window* mw, QString p_uri) :
   QTimer* t = new QTimer(this);
   connect(t, SIGNAL(timeout()), this, SLOT(refresh_timeout()));
   t->start(watcher_refresh_timeout);
+  refresh_timer.start();
 }
 
 Directory::~Directory() {
@@ -102,6 +103,8 @@ QString Directory::get_parent_uri() {
 
 
 void Directory::refresh() {
+  need_update = false;
+  refresh_timer.restart();
   if (uri.isEmpty()) {
     emit error(tr("Address is empty"));
     return;
@@ -136,7 +139,7 @@ void Directory::refresh() {
     fi.name = Special_uri(Special_uri::userdirs).caption();
     fi.uri = Special_uri(Special_uri::userdirs).uri();
     r << fi;
-    r.columns << column_name << column_uri;
+    r.columns << Column::name << Column::uri;
     emit ready(r);
     return;
   }
@@ -160,7 +163,7 @@ void Directory::refresh() {
       }
       id++;
     }
-    r.columns << column_name << column_uri;
+    r.columns << Column::name << Column::uri;
     emit ready(r);
     return;
   }
@@ -179,13 +182,13 @@ void Directory::refresh() {
 
   if (special_uri.name() == Special_uri::bookmarks) { // list of bookmarks
     File_info_list list = main_window->get_bookmarks()->get_all();
-    list.columns << column_name << column_uri;
+    list.columns << Column::name << Column::uri;
     emit ready(list);
     return;
   }
   if (special_uri.name() == Special_uri::userdirs) { // list of xdg bookmarks
     File_info_list list = main_window->get_user_dirs()->get_all();
-    list.columns << column_name << column_uri;
+    list.columns << Column::name << Column::uri;
     emit ready(list);
     return;
   }
@@ -223,14 +226,17 @@ void Directory::task_ready(File_info_list r) {
 
 void Directory::refresh_timeout() {
   if (!need_update) return;
-  need_update = false;
   refresh();
 }
 
 void Directory::directory_changed(QString changed_path) {
   qDebug() << "directory_changed" << path << changed_path;
   if (!path.isEmpty() && path == changed_path) {
-    need_update = true;
+    if (refresh_timer.elapsed() < watcher_refresh_timeout) {
+      need_update = true;
+    } else {
+      refresh();
+    }
   }
 }
 
