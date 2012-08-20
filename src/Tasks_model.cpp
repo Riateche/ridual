@@ -17,7 +17,7 @@ int Tasks_model::rowCount(const QModelIndex &parent) const {
 }
 
 int Tasks_model::columnCount(const QModelIndex &parent) const {
-  return 5;
+  return 4;
   Q_UNUSED(parent);
 }
 
@@ -40,8 +40,8 @@ QVariant Tasks_model::data(const QModelIndex &index, int role) const {
         return items[i].second.current_progress;
       case 3:
         return items[i].second.total_progress;
-      case 4:
-        return items[i].second.errors_count;
+   //   case 4:
+   //     return items[i].second.errors_count;
     }
   }
   return QVariant();
@@ -54,7 +54,7 @@ QVariant Tasks_model::headerData(int section, Qt::Orientation orientation, int r
       case 1: return tr("Current action");
       case 2: return tr("Current progress");
       case 3: return tr("Total progress");
-      case 4: return tr("Error count");
+  //    case 4: return tr("Error count");
     }
   }
   return QVariant();

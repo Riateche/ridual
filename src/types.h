@@ -36,9 +36,9 @@ public:
 
 class Action_state {
 public:
-  Action_state() : errors_count(0), queue_id(0) {}
+  Action_state(): queue_id(0) {}
   QString current_action, current_progress, total_progress;
-  int errors_count;
+  //int errors_count;
   int queue_id;
 };
 Q_DECLARE_METATYPE(Action_state)

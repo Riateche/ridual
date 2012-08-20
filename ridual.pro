@@ -50,7 +50,8 @@ SOURCES += src/Main_window.cpp \
     src/Directory_watcher.cpp \
     src/Action_queue.cpp \
     src/Action.cpp \
-    src/Action_answerer.cpp
+    src/Action_answerer.cpp \
+    src/mkdir.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -83,7 +84,8 @@ HEADERS  += src/Main_window.h \
     src/Action.h \
     src/Action_queue.h \
     src/Action_answerer.h \
-    src/types.h
+    src/types.h \
+    src/mkdir.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \

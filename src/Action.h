@@ -19,9 +19,7 @@ class Main_window;
 
 
 
-class Action_abort_exception { };
-class Action_retry_exception { };
-class Action_skip_exception { };
+
 
 
 
@@ -32,7 +30,6 @@ public:
   ~Action();
   void set_queue(Action_queue* q);
   void run();
-
 
 
 private:
@@ -56,10 +53,23 @@ private:
   bool cancelled;
   Error_reaction error_reaction;
 
+  Action_state state;
+
   Error_reaction ask_question(Question_data data);
   void process_events();
 
-  void process_one(const QString& path, const QString& root_path, Action_state& state);
+
+
+  void iterate_all(bool prepare);
+
+  void prepare_one(const QString& path, const QString& root_path, bool is_dir);
+  void process_one(const QString& path, const QString& root_path, bool is_dir);
+
+
+  class Abort_exception { };
+  class Retry_exception { };
+  class Skip_exception { };
+  class Prepare_finished_exception {};
 
 public slots:
   void question_answered(Error_reaction reaction);
@@ -69,7 +79,6 @@ public slots:
 signals:
   //void error(QString message);
   void state_changed(Action_state state);
-  //void finished();
   void question(Question_data data);
 
 

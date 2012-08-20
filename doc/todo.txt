@@ -10,30 +10,28 @@
   - auto actions accordingly to settings
 
 
+- align path buttons to the right when right pane is active.
 
-- execute each Directory in separate thread
+
 - deny closing main window when tasks are executing
-- remove "gio" folder and namespace
 - remove File_info::parent_folder, get parent folder manually
+
+- if average size of file is small, display total progress based on files count
+  instead of size
 
 - file size in File_info
 
-F5 - copy with last used settings
-Ctrl+F5 - show copy dialog
-
+F5 - copy
 F6 - move
-Ctrl+F6 - show move dialog
 Alt+L - create link dialog:
 - Type of link
   - hard link
   - absolute soft link
   - relative soft link
-- No recursive options
 - No "directory exists" error action
 - No max speed
 
 F8 - delete selected files.
-Ctrl+F8 - delete with dialog:
 - No "directory/file exists" error actions
 - No max speed
 
@@ -41,18 +39,7 @@ Tasks must not be created with "places" schema in source or destination.
 
 Option "Follow symlinks"
 
-Actions when there is an error while executing a task:
-- if predefined action was "cancel", cancel task and show a message
-- if predefined action was "ask":
-  Create new window and ask OS to pay attention on it. Show information about bad file,
-  destination (if any), buttons for possible actions (don't forget "retry" action for
-  all cases), total count of errors in the task.
-  If all files are iterated and there are pending question(s), task becomes suspended.
-  Task also pauses if maximum length of bad files list (50,000) is reached.
-- else perform predefined action and continue.
 
-All options in the dialog must be remembered. Their values must be default on next dialog
-showing.
 
 If some files was skipped or overwritten without propmt, the dialog about this must
 appear after the task is completed.
@@ -61,13 +48,10 @@ At the bottom of main window the tasks table must be displayed. Columns:
 - Current action:
   - "Copying <relative_filename>". May be also "Moving", "Creating link to" etc.
   - "Reading files list". Appears on recursive looking at the start of task or in main loop.
-  (Files tree mustn't be saved on recursive looking because it can be rather big.)
   - "Waiting in queue"
   - "Waiting for your answer"
 - Current progress: progress bar for copying current file (if any)
 - Total progress: progress bar for the whole task (if available)
-- Errors count: count of files skipped and waiting for user's answer. After giving an answer
-  this number must decrease.
 
 Context menu of table row:
 - Pause/Resume
