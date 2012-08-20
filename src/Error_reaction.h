@@ -3,18 +3,8 @@
 
 #include <QList>
 #include <QVariant>
+#include "types.h"
 
-enum Error_type {
-  no_error,
-  error_type_not_found,
-  error_type_read_failed,
-  error_type_create_failed,
-  error_type_write_failed,
-  error_type_delete_failed,
-  error_type_exists,
-  error_type_destination_inside_source
-};
-Q_DECLARE_METATYPE(Error_type)
 
 enum Error_reaction {
   error_reaction_undefined,

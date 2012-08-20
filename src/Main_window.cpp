@@ -170,7 +170,7 @@ void Main_window::set_active_pane(Pane *pane) {
   emit active_pane_changed();
 }
 
-QList<gio::Mount> Main_window::get_gio_mounts() {
+QList<Gio_mount> Main_window::get_gio_mounts() {
   static QMutex mutex;
   QMutexLocker locker(&mutex);
   return mounts;
@@ -292,14 +292,14 @@ void Main_window::init_gio_connects() {
 
 void Main_window::fetch_gio_mounts() {
   //foreach (gio::Mount* m, mounts) delete m;
-  foreach (gio::Volume* m, volumes) delete m;
+  foreach (Gio_volume* m, volumes) delete m;
   volumes.clear();
   mounts.clear();
 
   GList* list = g_volume_monitor_get_volumes(volume_monitor);
   for(; list; list = list->next) {
     GVolume* volume = static_cast<GVolume*>(list->data);
-    volumes << new gio::Volume(volume);
+    volumes << new Gio_volume(volume);
     g_object_unref(volume);
   }
   g_free(list);
@@ -307,7 +307,7 @@ void Main_window::fetch_gio_mounts() {
   list = g_volume_monitor_get_mounts(volume_monitor);
   for(; list; list = list->next) {
     GMount* mount = static_cast<GMount*>(list->data);
-    mounts << gio::Mount(mount);
+    mounts << Gio_mount(mount);
     g_object_unref(mount);
   }
   g_free(list);
@@ -482,7 +482,7 @@ void Main_window::refresh_path_toolbar() {
 
 
 
-  foreach(gio::Mount mount, mounts) {
+  foreach(Gio_mount mount, mounts) {
     QString uri_prefix = mount.uri;
     if (!uri_prefix.isEmpty() && real_path.startsWith(uri_prefix)) {
       File_info file_info;

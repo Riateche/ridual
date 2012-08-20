@@ -142,14 +142,14 @@ void Directory::refresh() {
   }
   if (special_uri.name() == Special_uri::mounts) { // list of mounts
     File_info_list r;
-    foreach (gio::Mount m, main_window->get_gio_mounts()) {
+    foreach (Gio_mount m, main_window->get_gio_mounts()) {
       File_info i;
       i.name = m.name;
       i.uri = m.default_location;
       r << i;
     }
     int id = 0;
-    foreach (gio::Volume* v, main_window->get_gio_volumes()) {
+    foreach (Gio_volume* v, main_window->get_gio_volumes()) {
       //we must show only unmounted volumes because
       //mounted volumes have been listed as gio::Mount's
       if (!v->mounted) {
@@ -190,7 +190,7 @@ void Directory::refresh() {
     return;
   }
 
-  foreach(gio::Mount mount, main_window->get_gio_mounts()) {
+  foreach(Gio_mount mount, main_window->get_gio_mounts()) {
     if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
       //convert uri e.g. "ftp://user@host/path"
       //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"

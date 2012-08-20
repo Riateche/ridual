@@ -56,8 +56,8 @@ public:
   /*! Get all currently active mounts.
     This function is thread-safe.
     */
-  QList<gio::Mount> get_gio_mounts();
-  QList<gio::Volume*> get_gio_volumes() { return volumes; }
+  QList<Gio_mount> get_gio_mounts();
+  QList<Gio_volume*> get_gio_volumes() { return volumes; }
 
   inline Bookmarks_file_parser* get_bookmarks() { return &bookmarks; }
   inline Bookmarks_file_parser* get_user_dirs() { return &user_dirs; }
@@ -110,8 +110,8 @@ private:
   Pane* active_pane;
   Hotkeys hotkeys;
 
-  QList<gio::Volume*> volumes;
-  QList<gio::Mount> mounts;
+  QList<Gio_volume*> volumes;
+  QList<Gio_mount> mounts;
   //Tasks_thread* tasks_thread;
 
   File_info_list old_path_items;

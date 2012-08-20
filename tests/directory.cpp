@@ -101,7 +101,7 @@ TEST(Directory, files_list) {
 TEST(Directory, ftp_list) {
   Main_window mw;
   QString uri = "ftp://anonymous@ftp.mozilla.org/";
-  foreach(gio::Mount m, mw.get_gio_mounts()) {
+  foreach(Gio_mount m, mw.get_gio_mounts()) {
     EXPECT_FALSE(m.uri == uri) << "Testing location must be unmounted before running tests.";
   }
 
@@ -117,7 +117,7 @@ TEST(Directory, ftp_list) {
   ASSERT_TRUE(list.count() > 0);
 
   bool found = false;
-  foreach(gio::Mount m, mw.get_gio_mounts()) {
+  foreach(Gio_mount m, mw.get_gio_mounts()) {
     if (m.uri == uri) found = true;
   }
   EXPECT_TRUE(found) << "Testing location must be mounted here.";

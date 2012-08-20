@@ -3,15 +3,12 @@
 #include "qt_gtk.h"
 
 
-
-using namespace gio;
-
-Volume::~Volume() {
+Gio_volume::~Gio_volume() {
   g_object_unref(gvolume);
 }
 
 
-Volume::Volume(GVolume *src): gvolume(src) {
+Gio_volume::Gio_volume(GVolume *src): gvolume(src) {
   g_object_ref(gvolume);
   char* p_name = g_volume_get_name(src);
   name = QString::fromLocal8Bit(p_name);

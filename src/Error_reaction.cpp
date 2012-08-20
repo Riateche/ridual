@@ -4,18 +4,20 @@
 
 QString error_reaction_to_string(Error_reaction reaction) {
   switch (reaction) {
-    case error_reaction_ask: return QObject::tr("Ask");
-    case error_reaction_retry: return QObject::tr("Retry");
-    case error_reaction_skip: return QObject::tr("Skip");
-    case error_reaction_abort: return QObject::tr("Abort");
-    case error_reaction_merge_dir: return QObject::tr("Merge");
-    case error_reaction_delete_existing: return QObject::tr("Delete existing");
-    case error_reaction_rename_existing: return QObject::tr("Rename existing");
-    case error_reaction_continue_writing: return QObject::tr("Continue writing");
-    case error_reaction_rename_new: return QObject::tr("Rename new");
+  case error_reaction_ask: return QObject::tr("Ask");
+  case error_reaction_retry: return QObject::tr("Retry");
+  case error_reaction_skip: return QObject::tr("Skip");
+  case error_reaction_abort: return QObject::tr("Abort");
+  case error_reaction_merge_dir: return QObject::tr("Merge");
+  case error_reaction_delete_existing: return QObject::tr("Delete existing");
+  case error_reaction_rename_existing: return QObject::tr("Rename existing");
+  case error_reaction_continue_writing: return QObject::tr("Continue writing");
+  case error_reaction_rename_new: return QObject::tr("Rename new");
+  default:
+    qWarning("error_reaction_to_string failed");
+    return QObject::tr("Unknown");
   }
-  qWarning("error_reaction_to_string failed");
-  return QObject::tr("Unknown");
+
 }
 
 QList<Error_reaction> get_error_reactions(Error_type error_type,

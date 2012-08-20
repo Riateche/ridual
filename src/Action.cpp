@@ -7,6 +7,7 @@
 #include "Action_queue.h"
 #include <QApplication>
 #include <QStack>
+#include <QDirIterator>
 
 Action::Action(Main_window *mw, const Action_data &p_data):
   main_window(mw),
@@ -38,7 +39,7 @@ void Action::set_queue(Action_queue *q) {
 
 QString Action::get_real_dir(QString uri) {
   if (uri.startsWith("/")) return uri;
-  foreach(gio::Mount mount, mounts) {
+  foreach(Gio_mount mount, mounts) {
     if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
       //convert uri e.g. "ftp://user@host/path"
       //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"

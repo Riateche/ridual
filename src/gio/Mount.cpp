@@ -5,10 +5,7 @@
 #include "Directory.h"
 
 
-
-using namespace gio;
-
-Mount::Mount(GMount *src) {
+Gio_mount::Gio_mount(GMount *src) {
   char* p_name = g_mount_get_name(src);
   name = QString::fromLocal8Bit(p_name);
   g_free(p_name);

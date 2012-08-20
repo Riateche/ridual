@@ -8,7 +8,8 @@
 #include <QTimer>
 #include "File_info.h"
 #include "gio/Mount.h"
-#include "Directory_tree_item.h"
+#include "Error_reaction.h"
+#include "types.h"
 
 #define BUFFER_SIZE 65536
 
@@ -16,64 +17,13 @@ class Action_queue;
 class Main_window;
 
 
-enum Action_type {
-  action_copy,
-  action_move,
-  action_link,
-  action_delete,
-  action_create_folder
-};
 
-enum Recursive_fetch_option {
-  recursive_fetch_on = 1,
-  recursive_fetch_off = 2,
-  recursive_fetch_auto = 3
-};
-
-enum Link_type {
-  link_type_soft_absolute,
-  link_type_soft_relative,
-  link_type_hard
-};
-
-class Action_data {
-public:
-  Action_type type;
-  Recursive_fetch_option recursive_fetch_option;
-  Link_type link_type;
-  File_info_list targets;
-  QString destination;
-};
-
-class Action_state {
-public:
-  Action_state() : errors_count(0), queue_id(0) {}
-  QString current_action, current_progress, total_progress;
-  int errors_count;
-  int queue_id;
-};
-Q_DECLARE_METATYPE(Action_state)
 
 class Action_abort_exception { };
 class Action_retry_exception { };
 class Action_skip_exception { };
 
-class Action;
 
-class Question_data {
-public:
-  Question_data() {}
-  Question_data(QString m, Error_type t, bool d) :
-    message(m)
-  , error_type(t)
-  , is_dir(d) {}
-
-  QString message;
-  Error_type error_type;
-  bool is_dir;
-  Action* action;
-};
-Q_DECLARE_METATYPE(Question_data)
 
 class Action: public QObject {
   Q_OBJECT
@@ -90,7 +40,7 @@ private:
   Action_data data;
   QString normalized_destination;
   Action_queue* queue;
-  QList<gio::Mount> mounts;
+  QList<Gio_mount> mounts;
 
   qint64 total_size, current_size;
   int total_count, current_count;
