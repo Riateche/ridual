@@ -8,6 +8,8 @@ integration with Ubuntu-specific features.
 
 ![screenshot](https://github.com/Riateche/ridual/raw/master/doc/screenshot.png)
 
+Ridual is written on C++/Qt and is distributed under MIT license (see LICENSE file).
+
 Ridual will become the best of its kind because it:
 - uses system color theme. You will see no crazy colors.
 - allows to use and change hotkeys for every action.
@@ -43,20 +45,28 @@ that aren't implemented yet. The following features will be implemented soon:
 
 ### Installing Ridual
 
-If you're using Ubuntu Precise, you can install Ridual from [our PPA](https://launchpad.net/%7Estrahovp/+archive/ridual).
+If you're using Ubuntu Precise, you can install Ridual from [our PPA](https://launchpad.net/%7Estrahovp/+archive/ridual):
 
-You also can download sources and run the following commands:
+    sudo add-apt-repository ppa:strahovp/ridual
+    sudo apt-get update
+    sudo apt-get install ridual
+
+You also can download sources and compile the project by yourself. Install
+`libglib2.0-dev` and `libgtk2.0-dev` packages, then run the following commands:
 
     qmake
     make
     sudo checkinstall
-
-Ridual is written on C++/Qt and is distributed under MIT license (see LICENSE file). 
 
 ### Running tests
 
     cd project-dir
     tests/run.sh
 
+### See also
+
+- [PPA](https://launchpad.net/%7Estrahovp/+archive/ridual)
+- [Software Center page](https://myapps.developer.ubuntu.com/dev/apps/1201/)
+- [Article about Ridual](http://habrahabr.ru/post/149647/) (Russian)
 
 
