@@ -1,10 +1,14 @@
-ridual
+Ridual
 ======
 
 Ridual is dual-pane file manager for Ubuntu.
 There are quite few dual-pane file managers for Linux. This one is
 developed especially for Ubuntu. We're trying to achieve high
 integration with Ubuntu-specific features.
+
+**This software was created for Ubuntu AppShowdown contest.
+Please vote for Ridual on [this page](http://www.surveymonkey.com/s/P56YNQ9) 
+to support further development.**
 
 ![screenshot](https://github.com/Riateche/ridual/raw/master/doc/screenshot.png)
 
