@@ -230,7 +230,7 @@ void Directory::refresh_timeout() {
 }
 
 void Directory::directory_changed(QString changed_path) {
-  qDebug() << "directory_changed" << path << changed_path;
+  //qDebug() << "directory_changed" << path << changed_path;
   if (!path.isEmpty() && path == changed_path) {
     if (refresh_timer.elapsed() < watcher_refresh_timeout) {
       need_update = true;

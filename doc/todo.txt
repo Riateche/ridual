@@ -11,6 +11,7 @@
 
 
 - align path buttons to the right when right pane is active.
+- after answering a question focus next question if any.
 
 
 - deny closing main window when tasks are executing

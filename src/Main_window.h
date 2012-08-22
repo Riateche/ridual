@@ -24,23 +24,12 @@ class Action_queue;
 class Action;
 class Tasks_model;
 class Directory_watcher;
+class Question_widget;
 
 typedef struct _GVolumeMonitor GVolumeMonitor;
 typedef struct _GDrive GDrive;
 
-class Button_settings {
-public:
-  Button_settings(int _number, QString _caption, QVariant _data = QVariant(), bool _enabled = true) :
-    number(_number),
-    caption(_caption),
-    data(_data),
-    enabled(_enabled)
-  {}
-  int number;
-  QString caption;
-  QVariant data;
-  bool enabled;
-};
+
 
 
 class Main_window : public QMainWindow {
@@ -69,7 +58,7 @@ public:
 
   Ui::Main_window* get_ui() { return ui; }
 
-  Action_queue* create_queue();
+
 
   Directory_watcher* get_watcher() { return watcher; }
 
@@ -83,6 +72,8 @@ public:
     and returns a pointer to new queue.
     */
   Action_queue* get_current_queue();
+
+  void set_current_queue(Action_queue *queue);
 
   /*! Create new action based on passed data. Several values in data are replaced
     accordingly to current application state:
@@ -99,7 +90,15 @@ public:
 
   Recursive_fetch_option get_recursive_fetch_option();
 
-  void show_question(QString message, QList<Button_settings> buttons, QObject* receiver, const char* slot);
+  /*! Add Question_widget to main window. This method
+    should never be used directly. It's called by
+    Question_widget constructor automatically.
+    */
+  void add_question(Question_widget* question);
+
+
+  // direction: 1 (down) or -1 (top)
+  void switch_focus_question(Question_widget* target, int direction);
 
 private:
   Bookmarks_file_parser bookmarks, user_dirs;
@@ -120,22 +119,19 @@ private:
 
   Tasks_model* tasks_model;
 
-  int current_queue_id;
+  Action_queue* current_queue;
 
-  QList<Button_settings> answer_buttons;
-  QList<QPushButton*> answer_buttons_widgets;
-  QObject* answer_receiver;
-  const char* answer_slot;
 
   Directory_watcher* watcher;
   QThread* watcher_thread;
 
+  Action_queue* create_queue();
   void init_gio_connects();
   void fetch_gio_mounts();
   static void gio_mount_changed(GVolumeMonitor *volume_monitor, GDrive *drive, Main_window* _this);
   void resizeEvent(QResizeEvent *);
   void view_or_edit_selected(bool edit);
-  void update_answer_buttons();
+
   void send_answer(int index);
 
   bool eventFilter(QObject *object, QEvent *event);
@@ -151,7 +147,6 @@ private slots:
   void on_action_edit_triggered();
   void on_action_copy_triggered();
   void on_action_queue_choose_triggered();
-  void on_question_answer_editor_textEdited(const QString &text);
   void on_action_about_triggered();
 
   void save_settings();
@@ -161,10 +156,11 @@ private slots:
   void go_to(QString uri);
   void slot_selection_changed();
   void slot_actions_recursive_fetch_triggered();
-  void slot_queue_chosen(QVariant data);
   void fatal_error(QString message);
   void resize_tasks_table();
-  void slot_answer_buttons_clicked();
+  void slot_queue_destroyed(QObject* object);
+  void slot_action_question(Question_data data);
+  void slot_focus_question();
 
 public slots:
   void open_current();
@@ -176,7 +172,6 @@ signals:
   void gio_mounts_changed();
   void selection_changed();
   void action_added(Action*);
-  //void question_answered(QVariant data, int number);
 
 };
 

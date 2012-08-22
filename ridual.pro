@@ -51,7 +51,9 @@ SOURCES += src/Main_window.cpp \
     src/Action_queue.cpp \
     src/Action.cpp \
     src/Action_answerer.cpp \
-    src/mkdir.cpp
+    src/mkdir.cpp \
+    src/Question_widget.cpp \
+    src/Current_queue_question.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -85,13 +87,16 @@ HEADERS  += src/Main_window.h \
     src/Action_queue.h \
     src/Action_answerer.h \
     src/types.h \
-    src/mkdir.h
+    src/mkdir.h \
+    src/Question_widget.h \
+    src/Current_queue_question.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \
     src/hotkeys/Hotkey_editor.ui \
     src/Settings_dialog.ui \
-    src/Task_details.ui
+    src/Task_details.ui \
+    src/Question_widget.ui
 
 
 INCLUDEPATH += src

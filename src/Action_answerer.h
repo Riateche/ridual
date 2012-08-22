@@ -3,26 +3,20 @@
 
 #include <QObject>
 #include "Action.h"
-#include <QQueue>
+#include "Question_widget.h"
 
 class Main_window;
 
-class Action_answerer : public QObject {
+class Action_answerer : public Question_widget {
   Q_OBJECT
 public:
-  explicit Action_answerer(Main_window* mw);
+  explicit Action_answerer(Main_window* mw, Question_data data);
   
 signals:
-  
-private slots:
-  void action_added(Action* a);
-  void question(Question_data data);
-  void question_answered(QVariant data);
+  void question_answered(Error_reaction::Enum);
 
 private:
-  Main_window* main_window;
-  QQueue<Question_data> queue;
-  void display_question();
+  void answered(QVariant data);
   
 };
 
