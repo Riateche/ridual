@@ -13,12 +13,14 @@ File_list_model::File_list_model() {
 void File_list_model::set_data(File_info_list p_list) {
   emit layoutAboutToBeChanged();
   list = p_list;
+  update_current_columns();
   emit layoutChanged();
 }
 
 void File_list_model::set_columns(const Columns &new_columns) {
   emit layoutAboutToBeChanged();
   columns = new_columns;
+  update_current_columns();
   emit layoutChanged();
 }
 
@@ -30,12 +32,11 @@ int File_list_model::rowCount(const QModelIndex &parent) const {
 
 int File_list_model::columnCount(const QModelIndex &parent) const {
   if (list.isEmpty()) return 1;
-  return get_current_columns().count();
+  return current_columns.count();
   Q_UNUSED(parent);
 }
 
 QVariant File_list_model::headerData(int section, Qt::Orientation orientation, int role) const {
-  Columns current_columns = get_current_columns();
   if (list.isEmpty()) return QVariant();
   if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
     if (section < 0 || section >= current_columns.count()) return QVariant();
@@ -50,7 +51,6 @@ QVariant File_list_model::headerData(int section, Qt::Orientation orientation, i
 }
 
 QVariant File_list_model::data(const QModelIndex &index, int role) const {
-  Columns current_columns = get_current_columns();
   int row = index.row(), column = index.column();
   if (list.isEmpty() && row == 0) {
     if (role == Qt::DisplayRole) {
@@ -146,13 +146,6 @@ File_info File_list_model::get_file_info(const QModelIndex &index) {
   return list[index.row()];
 }
 
-Columns File_list_model::get_current_columns() const {
-  if (!list.columns.isEmpty()) {
-    return list.columns;
-  } else {
-    return columns;
-  }
-}
 
 QString File_list_model::get_mime_description(QString mime_type) {
   if (mime_descriptions.contains(mime_type)) return mime_descriptions[mime_type];
@@ -168,6 +161,15 @@ void File_list_model::set_current_index(const QModelIndex &new_index) {
   current_index = new_index;
   emit_row_changed(old.row());
   emit_row_changed(new_index.row());
+}
+
+void File_list_model::update_current_columns()  {
+  if (!list.columns.isEmpty()) {
+    current_columns = list.columns;
+  } else {
+    current_columns = columns;
+  }
+
 }
 
 void File_list_model::emit_row_changed(int row) {

@@ -22,7 +22,6 @@ public:
   QModelIndex index_for_uri(QString uri);
 
   File_info get_file_info(const QModelIndex &index);
-  Columns get_current_columns() const;
 
   static QString get_mime_description(QString mime_type);
   static QString format_octal_permissions(QFile::Permissions permissions);
@@ -33,6 +32,8 @@ private:
   File_info_list list;
   QModelIndex current_index;
   Columns columns;
+  Columns current_columns;
+  void update_current_columns();
 
   void emit_row_changed(int row);
 

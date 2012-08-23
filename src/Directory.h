@@ -5,14 +5,13 @@
 #include "File_info.h"
 #include <QFileIconProvider>
 #include <QElapsedTimer>
+#include "Core_ally.h"
 
 typedef struct _GObject GObject;
 typedef struct _GAsyncResult GAsyncResult;
 typedef void* gpointer;
 
 
-
-class Main_window;
 
 /*!
   This class provides a way to get directory contents by uri.
@@ -45,7 +44,7 @@ class Main_window;
   list of available locations. It's specific for our application.
 
 */
-class Directory : public QObject {
+class Directory : public QObject, Core_ally {
   Q_OBJECT
 public:
   /*! Constructs an object for given uri. If you want to get the contents
@@ -55,7 +54,7 @@ public:
     "~" is expanded to home path, "/" can be added to the end or removed from
     the end to satisfy 'uri rules', etc. use Directory::get_uri to get canonical URI.
   */
-  explicit Directory(Main_window* mw, QString uri);
+  explicit Directory(Core* c, QString uri);
   ~Directory();
 
   static QString canonize(QString uri);
@@ -112,7 +111,6 @@ private slots:
   void directory_changed(QString path);
 
 private:
-  Main_window* main_window;
   QString uri;
   QString path; //real path
   QFileIconProvider icon_provider;

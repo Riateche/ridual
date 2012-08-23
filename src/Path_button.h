@@ -4,14 +4,15 @@
 #include <QToolButton>
 #include "File_info.h"
 #include <QPushButton>
+#include "Core_ally.h"
 
 class Main_window;
 class Directory;
 
-class Path_button : public QToolButton {
+class Path_button : public QToolButton, Core_ally {
   Q_OBJECT
 public:
-  explicit Path_button(Main_window* mw, QString text, QString uri);
+  explicit Path_button(Core* c, QString text, QString uri);
   inline void set_go_parent_visible(bool v) { go_parent_visible = v; }
 
   void contextMenuEvent(QContextMenuEvent *e);
@@ -22,7 +23,6 @@ public slots:
   void slot_clicked();
 
 private:
-  Main_window* main_window;
   QString uri;
   Directory* parent_directory;
 

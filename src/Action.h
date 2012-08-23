@@ -11,10 +11,9 @@
 #include "Error_reaction.h"
 #include "types.h"
 
-#define BUFFER_SIZE 65536
+#define BUFFER_SIZE 1048576
 
 class Action_queue;
-class Main_window;
 
 
 
@@ -53,7 +52,7 @@ public:
                     \sa Action_data
 
     */
-  explicit Action(Main_window* mw, const Action_data& p_data);
+  explicit Action(const Action_data& p_data);
   ~Action();
 
   /*! This function is called when Action is added to the queue.
@@ -63,6 +62,10 @@ public:
     */
   void set_queue(Action_queue* q);
 
+  /*! Set list of mounts used to convert URIs to real paths.
+    This should be called from gui thread before starting the task. */
+  void set_mounts(const QList<Gio_mount>& _mounts) { mounts = _mounts; }
+
   /*! This function executes main operations for this action.
     When Action::run is finished, Action is deleted by Action_queue.
     This function is executed in Action_queue thread.
@@ -71,7 +74,6 @@ public:
 
 
 private:
-  Main_window* main_window;
   Action_data data; //! Data passed to the constructor.
 
   /*! data.destination converted from URI (see Directory) to
@@ -79,7 +81,7 @@ private:
     */
   QString normalized_destination;
   Action_queue* queue;
-  QList<Gio_mount> mounts; //! List of mounts used to convert URIs to real paths.
+  QList<Gio_mount> mounts;
 
   /*! Total size (in bytes) and count of all target files for the operation.
     These values may be calculated before performing main operation.

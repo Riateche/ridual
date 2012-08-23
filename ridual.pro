@@ -53,7 +53,10 @@ SOURCES += src/Main_window.cpp \
     src/Action_answerer.cpp \
     src/mkdir.cpp \
     src/Question_widget.cpp \
-    src/Current_queue_question.cpp
+    src/Current_queue_question.cpp \
+    src/Core.cpp \
+    src/Mount_manager.cpp \
+    src/Core_ally.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -89,7 +92,10 @@ HEADERS  += src/Main_window.h \
     src/types.h \
     src/mkdir.h \
     src/Question_widget.h \
-    src/Current_queue_question.h
+    src/Current_queue_question.h \
+    src/Core.h \
+    src/Mount_manager.h \
+    src/Core_ally.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \

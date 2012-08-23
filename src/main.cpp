@@ -1,5 +1,5 @@
 #include <QtGui/QApplication>
-#include "Main_window.h"
+#include "Core.h"
 
 #include <QStyleFactory>
 
@@ -7,8 +7,7 @@ int main(int argc, char *argv[]) {
 
   QApplication a(argc, argv);
 
-  Main_window w;
-  w.show();
+  Core core;
   
   return a.exec();
 }

@@ -4,52 +4,39 @@
 #include <QMainWindow>
 #include <QTimer>
 #include "hotkeys/Hotkeys.h"
-#include "gio/Mount.h"
-#include "gio/Volume.h"
 #include "File_info.h"
 #include "Task.h"
-#include "Bookmarks_file_parser.h"
 #include "App_info.h"
 #include "Action.h"
 #include <QPushButton>
+#include "Core_ally.h"
 
 namespace Ui {
   class Main_window;
 }
 
+class Core;
 class Pane;
 
 class Tasks_thread;
 class Action_queue;
 class Action;
 class Tasks_model;
-class Directory_watcher;
 class Question_widget;
 
-typedef struct _GVolumeMonitor GVolumeMonitor;
-typedef struct _GDrive GDrive;
 
 
 
 
-class Main_window : public QMainWindow {
+
+class Main_window : public QMainWindow, Core_ally {
   Q_OBJECT
   
 public:
-  explicit Main_window(QWidget *parent = 0);
+  explicit Main_window(Core *c);
   ~Main_window();
   void set_active_pane(Pane* pane);
   inline Pane* get_active_pane() { return active_pane; }
-  //void add_task(Task* task);
-
-  /*! Get all currently active mounts.
-    This function is thread-safe.
-    */
-  QList<Gio_mount> get_gio_mounts();
-  QList<Gio_volume*> get_gio_volumes() { return volumes; }
-
-  inline Bookmarks_file_parser* get_bookmarks() { return &bookmarks; }
-  inline Bookmarks_file_parser* get_user_dirs() { return &user_dirs; }
 
   App_info_list get_apps(const QString& mime_type);
   App_info get_default_app(const QString& mime_type);
@@ -58,9 +45,10 @@ public:
 
   Ui::Main_window* get_ui() { return ui; }
 
+  inline Core* get_core() { return core; }
 
 
-  Directory_watcher* get_watcher() { return watcher; }
+
 
   /*! Get all currently existing queues. Note that any queue is deleted
     when it becomes empty.
@@ -101,34 +89,27 @@ public:
   void switch_focus_question(Question_widget* target, int direction);
 
 private:
-  Bookmarks_file_parser bookmarks, user_dirs;
-  GVolumeMonitor* volume_monitor;
   Ui::Main_window *ui;
+
 
   QTimer save_settings_timer;
   Pane* active_pane;
   Hotkeys hotkeys;
 
-  QList<Gio_volume*> volumes;
-  QList<Gio_mount> mounts;
+
   //Tasks_thread* tasks_thread;
 
   File_info_list old_path_items;
 
-  QList<gulong> gio_connects;
+
 
   Tasks_model* tasks_model;
 
   Action_queue* current_queue;
 
 
-  Directory_watcher* watcher;
-  QThread* watcher_thread;
 
   Action_queue* create_queue();
-  void init_gio_connects();
-  void fetch_gio_mounts();
-  static void gio_mount_changed(GVolumeMonitor *volume_monitor, GDrive *drive, Main_window* _this);
   void resizeEvent(QResizeEvent *);
   void view_or_edit_selected(bool edit);
 
@@ -169,7 +150,6 @@ public slots:
 signals:
   void active_pane_changed();
   //void signal_add_task(Task task);
-  void gio_mounts_changed();
   void selection_changed();
   void action_added(Action*);
 

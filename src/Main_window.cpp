@@ -1,6 +1,8 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
+#include "Mount_manager.h"
+#include "Core.h"
 #include "Current_queue_question.h"
 #include <QUrl>
 #include <QDesktopServices>
@@ -17,31 +19,21 @@
 #include "Special_uri.h"
 #include <QProcess>
 #include "Settings_dialog.h"
-#include "qt_gtk.h"
+
 #include <QTextCodec>
 #include "Action_queue.h"
 #include "Tasks_model.h"
 #include <QMessageBox>
-#include "Directory_watcher.h"
 #include "Action_answerer.h"
 
-Main_window::Main_window(QWidget *parent) :
-  QMainWindow(parent),
-  bookmarks(QDir::home().absoluteFilePath(".gtk-bookmarks"), Bookmarks_file_parser::format_gtk),
-  user_dirs(QDir::home().absoluteFilePath(".config/user-dirs.dirs"), Bookmarks_file_parser::format_xdg),
-  ui(new Ui::Main_window),
-  hotkeys(this),
-  current_queue(0)
+Main_window::Main_window(Core* c) :
+  QMainWindow(0)
+, Core_ally(c)
+, ui(new Ui::Main_window)
+, hotkeys(this)
+, current_queue(0)
 {
   QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
-
-  watcher = new Directory_watcher();
-  watcher_thread = new QThread();
-  watcher_thread->start();
-  watcher->moveToThread(watcher_thread);
-
-  init_gio_connects();
-  fetch_gio_mounts();
 
 
   QThreadPool::globalInstance()->setMaxThreadCount(5);
@@ -151,15 +143,9 @@ Main_window::Main_window(QWidget *parent) :
 }
 
 Main_window::~Main_window() {
-  foreach(gulong id, gio_connects) {
-    g_signal_handler_disconnect (volume_monitor, id);
-  }
-  gio_connects.clear();
 
   save_settings();
   //tasks_thread->interrupt();
-  watcher_thread->quit();
-  watcher_thread->wait();
   //delete tasks_thread;
   delete ui;
 }
@@ -174,11 +160,7 @@ void Main_window::set_active_pane(Pane *pane) {
   emit active_pane_changed();
 }
 
-QList<Gio_mount> Main_window::get_gio_mounts() {
-  static QMutex mutex;
-  QMutexLocker locker(&mutex);
-  return mounts;
-}
+
 
 App_info_list Main_window::get_apps(const QString &mime_type) {
   //qDebug() << "Main_window::get_apps";
@@ -248,10 +230,11 @@ void Main_window::create_action(Action_data data) {
   data.recursive_fetch_option = get_recursive_fetch_option();
   data.targets = active_pane->get_selected_files();
   data.destination = get_destination_pane()->get_uri();
-  Action* a = new Action(this, data);
+  Action* a = new Action(data);
+  a->set_mounts(core->get_mount_manager()->get_mounts());
   Action_queue* q = get_current_queue();
-  q->add_action(a);
   connect(a, SIGNAL(question(Question_data)), this, SLOT(slot_action_question(Question_data)));
+  q->add_action(a);
   emit action_added(a);
 }
 
@@ -280,52 +263,8 @@ void Main_window::switch_focus_question(Question_widget *target, int direction) 
 
 
 
-void Main_window::init_gio_connects() {
-  int argc = QApplication::argc();
-  char** argv = QApplication::argv();
-  gtk_init(&argc, &argv);
-  volume_monitor = g_volume_monitor_get();
-  gio_connects << g_signal_connect(volume_monitor, "volume-added",
-                   G_CALLBACK(gio_mount_changed), this);
-  gio_connects << g_signal_connect(volume_monitor, "volume-changed",
-                   G_CALLBACK(gio_mount_changed), this);
-  gio_connects << g_signal_connect(volume_monitor, "volume-removed",
-                   G_CALLBACK(gio_mount_changed), this);
-  gio_connects << g_signal_connect(volume_monitor, "mount-added",
-                   G_CALLBACK(gio_mount_changed), this);
-  gio_connects << g_signal_connect(volume_monitor, "mount-changed",
-                   G_CALLBACK(gio_mount_changed), this);
-  gio_connects << g_signal_connect(volume_monitor, "mount-removed",
-                   G_CALLBACK(gio_mount_changed), this);
-}
 
-void Main_window::fetch_gio_mounts() {
-  //foreach (gio::Mount* m, mounts) delete m;
-  foreach (Gio_volume* m, volumes) delete m;
-  volumes.clear();
-  mounts.clear();
 
-  GList* list = g_volume_monitor_get_volumes(volume_monitor);
-  for(; list; list = list->next) {
-    GVolume* volume = static_cast<GVolume*>(list->data);
-    volumes << new Gio_volume(volume);
-    g_object_unref(volume);
-  }
-  g_free(list);
-
-  list = g_volume_monitor_get_mounts(volume_monitor);
-  for(; list; list = list->next) {
-    GMount* mount = static_cast<GMount*>(list->data);
-    mounts << Gio_mount(mount);
-    g_object_unref(mount);
-  }
-  g_free(list);
-  emit gio_mounts_changed();
-}
-
-void Main_window::gio_mount_changed(GVolumeMonitor*, GDrive*, Main_window* _this) {
-  _this->fetch_gio_mounts();
-}
 
 void Main_window::resizeEvent(QResizeEvent *) {
   ui->path_widget->refresh();
@@ -435,10 +374,7 @@ void Main_window::refresh_path_toolbar() {
     }
   }
 
-
-
-
-  foreach(Gio_mount mount, mounts) {
+  foreach(Gio_mount mount, core->get_mount_manager()->get_mounts()) {
     QString uri_prefix = mount.uri;
     if (!uri_prefix.isEmpty() && real_path.startsWith(uri_prefix)) {
       File_info file_info;
@@ -503,7 +439,7 @@ void Main_window::refresh_path_toolbar() {
     if (i < path_items.count() - 1) {
       caption += tr(" ‣");
     }
-    Path_button* b = new Path_button(this, caption, path_items[i].uri);
+    Path_button* b = new Path_button(core, caption, path_items[i].uri);
     b->setChecked(path_items[i].uri == real_path);
     connect(b, SIGNAL(go_to(QString)), this, SLOT(go_to(QString)));
     buttons << b;

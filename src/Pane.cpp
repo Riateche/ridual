@@ -56,7 +56,7 @@ void Pane::set_uri(QString new_directory) {
     return;
   }
   if (pending_directory) delete pending_directory;
-  pending_directory = new Directory(main_window, new_directory);
+  pending_directory = new Directory(main_window->get_core(), new_directory);
   connect(pending_directory, SIGNAL(ready(File_info_list)),
           this, SLOT(directory_ready(File_info_list)));
   connect(pending_directory, SIGNAL(error(QString)),

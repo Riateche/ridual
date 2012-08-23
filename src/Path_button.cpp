@@ -1,16 +1,15 @@
 #include "Path_button.h"
-#include "Main_window.h"
 #include <QMenu>
 #include "Directory.h"
 #include "Special_uri.h"
 #include <QContextMenuEvent>
 
-Path_button::Path_button(Main_window* mw, QString text, QString p_uri) :
-  QToolButton(mw),
-  main_window(mw),
-  uri(p_uri),
-  parent_directory(0),
-  go_parent_visible(false)
+Path_button::Path_button(Core *c, QString text, QString p_uri)
+: QToolButton(0)
+, Core_ally(c)
+, uri(p_uri)
+, parent_directory(0)
+, go_parent_visible(false)
 {
   setText(text);
   setToolTip(uri);
@@ -27,8 +26,8 @@ void Path_button::contextMenuEvent(QContextMenuEvent *e) {
     return;
   }
   if (parent_directory == 0) {
-    Directory d(main_window, uri);
-    parent_directory = new Directory(main_window, d.get_parent_uri());
+    Directory d(core, uri);
+    parent_directory = new Directory(core, d.get_parent_uri());
     connect(parent_directory, SIGNAL(ready(File_info_list)),
             this, SLOT(directory_ready(File_info_list)));
   }
@@ -43,7 +42,7 @@ void Path_button::slot_clicked() {
 
 void Path_button::directory_ready(File_info_list files) {
   if (!menu_pending) return;
-  QMenu* menu = new QMenu(main_window);
+  QMenu* menu = new QMenu();
   if (go_parent_visible) {
     menu->addAction("Go to parent", this, SLOT(action_go_parent_triggered()));
     menu->addSeparator();
@@ -73,6 +72,6 @@ void Path_button::menu_action_triggered() {
 }
 
 void Path_button::action_go_parent_triggered() {
-  Directory d(main_window, uri);
+  Directory d(core, uri);
   emit go_to(d.get_parent_uri());
 }

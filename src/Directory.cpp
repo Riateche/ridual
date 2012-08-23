@@ -7,15 +7,20 @@
 #include "Directory_watcher.h"
 #include <QThreadPool>
 #include "qt_gtk.h"
+#include "Core.h"
+#include "Mount_manager.h"
+#include "Bookmarks_file_parser.h"
 
-
-Directory::Directory(Main_window* mw, QString p_uri) :
-  main_window(mw),
+Directory::Directory(Core *c, QString p_uri) :
+  Core_ally(c),
   uri(p_uri)
 {
-  connect(this, SIGNAL(watch(QString)), main_window->get_watcher(), SLOT(add(QString)));
-  connect(this, SIGNAL(unwatch(QString)), main_window->get_watcher(), SLOT(remove(QString)));
-  connect(main_window->get_watcher(), SIGNAL(directory_changed(QString)), this, SLOT(directory_changed(QString)));
+  connect(this, SIGNAL(watch(QString)),
+          core->get_directory_watcher(), SLOT(add(QString)));
+  connect(this, SIGNAL(unwatch(QString)),
+          core->get_directory_watcher(), SLOT(remove(QString)));
+  connect(core->get_directory_watcher(), SIGNAL(directory_changed(QString)),
+          this, SLOT(directory_changed(QString)));
 
   async_result_type = async_result_unexpected;
   need_update = false;
@@ -24,15 +29,15 @@ Directory::Directory(Main_window* mw, QString p_uri) :
 
   Special_uri special_uri(uri);
   if (special_uri.name() == Special_uri::mounts) {
-    connect(main_window, SIGNAL(gio_mounts_changed()), this, SLOT(refresh()));
+    connect(core->get_mount_manager(), SIGNAL(mounts_changed()), this, SLOT(refresh()));
   }
 
   if (special_uri.name() == Special_uri::bookmarks) {
-    connect(main_window->get_bookmarks(), SIGNAL(changed()), this, SLOT(refresh()));
+    connect(core->get_bookmarks(), SIGNAL(changed()), this, SLOT(refresh()));
   }
 
   if (special_uri.name() == Special_uri::userdirs) {
-    connect(main_window->get_user_dirs(), SIGNAL(changed()), this, SLOT(refresh()));
+    connect(core->get_user_dirs(), SIGNAL(changed()), this, SLOT(refresh()));
   }
 
 
@@ -145,14 +150,14 @@ void Directory::refresh() {
   }
   if (special_uri.name() == Special_uri::mounts) { // list of mounts
     File_info_list r;
-    foreach (Gio_mount m, main_window->get_gio_mounts()) {
+    foreach (Gio_mount m, core->get_mount_manager()->get_mounts()) {
       File_info i;
       i.name = m.name;
       i.uri = m.default_location;
       r << i;
     }
     int id = 0;
-    foreach (Gio_volume* v, main_window->get_gio_volumes()) {
+    foreach (Gio_volume* v, core->get_mount_manager()->get_volumes()) {
       //we must show only unmounted volumes because
       //mounted volumes have been listed as gio::Mount's
       if (!v->mounted) {
@@ -170,30 +175,31 @@ void Directory::refresh() {
 
   if (uri.startsWith(Special_uri(Special_uri::mounts).uri())) { //mounting of unmounted volume was requested
     int id = uri.mid(Special_uri(Special_uri::mounts).uri().length() + 1).toInt(); //uri is something like "places/mounts/42"
-    if (id < 0 || id >= main_window->get_gio_volumes().count()) {
+    QList<Gio_volume*> volumes = core->get_mount_manager()->get_volumes();
+    if (id < 0 || id >= volumes.count()) {
       emit error(tr("Invalid volume id"));
       return;
     }
-    GVolume* volume = main_window->get_gio_volumes().at(id)->get_gvolume();
+    GVolume* volume = volumes.at(id)->get_gvolume();
     async_result_type = async_result_mount_volume;
     g_volume_mount(volume, GMountMountFlags(), 0, 0, async_result, this);
     return;
   }
 
   if (special_uri.name() == Special_uri::bookmarks) { // list of bookmarks
-    File_info_list list = main_window->get_bookmarks()->get_all();
+    File_info_list list = core->get_bookmarks()->get_all();
     list.columns << Column::name << Column::uri;
     emit ready(list);
     return;
   }
   if (special_uri.name() == Special_uri::userdirs) { // list of xdg bookmarks
-    File_info_list list = main_window->get_user_dirs()->get_all();
+    File_info_list list = core->get_user_dirs()->get_all();
     list.columns << Column::name << Column::uri;
     emit ready(list);
     return;
   }
 
-  foreach(Gio_mount mount, main_window->get_gio_mounts()) {
+  foreach(Gio_mount mount, core->get_mount_manager()->get_mounts()) {
     if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
       //convert uri e.g. "ftp://user@host/path"
       //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"

@@ -1,6 +1,5 @@
 #include "Action.h"
 #include "Directory.h"
-#include "Main_window.h"
 #include <QDir>
 #include <QQueue>
 #include <QDebug>
@@ -10,10 +9,10 @@
 #include <QDirIterator>
 #include <QFSFileEngine>
 #include "mkdir.h"
+#include "Core.h"
 
-Action::Action(Main_window *mw, const Action_data &p_data):
-  main_window(mw),
-  data(p_data)
+Action::Action(const Action_data &p_data)
+: data(p_data)
 {
   total_size = 0;
   current_size = 0;
@@ -26,9 +25,6 @@ Action::Action(Main_window *mw, const Action_data &p_data):
 
   qRegisterMetaType<Action_state>("Action_state");
   qRegisterMetaType<Question_data>("Question_data");
-  //connect(this, SIGNAL(error(QString)), main_window, SLOT(fatal_error(QString)));
-  //connect(this, SIGNAL(error(QString)), this, SIGNAL(finished()));
-  //connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
 }
 
 Action::~Action() {
@@ -138,8 +134,6 @@ void Action::prepare_one(const QString &path, const QString &root_path, bool is_
 
 void Action::run() {
   state.queue_id = queue->get_id();
-
-  mounts = main_window->get_gio_mounts(); //thread-safe
   if (!data.destination.isEmpty()) {
     normalized_destination = get_real_dir(data.destination);
     if (normalized_destination.endsWith("/")) {
@@ -171,11 +165,11 @@ void Action::run() {
 void Action::process_one(const QString& path, const QString& root_path, bool is_dir) {
   try {
     process_events();
-    qDebug() << "path: " << path;
+    //qDebug() << "path: " << path;
     int index = root_path.lastIndexOf("/");
     QString relative_path = path.mid(index + 1);
     QString new_path = normalized_destination + "/" + relative_path;
-    qDebug() << "new_path: " << new_path;
+    //qDebug() << "new_path: " << new_path;
     if (normalized_destination.startsWith(path)) {
       ask_question(Question_data(tr("Failed to copy '%1' to '%2': can't copy folder inside itself.").arg(path).arg(new_path), Error_type::destination_inside_source, is_dir));
     }
