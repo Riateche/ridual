@@ -11,7 +11,7 @@
 #include "Error_reaction.h"
 #include "types.h"
 
-#define BUFFER_SIZE 1048576
+#define BUFFER_SIZE 65535
 
 class Action_queue;
 

@@ -121,6 +121,7 @@ void Action::prepare_one(const QString &path, const QString &root_path, bool is_
     throw Prepare_finished_exception();
   }
   if (signal_timer.elapsed() > signal_interval) {
+    process_events();
     state.current_action = tr("Calculating at '%1'").arg(path);
     state.current_progress = tr("Unknown");
     state.total_progress = tr("%1 files found").arg(total_count);
@@ -164,7 +165,6 @@ void Action::run() {
 
 void Action::process_one(const QString& path, const QString& root_path, bool is_dir) {
   try {
-    process_events();
     //qDebug() << "path: " << path;
     int index = root_path.lastIndexOf("/");
     QString relative_path = path.mid(index + 1);
@@ -178,6 +178,7 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
     do { //for retry
       try { //also for retry
         if (signal_timer.elapsed() > signal_interval) {
+          process_events();
           state.current_action = tr("Copying '%1'").arg(path);
           state.current_progress = tr("%1%").arg(0);
           if (total_size > 0) {
@@ -207,6 +208,8 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
             ask_question(Question_data(tr("Failed to create directory '%1': %2").arg(new_path).arg(mkdir_error), Error_type::create_failed, true));
           }
         } else {
+          //QFile::copy(path, new_path);
+
           QFile file1(path);
           QFile file2(new_path);
           if (file2.exists()) {
@@ -218,9 +221,14 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
           if (!file2.open(QFile::WriteOnly)) {
             ask_question(Question_data(tr("Failed to create file '%1': %2").arg(new_path).arg(file2.errorString()), Error_type::create_failed, false));
           }
+          //int process_events_counter = 0;
           while(!file1.atEnd()) {
-            process_events();
+  //          process_events_counter++;
+            //if (process_events_counter > 1000) {
+
+              //process_events_counter = 0;
             if (signal_timer.elapsed() > signal_interval) {
+              process_events();
               state.current_action = tr("Copying '%1'").arg(path);
               state.current_progress = tr("%1%").arg(100.0 * file1.pos() / file1.size(), 0, 'f', 1);
               if (total_size > 0) {
@@ -231,6 +239,7 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
               emit state_changed(state);
               signal_timer.restart();
             }
+//            }
             char copy_buffer[BUFFER_SIZE];
             int count = file1.read(copy_buffer, BUFFER_SIZE);
             if (count < 0) {
@@ -241,8 +250,9 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
               ask_question(Question_data(tr("Failed to write to file '%1': %2").arg(new_path).arg(file2.errorString()), Error_type::write_failed, false));
             }
             current_size += count;
-          }
-        } //end if file
+          } //end if file
+
+        } //is file
         current_count++;
       } catch (Retry_exception) {
         retry_asked = true;
