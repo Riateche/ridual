@@ -119,7 +119,8 @@ Main_window::Main_window(Core* c) :
   hotkeys.add("view",     ui->action_view);
   hotkeys.add("edit",     ui->action_edit);
   hotkeys.add("copy",     ui->action_copy);
-  hotkeys.add("move",     ui->action_move);
+  //hotkeys.add("move",     ui->action_move);
+  hotkeys.add("remove",     ui->action_remove);
   hotkeys.add("choose_queue", tr("Choose queue"), ui->action_queue_choose);
 
   connect(ui->action_go_parent_directory, SIGNAL(triggered()),
@@ -226,12 +227,17 @@ void Main_window::set_current_queue(Action_queue* queue) {
 void Main_window::create_action(Action_data data) {
   data.recursive_fetch_option = get_recursive_fetch_option();
   data.targets = active_pane->get_selected_files();
-  data.destination = get_destination_pane()->get_uri();
+  if (data.type == Action_type::copy) {
+    data.destination = get_destination_pane()->get_uri();
+  }
   Action* a = new Action(data);
   a->set_mounts(core->get_mount_manager()->get_mounts());
   Action_queue* q = get_current_queue();
   connect(a, SIGNAL(question(Question_data)), this, SLOT(slot_action_question(Question_data)));
-  connect(a, SIGNAL(started()), this, SLOT(action_started()));
+  Action_state_widget* w = new Action_state_widget(a);
+  connect(w, SIGNAL(show_requested()), this, SLOT(action_started()));
+
+  //connect(a, SIGNAL(started()), this, SLOT(action_started()));
   q->add_action(a);
   emit action_added(a);
 }
@@ -306,6 +312,12 @@ void Main_window::keyPressEvent(QKeyEvent *event) {
 
 void Main_window::on_action_about_triggered() {
   QDesktopServices::openUrl(QUrl("https://github.com/Riateche/ridual"));
+}
+
+void Main_window::on_action_remove_triggered() {
+  Action_data data;
+  data.type = Action_type::remove;
+  create_action(data);
 }
 
 void Main_window::switch_active_pane() {
@@ -570,9 +582,7 @@ void Main_window::slot_focus_question() {
 }
 
 void Main_window::action_started() {
-  //static cast because object belongs to another thread
-  Action* a = static_cast<Action*>(sender());
-  Action_state_widget* w = new Action_state_widget(a);
+  Action_state_widget* w = dynamic_cast<Action_state_widget*>(sender());
   ui->questions_layout->insertWidget(0, w);
 
 }

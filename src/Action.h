@@ -158,7 +158,7 @@ private:
   void prepare_one(const QString& path, const QString& root_path, bool is_dir);
 
   // perform copying for one file or directory
-  void process_one(const QString& path, const QString& root_path, bool is_dir);
+  void process_one(const QString& path, const QString& root_path, bool is_dir, bool dir_before);
 
 
   class Abort_exception { };

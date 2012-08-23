@@ -150,7 +150,6 @@
     <addaction name="action_copy"/>
     <addaction name="action_move"/>
     <addaction name="action_link"/>
-    <addaction name="action_symbolic_link"/>
     <addaction name="action_rename"/>
     <addaction name="action_remove"/>
     <addaction name="action_move_to_trash"/>
@@ -240,7 +239,7 @@
   </action>
   <action name="action_move">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Move</string>
@@ -279,6 +278,9 @@
    </property>
    <property name="text">
     <string>Remove</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F8</string>
    </property>
   </action>
   <action name="action_move_to_trash">

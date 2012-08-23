@@ -18,8 +18,12 @@ public:
 private:
   Ui::Action_state_widget *ui;
 
+signals:
+  void show_requested();
+
 private slots:
   void state_changed(Action_state state);
+
 };
 
 #endif // ACTION_STATE_WIDGET_H

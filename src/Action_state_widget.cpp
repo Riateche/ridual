@@ -6,6 +6,7 @@ Action_state_widget::Action_state_widget(Action* action) :
   ui(new Ui::Action_state_widget)
 {
   ui->setupUi(this);
+  connect(action, SIGNAL(started()), this, SIGNAL(show_requested()));
   connect(action, SIGNAL(state_changed(Action_state)),
           this, SLOT(state_changed(Action_state)));
   connect(action, SIGNAL(destroyed()), this, SLOT(deleteLater()));

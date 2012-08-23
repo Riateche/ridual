@@ -4,5 +4,9 @@
 #include <QString>
 
 bool ridual_mkdir(QString path, QString& error_string);
+bool ridual_rmdir(QString path, QString& error_string);
+
+QString errno_to_string(QString& error_string);
+
 
 #endif // MKDIR_H
