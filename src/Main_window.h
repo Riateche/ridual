@@ -117,6 +117,7 @@ private slots:
   void on_action_queue_choose_triggered();
   void on_action_about_triggered();
   void on_action_remove_triggered();
+  void on_action_move_triggered();
 
   void save_settings();
   void go_parent();

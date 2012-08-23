@@ -67,6 +67,8 @@ private slots:
 
 
 
+
+
 private:
   Ui::Pane *ui;
   bool ready;

@@ -119,7 +119,7 @@ Main_window::Main_window(Core* c) :
   hotkeys.add("view",     ui->action_view);
   hotkeys.add("edit",     ui->action_edit);
   hotkeys.add("copy",     ui->action_copy);
-  //hotkeys.add("move",     ui->action_move);
+  hotkeys.add("move",     ui->action_move);
   hotkeys.add("remove",     ui->action_remove);
   hotkeys.add("choose_queue", tr("Choose queue"), ui->action_queue_choose);
 
@@ -227,7 +227,7 @@ void Main_window::set_current_queue(Action_queue* queue) {
 void Main_window::create_action(Action_data data) {
   data.recursive_fetch_option = get_recursive_fetch_option();
   data.targets = active_pane->get_selected_files();
-  if (data.type == Action_type::copy) {
+  if (data.type != Action_type::remove) {
     data.destination = get_destination_pane()->get_uri();
   }
   Action* a = new Action(data);
@@ -317,6 +317,12 @@ void Main_window::on_action_about_triggered() {
 void Main_window::on_action_remove_triggered() {
   Action_data data;
   data.type = Action_type::remove;
+  create_action(data);
+}
+
+void Main_window::on_action_move_triggered() {
+  Action_data data;
+  data.type = Action_type::move;
   create_action(data);
 }
 

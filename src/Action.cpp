@@ -197,8 +197,13 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
       try { //also for retry
         if (signal_timer.elapsed() > signal_interval) {
           process_events();
-          if (data.type == Action_type::copy) {
-            state.current_action = tr("Copying '%1'").arg(path);
+          if (data.type == Action_type::copy || data.type == Action_type::move) {
+            if (data.type == Action_type::copy) {
+              state.current_action = tr("Copying");
+            } else {
+              state.current_action = tr("Moving");
+            }
+            state.current_action += tr(" '%1'").arg(path);
             state.current_progress = (double) 0.0;
             if (total_size > 0) {
               state.total_progress = 1.0 * current_size / total_size;
@@ -219,7 +224,7 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
         }
 
         if (is_dir) {
-          if (data.type == Action_type::copy) {
+          if (data.type == Action_type::copy || data.type == Action_type::move) {
             if (dir_before) {
               if (!QDir(path).isReadable()) {
                 //Error_reaction r =
@@ -238,16 +243,17 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
                 ask_question(Question_data(tr("Failed to create directory '%1': %2").arg(new_path).arg(mkdir_error), Error_type::create_failed, true));
               }
             } // if dir_before
-          } else if (data.type == Action_type::remove) {
+          } //copy or move
+          if (data.type == Action_type::remove || data.type == Action_type::move) {
             if (!dir_before) {
               QString rmdir_error;
               if (!ridual_rmdir(path, rmdir_error)) {
                 ask_question(Question_data(tr("Failed to remove directory '%1': %2").arg(path).arg(rmdir_error), Error_type::delete_failed, true));
               }
             }
-          } //remove
+          } //remove or move
         } else {
-          if (data.type == Action_type::copy) {
+          if (data.type == Action_type::copy || data.type == Action_type::move) {
             QFile file1(path);
             QFile file2(new_path);
             if (file2.exists()) {
@@ -259,12 +265,7 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
             if (!file2.open(QFile::WriteOnly)) {
               ask_question(Question_data(tr("Failed to create file '%1': %2").arg(new_path).arg(file2.errorString()), Error_type::create_failed, false));
             }
-            //int process_events_counter = 0;
             while(!file1.atEnd()) {
-    //          process_events_counter++;
-              //if (process_events_counter > 1000) {
-
-                //process_events_counter = 0;
               if (signal_timer.elapsed() > signal_interval) {
                 process_events();
                 state.current_action = tr("Copying '%1'").arg(path);
@@ -277,7 +278,6 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
                 emit state_changed(state);
                 signal_timer.restart();
               }
-  //            }
               char copy_buffer[BUFFER_SIZE];
               int count = file1.read(copy_buffer, BUFFER_SIZE);
               if (count < 0) {
@@ -289,12 +289,13 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
               }
               current_size += count;
             } //end if file
-          } else if (data.type == Action_type::remove) {
+          } //copy or move
+          if (data.type == Action_type::remove || data.type == Action_type::move) {
             QFile f(path);
             if (!f.remove()) {
               ask_question(Question_data(tr("Failed to remove file '%1': %2").arg(path).arg(f.errorString()), Error_type::delete_failed, false));
             }
-          } //remove
+          } //remove or move
         } //is file
         current_count++;
       } catch (Retry_exception) {
