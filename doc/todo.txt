@@ -1,100 +1,117 @@
-- tests:
--- add "clear" option for test launcher
--- correct getting project dir
--- modify readme to reflect new script
--- compile from gtest source
 
-- ability to show messages with basic icons (warning, success, info, critical)
-- all messages can be removed with ESC
-
-- table, questions and messages must always be displayed under the right pane
-
-- auto answering system
-  - when user changes task settings, it must affect current question (if any)
-  - popup dialog for editing task auto-answering settings:
-    - Apply new settings to: (checkboxes)
-    * this task
-    * all created tasks
-    * new tasks in the future
-  - if the rule is enabled for new tasks, warning should be displayed
-    at main window until this rule is removed (like "task will be placed in queue")
-
-- separate tab for all (current and pending) tasks; long description of each task here
-- display only current tasks in main window
-- task context menu:
-  * Pause/Resume (for started tasks) [+button]
-  * Abort [+button]
-  * Stop recursive fetch
-  * Auto-answer settings
-  * Max speed
-
-
-- align path buttons to the right when right pane is active
-- after answering a question focus next question if any
-- warning about too many (>3) queues
-- deny closing main window when tasks are executing
-- remove File_info::parent_folder, get parent folder manually
-- auto max speed tool based on destination and source folder
-- if average size of file is small, display total progress based on files count
-instead of size
-- file size in File_info
-- Tasks must not be created with "places" schema in source or destination
-- Option "Follow symlinks"
-- If some files was skipped or overwritten without propmt, the message about this must
-appear after the task is completed
-
-F5 - copy
-F6 - move
-F7 - create folder
-Shift+F4 - create file
-F2 - rename (or mass rename tool)
-Shift+F8 - delete
-F8 - move to trash
-<from menu> create link dialog:
-  - hard link
-  - absolute soft link
-  - relative soft link
-
-
-
-
-- ability to move conflicted files and dirs to *.orig
-- shortcut to abort last created task
-- hotkeys for 2nd, 3rd associated apps
-- progress in unity taskbar
-- editing column set
-- predefined templates for new file based on specified filename for creation (regexp match)
-  (for example: *.py - create file with python header, *.cpp - create hello world)
-
-Edit:
-  - extract archive to destination, extract here, browse into archive
-  - copy selected files names to clipboard (only filename, full path, full network path)
-  - set max copy speed
-  - ctrl+x/c/v (!)
-  - drag and drop
-  - select view and open commands from gio apps list (optional)
-  - rename many with regexp
-
-Browse:
+- bugs:
+  - after answering a question focus next question if any
+  - remove File_info::parent_folder, get parent folder manually
+  - file size in File_info
+  - Tasks must not be created with "places" schema in source or destination
   - file icons slow for network fs
-  - navigation history; hotkeys; quick search in history
-  - back/forward
-  - mount uri "archive://encoded_archive_uri/" when user goes into an archive; unmount on cdup
-  - gvfs mount with password and other questions
+  - resizeable splitter between panes; saving state of splitter
+
+
+- must-have features:
+  - allow relative path in address bar; autocomplete in address bar on keyboard input
+  - fast filter file list by typing mask
+  - all standart places in one location
+  - file search
   - option "list folders before files"
   - display count of selected items, total space used by them, free space on current volume
   - select all, unselect all, invert selection, select/unselect by regexp
-  - get icon using libnautilus-private/nautilus-icon-info.c
-  - icons for "places" menus
-  - file search
-  - resizeable splitter between panes; saving state of splitter
-  - shortcuts for all standard places
-  - select file by typing its name
-  - allow relative path in address bar; autocomplete in address bar on keyboard input
-  - unmount, eject, safely remove
+  - navigation history; hotkeys; quick search in history
+  - back/forward
+  - extract archive to destination, extract here, browse into archive
+  - set max copy speed
+  - ctrl+x/c/v (!)
+  - drag and drop
+  - F7 - create folder
+  - Shift+F4 - create file
+  - F2 - rename
+  - mass rename tool (F2 for many files)
+  - F8 - move to trash
+  - create link dialog:
+    - hard link
+    - absolute soft link
+    - relative soft link
+
+  - gvfs mount with password and other questions
+  - editing column set
+  - predefined templates for new file based on specified filename for creation (regexp match)
+    (for example: *.py - create file with python header, *.cpp - create hello world)
+  - pause and abort tasks with keyboard or mouse
+  - shortcut to abort last created task
+  - advanced error options (not only skip/abort/retry)
+  - task context menu:
+    * Pause/Resume (for started tasks) [+button]
+    * Abort [+button]
+    * Stop recursive fetch
+    * Auto-answer settings
+    * Max speed
+  - auto answering system
+    - when user changes task settings, it must affect current question (if any)
+    - popup dialog for editing task auto-answering settings:
+      - Apply new settings to: (checkboxes)
+      * this task
+      * all created tasks
+      * new tasks in the future
+    - if the rule is enabled for new tasks, warning should be displayed
+      at main window until this rule is removed (like "task will be placed in queue")
+  - deny closing main window when tasks are executing
+  - trash support: http://developer.gnome.org/gio/2.29/ch27.html#id531086
+  - auto max speed tool based on destination and source folder
+  - If some files was skipped or overwritten without propmt, the message about this must
+  appear after the task is completed
   - undo
   - edit bookmarks
-  - unix drives list
   - check for free space before operations
 
+- important features:
+  - separate tab for all (current and pending) tasks; long description of each task here
+  - Option "Follow symlinks"
+  - warning about too many (>3) queues
+  - hotkeys for 2nd, 3rd associated apps
+  - unmount, eject, safely remove
+  - unix drives list
 
+
+
+- ideas:
+  - align path buttons to the right when right pane is active
+  - if average size of file is small, display total progress based on files count
+  instead of size
+  - get icon using libnautilus-private/nautilus-icon-info.c
+
+- other features:
+  - ability to select view and open commands from gio apps list
+  - progress in unity taskbar
+  - copy selected files names to clipboard (only filename, full path, full network path)
+  - icons for "places" menus
+
+----------------------
+- alternatives:
+  - DoubleCommander: http://doublecmd.sourceforge.net/site/rus/index.html
+  - Dolphin
+  - mc
+  - mucommander
+  - marlin
+  - krusader
+  - sunflower
+  - gentoo: http://www.obsession.se/gentoo/
+  - Tux Commander: http://tuxcmd.sourceforge.net/
+  - SpaceFM
+  - Thunar
+
+- habraideas:
+  - tabs
+  - option to enable ".." item
+  - plugins
+    - for file preview
+    - see FAR plugins
+  - terminal support
+  - mouse gestures (Thunar)
+  - run-time permission granting
+
+
+- tests:
+  - add "clear" option for test launcher
+  - correct getting project dir
+  - modify readme to reflect new script
+  - compile from gtest source
