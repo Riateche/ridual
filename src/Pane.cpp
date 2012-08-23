@@ -281,8 +281,7 @@ void Pane::directory_error(QString message) {
     qWarning("Unknown sender");
     return;
   }
-  //todo: async messages
-  QMessageBox::critical(0, tr("Failed to get file list"), message);
+  main_window->show_message(tr("Failed to get file list: %1").arg(message), Icon::error);
 }
 
 void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {

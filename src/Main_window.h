@@ -90,32 +90,21 @@ public:
 
 private:
   Ui::Main_window *ui;
-
-
   QTimer save_settings_timer;
   Pane* active_pane;
   Hotkeys hotkeys;
-
-
-  //Tasks_thread* tasks_thread;
-
   File_info_list old_path_items;
-
-
-
   Tasks_model* tasks_model;
-
   Action_queue* current_queue;
-
-
 
   Action_queue* create_queue();
   void resizeEvent(QResizeEvent *);
   void view_or_edit_selected(bool edit);
-
   void send_answer(int index);
-
   bool eventFilter(QObject *object, QEvent *event);
+
+  void keyPressEvent(QKeyEvent* event);
+
 
 private slots:
   void on_action_hotkeys_triggered();
@@ -137,7 +126,6 @@ private slots:
   void go_to(QString uri);
   void slot_selection_changed();
   void slot_actions_recursive_fetch_triggered();
-  void fatal_error(QString message);
   void resize_tasks_table();
   void slot_queue_destroyed(QObject* object);
   void slot_action_question(Question_data data);
@@ -146,6 +134,7 @@ private slots:
 public slots:
   void open_current();
   void switch_active_pane();
+  void show_message(QString message, Icon::Enum icon);
 
 signals:
   void active_pane_changed();

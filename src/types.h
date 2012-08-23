@@ -75,6 +75,14 @@ public:
 };
 Q_DECLARE_METATYPE(Question_data)
 
-
+namespace Icon {
+  enum Enum {
+    warning,
+    info,
+    error,
+    success
+  };
+}
+Q_DECLARE_METATYPE(Icon::Enum)
 
 #endif // TYPES_H

@@ -16,12 +16,12 @@ Directory_list_task::~Directory_list_task() {
 void Directory_list_task::run() {
   QDir dir(path);
   if (!dir.exists()) {
-    emit error(tr("Directory %1 does not exist.").arg(dir.absolutePath()));
+    emit error(tr("Directory '%1' does not exist.").arg(dir.absolutePath()));
     deleteLater();
     return;
   }
   if (!dir.isReadable()) {
-    emit error(tr("Directory %1 can not be read.").arg(dir.absolutePath()));
+    emit error(tr("Directory '%1' can not be read.").arg(dir.absolutePath()));
     deleteLater();
     return;
   }

@@ -1,6 +1,7 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
+#include "Message_widget.h"
 #include "Mount_manager.h"
 #include "Core.h"
 #include "Current_queue_question.h"
@@ -293,6 +294,18 @@ bool Main_window::eventFilter(QObject *object, QEvent *event) {
   Q_UNUSED(event);
 }
 
+void Main_window::keyPressEvent(QKeyEvent *event) {
+  if (event->key() == Qt::Key_Escape) {
+    for(int i = 0; i < ui->questions_layout->count(); i++) {
+      QWidget* w = ui->questions_layout->itemAt(i)->widget();
+      if (dynamic_cast<Message_widget*>(w)) {
+        delete w;
+        i--;
+      }
+    }
+  }
+}
+
 
 void Main_window::on_action_about_triggered() {
   QDesktopServices::openUrl(QUrl("https://github.com/Riateche/ridual"));
@@ -300,6 +313,10 @@ void Main_window::on_action_about_triggered() {
 
 void Main_window::switch_active_pane() {
   set_active_pane(ui->left_pane == active_pane? ui->right_pane: ui->left_pane);
+}
+
+void Main_window::show_message(QString message, Icon::Enum icon) {
+  ui->questions_layout->insertWidget(0, new Message_widget(message, icon));
 }
 
 void Main_window::save_settings() {
@@ -331,6 +348,7 @@ void Main_window::go_parent() {
 
 void Main_window::open_current() {
   File_info info = active_pane->get_current_file();
+  if (info.uri.isEmpty()) return;
   if (info.is_folder()) {
     active_pane->set_uri(info.uri);
     return;
@@ -480,10 +498,6 @@ void Main_window::slot_actions_recursive_fetch_triggered() {
   }
 }
 
-void Main_window::fatal_error(QString message) {
-  QMessageBox::critical(0, "", message);
-}
-
 void Main_window::resize_tasks_table() {
   ui->tasks_table->setVisible(tasks_model->rowCount() > 0);
   if (tasks_model->rowCount() > 0) {
@@ -500,6 +514,10 @@ void Main_window::on_action_queue_choose_triggered() {
 
 
 void Main_window::on_action_go_places_triggered() {
+  /*show_message("test info", Icon::info);
+  show_message("test success", Icon::success);
+  show_message("test error", Icon::error);
+  show_message("test warning", Icon::warning); */
   go_to(Special_uri(Special_uri::places).uri());
 }
 

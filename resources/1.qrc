@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>loading.gif</file>
+        <file>images/info.png</file>
+        <file>images/warning.png</file>
+        <file>images/error.png</file>
+        <file>images/success.png</file>
     </qresource>
 </RCC>
