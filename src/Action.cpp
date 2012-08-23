@@ -122,9 +122,9 @@ void Action::prepare_one(const QString &path, const QString &root_path, bool is_
   }
   if (signal_timer.elapsed() > signal_interval) {
     process_events();
-    state.current_action = tr("Calculating at '%1'").arg(path);
-    state.current_progress = tr("Unknown");
-    state.total_progress = tr("%1 files found").arg(total_count);
+    state.current_action = tr("Recursive fetch at '%1'").arg(path);
+    state.current_progress = false;
+    state.total_progress = tr("Files count: %1").arg(total_count);
     emit state_changed(state);
     signal_timer.restart();
   }
@@ -134,6 +134,7 @@ void Action::prepare_one(const QString &path, const QString &root_path, bool is_
 }
 
 void Action::run() {
+  emit started();
   state.queue_id = queue->get_id();
   if (!data.destination.isEmpty()) {
     normalized_destination = get_real_dir(data.destination);
@@ -180,9 +181,9 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
         if (signal_timer.elapsed() > signal_interval) {
           process_events();
           state.current_action = tr("Copying '%1'").arg(path);
-          state.current_progress = tr("%1%").arg(0);
+          state.current_progress = (double) 0.0;
           if (total_size > 0) {
-            state.total_progress = tr("%1%").arg(100.0 * current_size / total_size, 0, 'f', 1);
+            state.total_progress = 1.0 * current_size / total_size;
           } else {
             state.total_progress = tr("Files count: %1").arg(current_count);
           }
@@ -230,9 +231,9 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
             if (signal_timer.elapsed() > signal_interval) {
               process_events();
               state.current_action = tr("Copying '%1'").arg(path);
-              state.current_progress = tr("%1%").arg(100.0 * file1.pos() / file1.size(), 0, 'f', 1);
+              state.current_progress = 1.0 * file1.pos() / file1.size();
               if (total_size > 0) {
-                state.total_progress = tr("%1%").arg(100.0 * current_size / total_size, 0, 'f', 1);
+                state.total_progress = 1.0 * current_size / total_size;
               } else {
                 state.total_progress = tr("Files count: %1").arg(current_count);
               }

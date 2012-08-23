@@ -2,9 +2,9 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-Message_widget::Message_widget(QString message, Icon::Enum icon)
-{
+Message_widget::Message_widget(QString message, Icon::Enum icon) {
   setFrameShape(QFrame::StyledPanel);
+  setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
   QHBoxLayout* layout = new QHBoxLayout(this);
   layout->setContentsMargins(5, 3, 5, 3);
   QLabel* icon_label = new QLabel();

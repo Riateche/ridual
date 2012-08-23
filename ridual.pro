@@ -43,7 +43,6 @@ SOURCES += src/Main_window.cpp \
     src/App_info.cpp \
     src/Settings_dialog.cpp \
     src/Bookmarks_file_parser.cpp \
-    src/Tasks_model.cpp \
     src/Task_details.cpp \
     src/Error_reaction.cpp \
     src/File_leaf.cpp \
@@ -57,7 +56,8 @@ SOURCES += src/Main_window.cpp \
     src/Core.cpp \
     src/Mount_manager.cpp \
     src/Core_ally.cpp \
-    src/Message_widget.cpp
+    src/Message_widget.cpp \
+    src/Action_state_widget.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -82,7 +82,6 @@ HEADERS  += src/Main_window.h \
     src/App_info.h \
     src/Settings_dialog.h \
     src/Bookmarks_file_parser.h \
-    src/Tasks_model.h \
     src/Task_details.h \
     src/Error_reaction.h \
     src/File_leaf.h \
@@ -97,14 +96,16 @@ HEADERS  += src/Main_window.h \
     src/Core.h \
     src/Mount_manager.h \
     src/Core_ally.h \
-    src/Message_widget.h
+    src/Message_widget.h \
+    src/Action_state_widget.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \
     src/hotkeys/Hotkey_editor.ui \
     src/Settings_dialog.ui \
     src/Task_details.ui \
-    src/Question_widget.ui
+    src/Question_widget.ui \
+    src/Action_state_widget.ui
 
 
 INCLUDEPATH += src

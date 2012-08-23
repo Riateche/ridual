@@ -39,7 +39,8 @@ public:
 class Action_state {
 public:
   Action_state(): queue_id(0) {}
-  QString current_action, current_progress, total_progress;
+  QString current_action;
+  QVariant current_progress, total_progress; //string, double or bool(false)
   //int errors_count;
   int queue_id;
 };

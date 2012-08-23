@@ -21,7 +21,6 @@ class Pane;
 class Tasks_thread;
 class Action_queue;
 class Action;
-class Tasks_model;
 class Question_widget;
 
 
@@ -94,7 +93,6 @@ private:
   Pane* active_pane;
   Hotkeys hotkeys;
   File_info_list old_path_items;
-  Tasks_model* tasks_model;
   Action_queue* current_queue;
 
   Action_queue* create_queue();
@@ -126,10 +124,10 @@ private slots:
   void go_to(QString uri);
   void slot_selection_changed();
   void slot_actions_recursive_fetch_triggered();
-  void resize_tasks_table();
   void slot_queue_destroyed(QObject* object);
   void slot_action_question(Question_data data);
   void slot_focus_question();
+  void action_started();
 
 public slots:
   void open_current();

@@ -1,6 +1,7 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
+#include "Action_state_widget.h"
 #include "Message_widget.h"
 #include "Mount_manager.h"
 #include "Core.h"
@@ -23,7 +24,6 @@
 
 #include <QTextCodec>
 #include "Action_queue.h"
-#include "Tasks_model.h"
 #include <QMessageBox>
 #include "Action_answerer.h"
 
@@ -47,10 +47,6 @@ Main_window::Main_window(Core* c) :
   ui->left_pane->set_main_window(this);
   ui->right_pane->set_main_window(this);
 
-  tasks_model = new Tasks_model(this);
-  ui->tasks_table->hide();
-  ui->tasks_table->setModel(tasks_model);
-  connect(tasks_model, SIGNAL(layoutChanged()), this, SLOT(resize_tasks_table()));
   foreach(QAction* a, QList<QAction*>() << ui->action_recursive_fetch_auto
           << ui->action_recursive_fetch_off << ui->action_recursive_fetch_on) {
     connect(a, SIGNAL(triggered()), this, SLOT(slot_actions_recursive_fetch_triggered()));
@@ -235,6 +231,7 @@ void Main_window::create_action(Action_data data) {
   a->set_mounts(core->get_mount_manager()->get_mounts());
   Action_queue* q = get_current_queue();
   connect(a, SIGNAL(question(Question_data)), this, SLOT(slot_action_question(Question_data)));
+  connect(a, SIGNAL(started()), this, SLOT(action_started()));
   q->add_action(a);
   emit action_added(a);
 }
@@ -498,14 +495,7 @@ void Main_window::slot_actions_recursive_fetch_triggered() {
   }
 }
 
-void Main_window::resize_tasks_table() {
-  ui->tasks_table->setVisible(tasks_model->rowCount() > 0);
-  if (tasks_model->rowCount() > 0) {
-    int h = ui->tasks_table->horizontalHeader()->height() + 3 +
-        ui->tasks_table->rowHeight(0) * qMin(5, tasks_model->rowCount());
-    ui->tasks_table->setFixedHeight(h);
-  }
-}
+
 
 void Main_window::on_action_queue_choose_triggered() {
   Current_queue_question* q = new Current_queue_question(this);
@@ -577,4 +567,12 @@ void Main_window::slot_focus_question() {
       return;
     }
   }
+}
+
+void Main_window::action_started() {
+  //static cast because object belongs to another thread
+  Action* a = static_cast<Action*>(sender());
+  Action_state_widget* w = new Action_state_widget(a);
+  ui->questions_layout->insertWidget(0, w);
+
 }

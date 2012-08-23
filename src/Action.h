@@ -175,6 +175,7 @@ signals:
   //void error(QString message);
   void state_changed(Action_state state);
   void question(Question_data data);
+  void started();
 
 
 
