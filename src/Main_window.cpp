@@ -251,23 +251,17 @@ Recursive_fetch_option Main_window::get_recursive_fetch_option() {
 }
 
 void Main_window::add_question(Question_widget *question) {
+  question_widgets.prepend(question);
+  connect(question, SIGNAL(destroyed(QObject*)), this, SLOT(question_widget_destroyed(QObject*)));
   ui->questions_layout->insertWidget(0, question);
 }
 
 void Main_window::switch_focus_question(Question_widget *target, int direction) {
-  for(int i = ui->questions_layout->indexOf(target) + direction;
-      i >= 0 && i < ui->questions_layout->count();
-      i += direction) {
-    if (ui->questions_layout->itemAt(i)->widget() != 0) {
-      dynamic_cast<Question_widget*>(ui->questions_layout->itemAt(i)->widget())->start_editor();
-      return;
-    }
+  int i = question_widgets.indexOf(target) + direction;
+  if (i >= 0 && i < question_widgets.count()) {
+    question_widgets[i]->start_editor();
   }
 }
-
-
-
-
 
 
 void Main_window::resizeEvent(QResizeEvent *) {
@@ -591,4 +585,13 @@ void Main_window::action_started() {
   Action_state_widget* w = dynamic_cast<Action_state_widget*>(sender());
   ui->questions_layout->insertWidget(0, w);
 
+}
+
+void Main_window::question_widget_destroyed(QObject *object) {
+  Question_widget* w = reinterpret_cast<Question_widget*>(object);
+  int i = question_widgets.indexOf(w);
+  question_widgets.removeAll(w);
+  if (i >= 0 && i < question_widgets.count()) {
+    question_widgets[i]->start_editor();
+  }
 }

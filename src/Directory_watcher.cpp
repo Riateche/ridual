@@ -9,12 +9,12 @@ Directory_watcher::Directory_watcher(QObject *parent) :
 }
 
 void Directory_watcher::add(QString path) {
-  qDebug() << "Directory_watcher::add" << path;
+  //qDebug() << "Directory_watcher::add" << path;
   if (counter.contains(path)) {
     counter[path]++;
-    qDebug() << "already added";
+    //qDebug() << "already added";
   } else {
-    qDebug() << "adding";
+    //qDebug() << "adding";
     counter[path] = 1;
     if (QDir(path).exists()) {
       watcher.addPath(path);
@@ -23,10 +23,10 @@ void Directory_watcher::add(QString path) {
 }
 
 void Directory_watcher::remove(QString path) {
-  qDebug() << "Directory_watcher::remove" << path;
+  //qDebug() << "Directory_watcher::remove" << path;
   counter[path]--;
   if (counter[path] == 0) {
-    qDebug() << "removing";
+    //qDebug() << "removing";
     counter.remove(path);
     watcher.removePath(path);
   }

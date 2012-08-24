@@ -94,6 +94,7 @@ private:
   Hotkeys hotkeys;
   File_info_list old_path_items;
   Action_queue* current_queue;
+  QList<Question_widget*> question_widgets;
 
   Action_queue* create_queue();
   void resizeEvent(QResizeEvent *);
@@ -130,6 +131,7 @@ private slots:
   void slot_action_question(Question_data data);
   void slot_focus_question();
   void action_started();
+  void question_widget_destroyed(QObject* object);
 
 public slots:
   void open_current();
