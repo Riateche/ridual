@@ -87,7 +87,11 @@ bool Question_widget::eventFilter(QObject *object, QEvent *event) {
 }
 
 void Question_widget::resizeEvent(QResizeEvent *) {
-  update_buttons();
+  static int old_width = 0;
+  if (old_width != width()) {
+    old_width = width();
+    update_buttons();
+  }
 }
 
 void Question_widget::on_answer_editor_textEdited(const QString &text) {
