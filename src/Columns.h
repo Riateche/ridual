@@ -13,6 +13,7 @@ namespace Column {
     parent_folder,
     full_path,
     uri,
+    size,
     mime_type,
     type_description,
     date_modified,

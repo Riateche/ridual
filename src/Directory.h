@@ -11,6 +11,7 @@ typedef struct _GObject GObject;
 typedef struct _GAsyncResult GAsyncResult;
 typedef void* gpointer;
 
+class Gio_mount;
 
 
 /*!
@@ -68,7 +69,21 @@ public:
     Get parent URI. This function doesn't deal with filesystem. Its result is
     based on URI syntax and rules.
   */
-  QString get_parent_uri();
+  static QString get_parent_uri(QString target_uri);
+
+  inline QString get_parent_uri() { return get_parent_uri(uri); }
+
+
+
+
+  /*! Convert current Directory URI to real path. If no matching
+    GIO mount is found, result of this function is the same is URI.
+    */
+  static QString find_real_path(QString uri, const QList<Gio_mount> &mounts);
+  static QString find_real_path(QString uri, Core* core);
+
+
+
 
   
 signals:

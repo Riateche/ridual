@@ -35,7 +35,7 @@ void Action::set_queue(Action_queue *q) {
   queue = q;
 }
 
-QString Action::get_real_dir(QString uri) {
+/*QString Action::get_real_dir(QString uri) {
   if (uri.startsWith("/")) return uri;
   foreach(Gio_mount mount, mounts) {
     if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
@@ -47,6 +47,7 @@ QString Action::get_real_dir(QString uri) {
   }
   return uri;
 }
+*/
 
 Error_reaction::Enum Action::ask_question(Question_data data) {
   error_reaction = Error_reaction::undefined;
@@ -74,7 +75,7 @@ void Action::process_events() {
 void Action::iterate_all(bool prepare) {
   try {
     foreach(File_info target, data.targets) {
-      QString root_path = get_real_dir(target.full_path);
+      QString root_path = Directory::find_real_path(target.uri, mounts);
       if (root_path.endsWith("/")) root_path = root_path.left(root_path.length() - 1);
       QStack<QDirIterator*> stack;
       try {
@@ -161,7 +162,7 @@ void Action::run() {
   emit started();
   state.queue_id = queue->get_id();
   if (!data.destination.isEmpty()) {
-    normalized_destination = get_real_dir(data.destination);
+    normalized_destination = Directory::find_real_path(data.destination, mounts);
     if (normalized_destination.endsWith("/")) {
       normalized_destination = normalized_destination.left(normalized_destination.length() - 1);
     }

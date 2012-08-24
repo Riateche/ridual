@@ -12,17 +12,20 @@ class File_info {
 public:
   File_info();
 
-  /*! For special locations - displayed name;
-    for regular files - basename (filename without path and extension). */
-  QString name;
-  QString uri; //! The uri displaying in the address bar
-  QString full_path; //! Real path in file system
+  QString name; //! Displayed name (for special locations only)
+  QString uri; //! item uri (required)
+  //QString full_path; //! Real path in file system
   QIcon icon;
   bool is_file;
   bool is_executable;
   bool is_folder() { return !is_file; }
+  qint64 file_size; // in bytes; 0 if folder or unknown
 
-  QString extension, full_name, parent_folder;
+  QString file_name() const;
+  QString extension() const;
+  QString basename() const;
+
+  //QString extension, full_name;
   QDateTime date_created, date_modified, date_accessed;
   QString mime_type; //, mime_description;
   QString owner, group;
@@ -33,7 +36,7 @@ class File_info_list: public QList<File_info> {
 public:
   File_info_list() {}
   Columns columns;
-  QStringList paths();
+  //QStringList paths();
 };
 
 Q_DECLARE_METATYPE(File_info)

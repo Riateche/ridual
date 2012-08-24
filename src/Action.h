@@ -106,7 +106,7 @@ private:
   static const int auto_recursive_fetch_max = 1000;
   static const int sleep_interval = 100; //! Sleep time (in ms) for one iteration while waiting for user answer or resume after pause.
 
-  QString get_real_dir(QString uri); //! Convert URI to real path based on Action::mounts value.
+  //QString get_real_dir(QString uri); //! Convert URI to real path based on Action::mounts value.
 
   bool paused; //! Indicates if action is currently paused. This value is setted by Action::toggle_pause slot.
 

@@ -1,6 +1,7 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
+#include "Directory.h"
 #include "Action_state_widget.h"
 #include "Message_widget.h"
 #include "Mount_manager.h"
@@ -272,10 +273,10 @@ void Main_window::view_or_edit_selected(bool edit) {
   File_info_list list = active_pane->get_selected_files();
   foreach(File_info f, list) {
     QProcess* p = new QProcess(this);
-    p->setWorkingDirectory(QFileInfo(f.full_path).dir().absolutePath());
+    p->setWorkingDirectory(Directory::find_real_path(Directory::get_parent_uri(f.uri), core));
     QString command = QSettings().value(edit? "edit_command": "view_command", "gedit %U").toString();
     command = command.replace("%U", QString("\"%1\"").arg(f.uri));
-    command = command.replace("%F", QString("\"%1\"").arg(f.full_path));
+    command = command.replace("%F", QString("\"%1\"").arg(Directory::find_real_path(f.uri, core)));
     //todo: correct shell escaping
     p->start(command);
     //todo: catch errors
@@ -367,7 +368,7 @@ void Main_window::open_current() {
   foreach (File_info i, files) {
     if (i.is_file && !i.uri.isEmpty() && !i.mime_type.isEmpty()) {
 //      types[i.mime_type] << i.uri;
-      types[i.mime_type] << i.full_path;
+      types[i.mime_type] << Directory::find_real_path(i.uri, core);
     }
   }
   foreach (QString mime_type, types.keys()) {
@@ -535,8 +536,8 @@ void Main_window::on_action_execute_triggered() {
   File_info_list list = active_pane->get_selected_files();
   foreach(File_info f, list) {
     QProcess* p = new QProcess(this);
-    p->setWorkingDirectory(QFileInfo(f.full_path).dir().absolutePath());
-    p->start(f.full_path);
+    p->setWorkingDirectory(Directory::find_real_path(Directory::get_parent_uri(f.uri), core));
+    p->start(Directory::find_real_path(f.uri, core));
     //todo: catch errors
     //todo: run in tasks thread
   }

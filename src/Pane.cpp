@@ -335,7 +335,7 @@ void Pane::action_launch_triggered() {
   }
   App_info app = data[0].value<App_info>();
   File_info file = data[1].value<File_info>();
-  app.launch(file.full_path);
+  app.launch(Directory::find_real_path(file.uri, main_window->get_core()));
 }
 
 void Pane::update_model_current_index() {

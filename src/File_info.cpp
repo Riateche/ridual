@@ -7,12 +7,25 @@ File_info::File_info():
 {
 }
 
-QStringList File_info_list::paths() {
+QString File_info::file_name() const {
+  if (uri.isEmpty()) return "";
+  return uri.split("/", QString::SkipEmptyParts).last();
+}
+
+QString File_info::extension() const {
+  return QFileInfo(file_name()).completeSuffix();
+}
+
+QString File_info::basename() const {
+  return QFileInfo(file_name()).baseName();
+}
+
+/*QStringList File_info_list::paths() {
   QStringList r;
   foreach(File_info i, *this) {
     r << i.full_path;
   }
   return r;
-}
+}*/
 
 

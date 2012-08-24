@@ -57,8 +57,8 @@ TEST(Directory, files_list) {
 
   foreach(File_info i, list) {
     EXPECT_FALSE(i.icon.isNull()) << "Icon is missing";
-    EXPECT_EQ(i.uri, i.full_path) << "uri and full_path must be equal here";
-    EXPECT_EQ(uri, i.parent_folder);
+    //EXPECT_EQ(i.uri, i.full_path) << "uri and full_path must be equal here";
+    EXPECT_EQ(uri, Directory(i.uri).get_parent_uri());
     EXPECT_TRUE(i.date_accessed.isValid());
     EXPECT_TRUE(i.date_created.isValid());
     EXPECT_TRUE(i.date_modified.isValid());

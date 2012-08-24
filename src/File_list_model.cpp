@@ -2,7 +2,7 @@
 #include <QIcon>
 #include <QDebug>
 #include <QFont>
-
+#include "Directory.h"
 #include "qt_gtk.h"
 
 
@@ -64,19 +64,22 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
     if (column < 0 || column >= current_columns.count()) return QVariant();
     switch (current_columns[column]) {
       case Column::full_name: {
-        return file_info.full_name;
+        return file_info.file_name();
       }
       case Column::name: {
         return file_info.name;
       }
       case Column::extension: {
-        return file_info.extension;
+        return file_info.extension();
+      }
+      case Column::size: {
+        return file_info.file_size; //todo: size formatting
       }
       case Column::parent_folder: {
-        return file_info.parent_folder;
+        return "";//Directory(file_info.uri).get_parent_uri();
       }
       case Column::full_path: {
-        return file_info.full_path;
+        return ""; //todo: new implementation // file_info.full_path;
       }
       case Column::owner: {
         return file_info.owner;

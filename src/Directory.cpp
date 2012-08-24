@@ -84,16 +84,16 @@ QString Directory::canonize(QString uri) {
   return uri;
 }
 
-QString Directory::get_parent_uri() {
+QString Directory::get_parent_uri(QString target_uri) {
   QRegExp network_root("^[^\\:]*\\://[^/]*/$");
-  if (network_root.indexIn(uri) == 0) {
+  if (network_root.indexIn(target_uri) == 0) {
     //we are in network root such as "ftp://user@host/"
     return Special_uri(Special_uri::mounts).uri();
   }
-  if (uri == "/" || Special_uri(uri).name() == Special_uri::places) {
+  if (target_uri == "/" || Special_uri(target_uri).name() == Special_uri::places) {
     return Special_uri(Special_uri::places).uri();
   }
-  QStringList m = uri.split("/"); //uri separator must always be "/"
+  QStringList m = target_uri.split("/"); //uri separator must always be "/"
   if (!m.isEmpty()) m.removeLast();
   if (m.count() == 1 && m.first().isEmpty()) return "/";
   QString s = m.join("/");
@@ -103,6 +103,20 @@ QString Directory::get_parent_uri() {
     s += "/";
   }
   return s;
+}
+
+QString Directory::find_real_path(QString uri, const QList<Gio_mount> &mounts) {
+  if (uri.startsWith("/")) return uri;
+  foreach(Gio_mount mount, mounts) {
+    if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
+      return mount.path + "/" + uri.mid(mount.uri.length());
+    }
+  }
+  return uri;
+}
+
+QString Directory::find_real_path(QString uri, Core *core) {
+  return find_real_path(uri, core->get_mount_manager()->get_mounts());
 }
 
 
@@ -199,15 +213,11 @@ void Directory::refresh() {
     return;
   }
 
-  foreach(Gio_mount mount, core->get_mount_manager()->get_mounts()) {
-    if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
-      //convert uri e.g. "ftp://user@host/path"
-      //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"
-      path = mount.path + "/" + uri.mid(mount.uri.length());
-      //qDebug() << "This location is recognized as existing mount";
-      create_task(path);
-      return;
-    }
+  QString real_path = find_real_path(uri, core);
+  if (uri != real_path) {
+    path = real_path;
+    create_task(path);
+    return;
   }
 
   //address not recognized. try to pass it to gio
@@ -218,13 +228,13 @@ void Directory::refresh() {
 }
 
 void Directory::task_ready(File_info_list r) {
-  QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
+  //QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
   for(int i = 0; i < r.count(); i++) {
-    r[i].uri = uri_prefix + QFileInfo(r[i].full_path).fileName();
+    //r[i].uri = uri_prefix + QFileInfo(r[i].full_path).fileName();
     //we can't get icons in non-gui thread, because QFileIconProvider uses QPixmap
     //and it produces warning. We must do it in gui thread, it's bad because
     //it causes GUI to freeze.
-    r[i].icon = icon_provider.icon(QFileInfo(r[i].full_path));
+    r[i].icon = icon_provider.icon(find_real_path(r[i].uri, core));
     //todo: this is slow for network fs
   }
   emit ready(r);
@@ -247,7 +257,7 @@ void Directory::directory_changed(QString changed_path) {
 }
 
 void Directory::create_task(QString path) {
-  Directory_list_task* task = new Directory_list_task(path);
+  Directory_list_task* task = new Directory_list_task(path, uri);
   connect(task, SIGNAL(ready(File_info_list)), this, SLOT(task_ready(File_info_list)));
   connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
   //connect(task, SIGNAL(error(QString)), this, SLOT(test(QString)));

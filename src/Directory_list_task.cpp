@@ -5,8 +5,9 @@
 #include "qt_gtk.h"
 
 
-Directory_list_task::Directory_list_task(QString p_path) :
-  path(p_path)
+Directory_list_task::Directory_list_task(QString p_path, QString p_uri) :
+  path(p_path),
+  uri(p_uri)
 {
 }
 
@@ -28,18 +29,25 @@ void Directory_list_task::run() {
   QFileInfoList list = dir.entryInfoList(QStringList(), QDir::AllEntries | QDir::NoDotAndDotDot);
   GError* gerror = 0;
   File_info_list r;
+  if (!uri.endsWith("/")) uri += "/";
   foreach (QFileInfo info, list) {
     File_info item;
-    item.name = info.fileName();
-    item.full_path = info.absoluteFilePath();
+    //item.name = info.fileName();
+    //item.full_path = info.absoluteFilePath();
+    item.uri = uri + info.fileName();
     item.is_file = info.isFile();
+    if (item.is_file) {
+      item.file_size = info.size();
+    } else {
+      item.file_size = 0;
+    }
     item.owner = info.owner();
     item.group = info.group();
     item.permissions = info.permissions();
-    item.name = info.baseName();
-    item.extension = info.suffix();
-    item.full_name = info.fileName();
-    item.parent_folder = info.dir().path();
+    //item.name = info.baseName();
+    //item.extension = info.suffix();
+    //item.full_name = info.fileName();
+    //item.parent_folder = info.dir().path();
     item.date_accessed = info.lastRead();
     item.date_modified = info.lastModified();
     item.date_created = info.created();

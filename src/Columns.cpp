@@ -10,6 +10,7 @@ const QMap<Column::Enum, QString>& Columns::get_all() {
     r[Column::parent_folder] = QObject::tr("Parent folder");
     r[Column::full_path] = QObject::tr("Full path");
     r[Column::uri]       = QObject::tr("Location");
+    r[Column::size]       = QObject::tr("Size");
     r[Column::mime_type] = QObject::tr("MIME type");
     r[Column::type_description] = QObject::tr("Type");
     r[Column::date_modified] = QObject::tr("Date modified");
@@ -27,7 +28,7 @@ const QMap<Column::Enum, QString>& Columns::get_all() {
 
 Columns Columns::get_default() {
   Columns r;
-  r << Column::full_name << Column::mime_type << Column::type_description << Column::date_modified <<
+  r << Column::full_name << Column::size << Column::type_description << Column::date_modified <<
        Column::owner << Column::octal_permissions;
   return r;
 }
