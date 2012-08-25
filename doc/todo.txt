@@ -6,6 +6,7 @@
   - resizeable splitter between panes; saving state of splitter
   - don't show undefined progress bar while waiting for answer
   - "execute" should not be accessible for "Places", "FS root" etc
+  - fail with filenames in wrong encoding
 
 
 
@@ -33,7 +34,6 @@
     - relative soft link
 
   - gvfs mount with password and other questions
-  - editing column set
   - predefined templates for new file based on specified filename for creation (regexp match)
     (for example: *.py - create file with python header, *.cpp - create hello world)
   - pause and abort tasks with keyboard or mouse
@@ -70,6 +70,7 @@
   - hotkeys for 2nd, 3rd associated apps
   - unmount, eject, safely remove
   - unix drives list
+  - permissions as "rwxrwxrwx"
 
 
 

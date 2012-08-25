@@ -14,11 +14,11 @@ Core::Core() {
   user_dirs = new Bookmarks_file_parser(QDir::home().absoluteFilePath(".config/user-dirs.dirs"),
                                         Bookmarks_file_parser::format_xdg);
   mount_manager = new Mount_manager(this);
-
   watcher = new Directory_watcher();
   watcher_thread = new QThread();
   watcher_thread->start();
   watcher->moveToThread(watcher_thread);
+
 
 
   main_window = new Main_window(this);

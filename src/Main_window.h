@@ -46,6 +46,9 @@ public:
 
   inline Core* get_core() { return core; }
 
+  inline Columns get_columns() { return columns; }
+  void set_columns(Columns v);
+
 
 
 
@@ -95,6 +98,7 @@ private:
   File_info_list old_path_items;
   Action_queue* current_queue;
   QList<Question_widget*> question_widgets;
+    Columns columns;
 
   Action_queue* create_queue();
   void resizeEvent(QResizeEvent *);
@@ -143,6 +147,7 @@ signals:
   //void signal_add_task(Task task);
   void selection_changed();
   void action_added(Action*);
+  void columns_changed(Columns);
 
 };
 

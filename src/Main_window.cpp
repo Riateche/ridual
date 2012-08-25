@@ -37,7 +37,6 @@ Main_window::Main_window(Core* c) :
 {
   QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
 
-
   QThreadPool::globalInstance()->setMaxThreadCount(5);
 
   qRegisterMetaType<File_info_list>("File_info_list");
@@ -69,6 +68,9 @@ Main_window::Main_window(Core* c) :
   ui->right_pane->load_state(&s);
   s.endGroup();
 
+  QVariant v = s.value("columns");
+  columns = v.isValid()? Columns::deserialize(v): Columns::get_default();
+
   int option = s.value("recursive_fetch_option", static_cast<int>(recursive_fetch_auto)).toInt();
   switch(static_cast<Recursive_fetch_option>(option)) {
     case recursive_fetch_on: ui->action_recursive_fetch_on->setChecked(true); break;
@@ -76,10 +78,6 @@ Main_window::Main_window(Core* c) :
     case recursive_fetch_auto: ui->action_recursive_fetch_auto->setChecked(true); break;
   }
 
-
-
-  //todo: load columns
-  Columns columns = Columns::get_default();
   ui->left_pane->set_columns(columns);
   ui->right_pane->set_columns(columns);
 
@@ -197,6 +195,13 @@ Pane *Main_window::get_destination_pane() {
   return ui->left_pane == active_pane? ui->right_pane: ui->left_pane;
 }
 
+void Main_window::set_columns(Columns v) {
+  columns = v;
+  QSettings s;
+  s.setValue("columns", v.serialize());
+  emit columns_changed(v);
+}
+
 Action_queue *Main_window::create_queue() {
   QSet<int> ids;
   foreach(Action_queue* q, get_queues()) ids << q->get_id();
@@ -276,7 +281,7 @@ void Main_window::view_or_edit_selected(bool edit) {
     p->setWorkingDirectory(Directory::find_real_path(Directory::get_parent_uri(f.uri), core));
     QString command = QSettings().value(edit? "edit_command": "view_command", "gedit %U").toString();
     command = command.replace("%U", QString("\"%1\"").arg(f.uri));
-    command = command.replace("%F", QString("\"%1\"").arg(Directory::find_real_path(f.uri, core)));
+    command = command.replace("%F", QString("\"%1\"").arg(f.path));
     //todo: correct shell escaping
     p->start(command);
     //todo: catch errors
@@ -368,7 +373,7 @@ void Main_window::open_current() {
   foreach (File_info i, files) {
     if (i.is_file && !i.uri.isEmpty() && !i.mime_type.isEmpty()) {
 //      types[i.mime_type] << i.uri;
-      types[i.mime_type] << Directory::find_real_path(i.uri, core);
+      types[i.mime_type] << i.path;
     }
   }
   foreach (QString mime_type, types.keys()) {
@@ -537,14 +542,14 @@ void Main_window::on_action_execute_triggered() {
   foreach(File_info f, list) {
     QProcess* p = new QProcess(this);
     p->setWorkingDirectory(Directory::find_real_path(Directory::get_parent_uri(f.uri), core));
-    p->start(Directory::find_real_path(f.uri, core));
+    p->start(f.path);
     //todo: catch errors
     //todo: run in tasks thread
   }
 }
 
 void Main_window::on_action_general_settings_triggered() {
-  (new Settings_dialog(this))->show();
+  (new Settings_dialog(core))->show();
 }
 
 void Main_window::on_action_view_triggered() {

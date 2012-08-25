@@ -234,7 +234,7 @@ void Directory::task_ready(File_info_list r) {
     //we can't get icons in non-gui thread, because QFileIconProvider uses QPixmap
     //and it produces warning. We must do it in gui thread, it's bad because
     //it causes GUI to freeze.
-    r[i].icon = icon_provider.icon(find_real_path(r[i].uri, core));
+    r[i].icon = icon_provider.icon(r[i].path);
     //todo: this is slow for network fs
   }
   emit ready(r);

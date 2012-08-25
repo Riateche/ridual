@@ -20,6 +20,7 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   ui->list->viewport()->installEventFilter(this);
   ui->list->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
+
   QFontMetrics font_metrics(ui->list->font());
   ui->list->verticalHeader()->setFixedWidth(10 + font_metrics.width(">"));
 
@@ -33,7 +34,7 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   ui->loading_indicator->setMovie(loading_movie);
   loading_movie->start();
 
-  connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(current_index_changed(QModelIndex,QModelIndex)));  
+  connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(current_index_changed(QModelIndex,QModelIndex)));
   connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SIGNAL(selection_changed()));
   connect(ui->list->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selection_changed()));
 }
@@ -47,6 +48,8 @@ void Pane::set_main_window(Main_window *p_main_window) {
   main_window = p_main_window;
   connect(main_window, SIGNAL(active_pane_changed()), this, SLOT(active_pane_changed()));
   connect(ui->list, SIGNAL(doubleClicked(QModelIndex)), main_window, SLOT(open_current()));
+  connect(main_window, SIGNAL(columns_changed(Columns)),
+          &file_list_model, SLOT(set_columns(Columns)));
 
 }
 

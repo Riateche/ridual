@@ -41,7 +41,7 @@ QVariant File_list_model::headerData(int section, Qt::Orientation orientation, i
   if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
     if (section < 0 || section >= current_columns.count()) return QVariant();
     Column::Enum column = current_columns.at(section);
-    return Columns::get_all()[column];
+    return Columns::name(column);
   }
   if (role == Qt::DisplayRole && orientation == Qt::Vertical) {
     //return QString("%1").arg(section + 1);
@@ -63,23 +63,33 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
   if (role == Qt::DisplayRole) {
     if (column < 0 || column >= current_columns.count()) return QVariant();
     switch (current_columns[column]) {
-      case Column::full_name: {
+      case Column::file_name: {
         return file_info.file_name();
       }
       case Column::name: {
         return file_info.name;
       }
+      case Column::basename: {
+        return file_info.basename();
+      }
       case Column::extension: {
         return file_info.extension();
       }
       case Column::size: {
-        return file_info.file_size; //todo: size formatting
+        if (file_info.file_size >= 0) {
+          return file_info.file_size; //todo: size formatting
+        } else {
+          return "";
+        }
       }
-      case Column::parent_folder: {
-        return "";//Directory(file_info.uri).get_parent_uri();
+      case Column::parent_uri: {
+        return Directory::get_parent_uri(file_info.uri);
       }
       case Column::full_path: {
-        return ""; //todo: new implementation // file_info.full_path;
+        return file_info.path;
+      }
+      case Column::uri: {
+        return file_info.uri;
       }
       case Column::owner: {
         return file_info.owner;
@@ -104,9 +114,6 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
       }
       case Column::type_description: {
         return get_mime_description(file_info.mime_type);
-      }
-      case Column::uri: {
-        return file_info.uri;
       }
       default: {
         return "not implemented";
@@ -151,6 +158,7 @@ File_info File_list_model::get_file_info(const QModelIndex &index) {
 
 
 QString File_list_model::get_mime_description(QString mime_type) {
+  if (mime_type.isEmpty()) return tr("Unknown");
   if (mime_descriptions.contains(mime_type)) return mime_descriptions[mime_type];
   gchar* mime_description = g_content_type_get_description(mime_type.toLocal8Bit());
   QString r = QString::fromLocal8Bit(mime_description);

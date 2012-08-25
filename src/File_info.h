@@ -14,12 +14,12 @@ public:
 
   QString name; //! Displayed name (for special locations only)
   QString uri; //! item uri (required)
-  //QString full_path; //! Real path in file system
+  QString path; //! Real path in file system
   QIcon icon;
   bool is_file;
   bool is_executable;
   bool is_folder() { return !is_file; }
-  qint64 file_size; // in bytes; 0 if folder or unknown
+  qint64 file_size; // in bytes; -1 if folder or unknown
 
   QString file_name() const;
   QString extension() const;

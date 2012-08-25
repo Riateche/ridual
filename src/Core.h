@@ -3,7 +3,6 @@
 
 #include <QObject>
 
-
 class Main_window;
 class Mount_manager;
 class Bookmarks_file_parser;
@@ -15,9 +14,7 @@ public:
   explicit Core();
   ~Core();
 
-
-
-
+  inline Main_window* get_main_window() { return main_window; }
   inline Bookmarks_file_parser* get_bookmarks() { return bookmarks; }
   inline Bookmarks_file_parser* get_user_dirs() { return user_dirs; }
   inline Mount_manager* get_mount_manager() {  return mount_manager; }
@@ -34,6 +31,7 @@ private:
   Mount_manager* mount_manager;
   Directory_watcher* watcher;
   QThread* watcher_thread;
+
 
 };
 

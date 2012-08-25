@@ -9,10 +9,10 @@
 #include <QCache>
 
 class File_list_model : public QAbstractTableModel {
+  Q_OBJECT
 public:
   File_list_model();
   void set_data(File_info_list list);
-  void set_columns(const Columns& new_columns);
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -27,6 +27,9 @@ public:
   static QString format_octal_permissions(QFile::Permissions permissions);
 
   void set_current_index(const QModelIndex& index);
+
+public slots:
+  void set_columns(const Columns& new_columns);
 
 private:
   File_info_list list;

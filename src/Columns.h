@@ -9,8 +9,9 @@ namespace Column {
   enum Enum {
     name,
     extension,
-    full_name,
-    parent_folder,
+    file_name,
+    basename,
+    parent_uri,
     full_path,
     uri,
     size,
@@ -20,9 +21,7 @@ namespace Column {
     date_accessed,
     date_created,
     owner,
-    owner_full_name,
     group,
-    group_full_name,
     permissions,
     octal_permissions
   };
@@ -30,12 +29,12 @@ namespace Column {
 
 class Columns: public QList<Column::Enum> {
 public:
-  static const QMap<Column::Enum, QString> &get_all();
+  static Columns get_all();
   static Columns get_default();
   QVariant serialize();
   static Columns deserialize(QVariant data);
+  static QString name(Column::Enum column);
 
-  QString to_string() const;
 
 
 };

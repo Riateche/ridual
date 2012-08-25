@@ -13,11 +13,11 @@ QString File_info::file_name() const {
 }
 
 QString File_info::extension() const {
-  return QFileInfo(file_name()).completeSuffix();
+  return QFileInfo(file_name()).suffix();
 }
 
 QString File_info::basename() const {
-  return QFileInfo(file_name()).baseName();
+  return QFileInfo(file_name()).completeBaseName();
 }
 
 /*QStringList File_info_list::paths() {
