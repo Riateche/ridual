@@ -11,6 +11,7 @@
 
 
 - must-have features:
+  - sort file list
   - allow relative path in address bar; autocomplete in address bar on keyboard input
   - fast filter file list by typing mask
   - file search

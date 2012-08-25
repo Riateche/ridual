@@ -11,6 +11,8 @@
 #include <QScrollBar>
 #include "Special_uri.h"
 
+
+
 Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   directory = 0;
   pending_directory = 0;
