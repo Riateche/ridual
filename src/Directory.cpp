@@ -28,15 +28,9 @@ Directory::Directory(Core *c, QString p_uri) :
   uri = canonize(uri);
 
   Special_uri special_uri(uri);
-  if (special_uri.name() == Special_uri::mounts) {
+  if (special_uri.name() == Special_uri::places) {
     connect(core->get_mount_manager(), SIGNAL(mounts_changed()), this, SLOT(refresh()));
-  }
-
-  if (special_uri.name() == Special_uri::bookmarks) {
     connect(core->get_bookmarks(), SIGNAL(changed()), this, SLOT(refresh()));
-  }
-
-  if (special_uri.name() == Special_uri::userdirs) {
     connect(core->get_user_dirs(), SIGNAL(changed()), this, SLOT(refresh()));
   }
 
@@ -146,30 +140,22 @@ void Directory::refresh() {
     fi.name = tr("Home");
     fi.uri = QDir::homePath();
     r << fi;
-    fi = File_info();
-    fi.name = Special_uri(Special_uri::mounts).caption();
-    fi.uri = Special_uri(Special_uri::mounts).uri();
-    r << fi;
-    fi = File_info();
-    fi.name = Special_uri(Special_uri::bookmarks).caption();
-    fi.uri = Special_uri(Special_uri::bookmarks).uri();
-    r << fi;
-    fi = File_info();
-    fi.name = Special_uri(Special_uri::userdirs).caption();
-    fi.uri = Special_uri(Special_uri::userdirs).uri();
-    r << fi;
-    r.columns << Column::name << Column::uri;
-    emit ready(r);
-    return;
-  }
-  if (special_uri.name() == Special_uri::mounts) { // list of mounts
-    File_info_list r;
+
+
+    File_info_list mounts;
     foreach (Gio_mount m, core->get_mount_manager()->get_mounts()) {
       File_info i;
       i.name = m.name;
       i.uri = m.default_location;
-      r << i;
+      mounts << i;
     }
+    if (!mounts.isEmpty()) {
+      File_info fi;
+      fi.name = QString("* ") + tr("Mounted filesystems");
+      r << fi;
+      r << mounts;
+    }
+    File_info_list volumes;
     int id = 0;
     foreach (Gio_volume* v, core->get_mount_manager()->get_volumes()) {
       //we must show only unmounted volumes because
@@ -178,10 +164,53 @@ void Directory::refresh() {
         File_info i;
         i.name = v->name + tr(" (unmounted)");
         i.uri = QString("places/mounts/%1").arg(id); //use number of volume in list as id
-        r << i;
+        volumes << i;
       }
       id++;
     }
+    if (!volumes.isEmpty()) {
+      File_info fi;
+      fi.name = QString("* ") + tr("Unmounted volumes");
+      r << fi;
+      r << volumes;
+    }
+
+    QStringList uris;
+    foreach(File_info fi, r) {
+      fi.uri = canonize(fi.uri);
+      uris << fi.uri;
+    }
+
+    File_info_list bookmarks;
+    foreach(File_info fi, core->get_bookmarks()->get_all()) {
+      fi.uri = canonize(fi.uri);
+      if (!uris.contains(fi.uri)) {
+        uris << fi.uri;
+        bookmarks << fi;
+      }
+    }
+    if (!bookmarks.isEmpty()) {
+      File_info fi;
+      fi.name = QString("* ") + tr("Bookmarks");
+      r << fi;
+      r << bookmarks;
+    }
+
+    File_info_list user_dirs;
+    foreach(File_info fi, core->get_user_dirs()->get_all()) {
+      fi.uri = canonize(fi.uri);
+      if (!uris.contains(fi.uri)) {
+        uris << fi.uri;
+        user_dirs << fi;
+      }
+    }
+    if (!user_dirs.isEmpty()) {
+      File_info fi;
+      fi.name = QString("* ") + tr("Standard places");
+      r << fi;
+      r << user_dirs;
+    }
+
     r.columns << Column::name << Column::uri;
     emit ready(r);
     return;
@@ -197,19 +226,6 @@ void Directory::refresh() {
     GVolume* volume = volumes.at(id)->get_gvolume();
     async_result_type = async_result_mount_volume;
     g_volume_mount(volume, GMountMountFlags(), 0, 0, async_result, this);
-    return;
-  }
-
-  if (special_uri.name() == Special_uri::bookmarks) { // list of bookmarks
-    File_info_list list = core->get_bookmarks()->get_all();
-    list.columns << Column::name << Column::uri;
-    emit ready(list);
-    return;
-  }
-  if (special_uri.name() == Special_uri::userdirs) { // list of xdg bookmarks
-    File_info_list list = core->get_user_dirs()->get_all();
-    list.columns << Column::name << Column::uri;
-    emit ready(list);
     return;
   }
 

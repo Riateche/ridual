@@ -52,7 +52,7 @@ void Directory_list_task::run() {
     //qDebug() << "GFile* file = " << file;
     GFileInfo* gfileinfo = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, GFileQueryInfoFlags(), 0, &gerror);
     if (gerror) {
-      qWarning("gio error: %s", gerror->message);
+      qDebug("gio error: %s", gerror->message);
       //emit error(QString::fromLocal8Bit(gerror->message));
       g_error_free(gerror);
       gerror = 0;
