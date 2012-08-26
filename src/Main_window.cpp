@@ -232,9 +232,17 @@ void Main_window::set_current_queue(Action_queue* queue) {
 
 void Main_window::create_action(Action_data data) {
   data.recursive_fetch_option = get_recursive_fetch_option();
+  if (active_pane->get_uri() == Special_uri(Special_uri::places).uri()) {
+    show_message(tr("Invalid target for this operation."), Icon::error);
+    return;
+  }
   data.targets = active_pane->get_selected_files();
   if (data.type != Action_type::remove) {
     data.destination = get_destination_pane()->get_uri();
+    if (data.destination == Special_uri(Special_uri::places).uri()) {
+      show_message(tr("Can't use 'Places' special location as destination."), Icon::error);
+      return;
+    }
   }
   Action* a = new Action(data);
   a->set_mounts(core->get_mount_manager()->get_mounts());

@@ -4,7 +4,7 @@
 
 Message_widget::Message_widget(QString message, Icon::Enum icon) {
   setFrameShape(QFrame::StyledPanel);
-  setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
+  setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
   QHBoxLayout* layout = new QHBoxLayout(this);
   layout->setContentsMargins(5, 3, 5, 3);
   QLabel* icon_label = new QLabel();
@@ -17,6 +17,8 @@ Message_widget::Message_widget(QString message, Icon::Enum icon) {
   }
   icon_label->setPixmap(QPixmap(QString(":/images/%1.png").arg(icon_name)));
   layout->addWidget(icon_label);
-  layout->addWidget(new QLabel(message));
+  QLabel* message_label = new QLabel(message);
+  message_label->setWordWrap(true);
+  layout->addWidget(message_label, 10);
   layout->addStretch();
 }

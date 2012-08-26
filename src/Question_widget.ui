@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>526</width>
-    <height>74</height>
+    <width>426</width>
+    <height>214</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,7 +41,10 @@
       <item>
        <widget class="QLabel" name="message">
         <property name="text">
-         <string>message</string>
+         <string>message message message message message message message message message message message message message message message message message message message </string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
