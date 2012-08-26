@@ -40,9 +40,13 @@ class Action_state {
 public:
   Action_state(): queue_id(0) {}
   QString current_action;
-  QVariant current_progress, total_progress; //string, double or bool(false)
+  QString current_progress_text;
+  QString total_progress_text;
+  double current_progress, total_progress; // from 0 to 1, or -1 (unknown) or -2 (disabled)
   //int errors_count;
   int queue_id;
+  static const int UNKNOWN = -1;
+  static const int DISABLED = -2;
 };
 Q_DECLARE_METATYPE(Action_state)
 

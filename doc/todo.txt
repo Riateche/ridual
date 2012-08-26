@@ -1,6 +1,5 @@
 
 - bugs:
-  - Tasks must not be created with "places" schema in source or destination
   - file icons slow for network fs
   - resizeable splitter between panes; saving state of splitter
   - don't show undefined progress bar while waiting for answer

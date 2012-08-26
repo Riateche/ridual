@@ -3,6 +3,8 @@
 #include "Main_window.h"
 #include "Pane.h"
 #include <QKeyEvent>
+#include <QDebug>
+#include <QTextDocument>
 
 Question_widget::Question_widget(Main_window *mw) :
   ui(new Ui::Question_widget)
@@ -19,12 +21,13 @@ Question_widget::~Question_widget() {
 }
 
 void Question_widget::set_message(const QString &message) {
-  ui->message->setText(message);
+  QString s = Qt::escape(message).replace("/", "/&#8203;");
+  ui->message->setText(s);
 }
 
 void Question_widget::set_buttons(const QList<Button_settings> &_buttons) {
   buttons = _buttons;
-  update_buttons();
+  //update_buttons();
 }
 
 void Question_widget::start_editor() {
@@ -55,6 +58,7 @@ void Question_widget::update_buttons() {
   ui->frame_layout->getContentsMargins(&margin_left, 0, &margin_right, 0);
   int columns = (ui->frame->width() - margin_left - margin_right + ui->buttons_layout->horizontalSpacing())
       / (button_width + ui->buttons_layout->horizontalSpacing());
+  qDebug() << ui->frame->width() << button_width << columns;
   if (columns < 1) columns = 1;
   for(int i = 0; i < buttons_widgets.count(); i++) {
     QPushButton* b = buttons_widgets[i];
@@ -86,10 +90,8 @@ bool Question_widget::eventFilter(QObject *object, QEvent *event) {
   return false;
 }
 
-void Question_widget::resizeEvent(QResizeEvent *) {
-  static int old_width = 0;
-  if (old_width != width()) {
-    old_width = width();
+void Question_widget::resizeEvent(QResizeEvent* e) {
+  if (e->oldSize().width() != width()) {
     update_buttons();
   }
 }
