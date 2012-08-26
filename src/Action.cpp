@@ -50,6 +50,14 @@ void Action::set_queue(Action_queue *q) {
 */
 
 Error_reaction::Enum Action::ask_question(Question_data data) {
+  state.current_action = tr("Waiting for answer");
+  if (state.current_progress == Action_state::UNKNOWN) {
+    state.current_progress = Action_state::DISABLED;
+  }
+  if (state.total_progress == Action_state::UNKNOWN) {
+    state.total_progress = Action_state::DISABLED;
+  }
+  emit state_changed(state);
   error_reaction = Error_reaction::undefined;
   data.action = this;
   emit question(data);
@@ -146,8 +154,10 @@ void Action::prepare_one(const QString &path, const QString &root_path, bool is_
   if (signal_timer.elapsed() > signal_interval) {
     process_events();
     state.current_action = tr("Recursive fetch at '%1'").arg(path);
-    state.current_progress = false;
-    state.total_progress = tr("Files count: %1").arg(total_count);
+    state.current_progress = Action_state::DISABLED;
+    state.current_progress_text = "";
+    state.total_progress_text = tr("Files count: %1").arg(total_count);
+    state.total_progress = Action_state::UNKNOWN;
     emit state_changed(state);
     signal_timer.restart();
   }
@@ -193,8 +203,9 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
       ask_question(Question_data(tr("Failed to copy '%1' to '%2': can't copy folder inside itself.").arg(path).arg(new_path), Error_type::destination_inside_source, is_dir));
     }
 
-    bool retry_asked = false;
+    bool retry_asked;
     do { //for retry
+      retry_asked = false;
       try { //also for retry
         if (signal_timer.elapsed() > signal_interval) {
           process_events();
@@ -205,19 +216,23 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
               state.current_action = tr("Moving");
             }
             state.current_action += tr(" '%1'").arg(path);
-            state.current_progress = (double) 0.0;
+            state.current_progress = Action_state::DISABLED;
+            state.current_progress_text = "";
             if (total_size > 0) {
               state.total_progress = 1.0 * current_size / total_size;
             } else {
-              state.total_progress = tr("Files count: %1").arg(current_count);
+              state.total_progress_text = tr("Files count: %1").arg(current_count);
+              state.total_progress = Action_state::UNKNOWN;
             }
           } else if (data.type == Action_type::remove) {
             state.current_action = tr("Deleting '%1'").arg(path);
-            state.current_progress = false;
+            state.current_progress = Action_state::DISABLED;
+            state.current_progress_text = "";
             if (total_count > 0) {
               state.total_progress = 1.0 * current_count / total_count;
             } else {
-              state.total_progress = tr("Files count: %1").arg(current_count);
+              state.total_progress_text = tr("Files count: %1").arg(current_count);
+              state.total_progress = Action_state::UNKNOWN;
             }
           }
           emit state_changed(state);
@@ -274,7 +289,8 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
                 if (total_size > 0) {
                   state.total_progress = 1.0 * current_size / total_size;
                 } else {
-                  state.total_progress = tr("Files count: %1").arg(current_count);
+                  state.total_progress_text = tr("Files count: %1").arg(current_count);
+                  state.total_progress = Action_state::UNKNOWN;
                 }
                 emit state_changed(state);
                 signal_timer.restart();
