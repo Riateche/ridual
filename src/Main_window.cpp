@@ -35,6 +35,8 @@ Main_window::Main_window(Core* c) :
 , hotkeys(this)
 , current_queue(0)
 {
+  setAttribute(Qt::WA_DeleteOnClose);
+
   QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
 
   QThreadPool::globalInstance()->setMaxThreadCount(5);
@@ -61,6 +63,12 @@ Main_window::Main_window(Core* c) :
   QApplication::setOrganizationName("ridual");
 
   QSettings s;
+
+  QVariant v = s.value("columns");
+  columns = v.isValid()? Columns::deserialize(v): Columns::get_default();
+  ui->left_pane->set_columns(columns);
+  ui->right_pane->set_columns(columns);
+
   s.beginGroup("left_pane");
   ui->left_pane->load_state(&s);
   s.endGroup();
@@ -68,8 +76,6 @@ Main_window::Main_window(Core* c) :
   ui->right_pane->load_state(&s);
   s.endGroup();
 
-  QVariant v = s.value("columns");
-  columns = v.isValid()? Columns::deserialize(v): Columns::get_default();
 
   int option = s.value("recursive_fetch_option", static_cast<int>(recursive_fetch_auto)).toInt();
   switch(static_cast<Recursive_fetch_option>(option)) {
@@ -78,8 +84,6 @@ Main_window::Main_window(Core* c) :
     case recursive_fetch_auto: ui->action_recursive_fetch_auto->setChecked(true); break;
   }
 
-  ui->left_pane->set_columns(columns);
-  ui->right_pane->set_columns(columns);
 
   restoreState(s.value("main_window/state").toByteArray());
   restoreGeometry(s.value("main_window/geometry").toByteArray());

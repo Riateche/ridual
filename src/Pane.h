@@ -25,20 +25,33 @@ public:
   void set_main_window(Main_window* main_window);
   void set_uri(QString dir);
 
-  bool eventFilter(QObject* object, QEvent* event);
 
   void load_state(QSettings* s);
   void save_state(QSettings* s);
 
+  /*! Check if this pane is active. Only one of two panes can be active at a time.
+    */
   bool is_active() const;
 
+  /*! Get the uri of location which content is displayed in file list. This can be empty.
+    */
   QString get_uri();
 
+  /*! Set columns used by file list table.
+    */
   inline void set_columns(Columns columns) { file_list_model.set_columns(columns); }
 
-  File_info_list get_selected_files();
+  /*! Get list of selected files. If  fallback_to_current is true (default) and
+    none is selected but there is a current row, this row is treated as selected.
+    */
+  File_info_list get_selected_files(bool fallback_to_current = true);
+
+  /*! Get file pointed by current row. If there is no current row,
+    invalid File_info is returned (invalid File_info has empty 'uri' field).
+    */
   File_info get_current_file();
 
+  //! Set focus to this pane's file list.
   void setFocus();
 
 signals:
@@ -79,6 +92,7 @@ private:
   Directory* directory, *pending_directory;
 
   void update_model_current_index();
+  bool eventFilter(QObject* object, QEvent* event);
 
 };
 

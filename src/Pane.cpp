@@ -141,11 +141,16 @@ void Pane::load_state(QSettings *s) {
   if (uri.isEmpty()) {
     uri = Special_uri(Special_uri::places).uri();
   }
+  ui->list->sortByColumn(s->value("sort_column").toInt(),
+                         static_cast<Qt::SortOrder>(s->value("sort_order").toInt()));
   set_uri(uri);
 }
 
 void Pane::save_state(QSettings *s) {
   s->setValue("path", get_uri());
+  s->setValue("sort_column", proxy_model->sortColumn());
+  qDebug() << "store order" << proxy_model->sortOrder();
+  s->setValue("sort_order", static_cast<int>(proxy_model->sortOrder()));
 }
 
 bool Pane::is_active() const {
@@ -157,9 +162,12 @@ QString Pane::get_uri() {
   return directory? directory->get_uri(): QString();
 }
 
-File_info_list Pane::get_selected_files() {
+File_info_list Pane::get_selected_files(bool fallback_to_current) {
   QModelIndexList indexes = proxy_model->mapSelectionToSource(ui->list->selectionModel()->selection()).indexes();
   if (indexes.isEmpty()) {
+    if (!fallback_to_current) {
+      return File_info_list();
+    }
     File_info info = file_list_model.get_file_info(proxy_model->mapToSource(ui->list->currentIndex()));
     if (info.uri.isEmpty()) {
       return File_info_list();
@@ -248,7 +256,7 @@ void Pane::directory_ready(File_info_list files) {
     //it's a refresh, we need to store selection state
     old_state_stored = true;
     old_current_uri = get_current_file().uri;
-    File_info_list list = get_selected_files();
+    File_info_list list = get_selected_files(false);
     foreach(File_info i, list) old_selected_uris << i.uri;
     old_scroll_pos.setX(ui->list->horizontalScrollBar()->value());
     old_scroll_pos.setY(ui->list->verticalScrollBar()->value());
