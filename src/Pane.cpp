@@ -227,7 +227,8 @@ void Pane::show_loading_indicator() {
 void Pane::directory_ready(File_info_list files) {
   bool old_state_stored = false;
   QString new_current_uri;
-  QModelIndex old_current_index;
+  //QModelIndex old_current_index;
+  int old_current_row, old_current_column;
   QItemSelection old_selection;
   QPoint old_scroll_pos;
 
@@ -245,8 +246,11 @@ void Pane::directory_ready(File_info_list files) {
   } else if (sender() == directory) {
     //it's a refresh, we need to store selection state
     old_state_stored = true;
-    old_current_index = ui->list->currentIndex();
+    QModelIndex index = ui->list->currentIndex();
+    old_current_row = index.row();
+    old_current_column = index.column();
     old_selection = ui->list->selectionModel()->selection();
+    //todo: remember real uri's instead of indexes
     old_scroll_pos.setX(ui->list->horizontalScrollBar()->value());
     old_scroll_pos.setY(ui->list->verticalScrollBar()->value());
   } else {
@@ -262,7 +266,9 @@ void Pane::directory_ready(File_info_list files) {
   ui->loading_indicator->hide();
 
   if (old_state_stored) {
-    ui->list->setCurrentIndex(old_current_index);
+    //qDebug() << old_current_index;
+    //qDebug() << proxy_model->rowCount() << proxy_model->columnCount();
+    ui->list->setCurrentIndex(proxy_model->index(old_current_row, old_current_column));
     ui->list->selectionModel()->select(old_selection, QItemSelectionModel::SelectCurrent);
     ui->list->horizontalScrollBar()->setValue(old_scroll_pos.x());
     ui->list->verticalScrollBar()->setValue(old_scroll_pos.y());
