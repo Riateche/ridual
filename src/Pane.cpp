@@ -227,9 +227,10 @@ void Pane::show_loading_indicator() {
 void Pane::directory_ready(File_info_list files) {
   bool old_state_stored = false;
   QString new_current_uri;
-  //QModelIndex old_current_index;
-  int old_current_row, old_current_column;
-  QItemSelection old_selection;
+ // int old_current_row, old_current_column;
+  QString old_current_uri;
+  QStringList old_selected_uris;
+//  QItemSelection old_selection;
   QPoint old_scroll_pos;
 
   if (sender() == pending_directory) {
@@ -246,11 +247,9 @@ void Pane::directory_ready(File_info_list files) {
   } else if (sender() == directory) {
     //it's a refresh, we need to store selection state
     old_state_stored = true;
-    QModelIndex index = ui->list->currentIndex();
-    old_current_row = index.row();
-    old_current_column = index.column();
-    old_selection = ui->list->selectionModel()->selection();
-    //todo: remember real uri's instead of indexes
+    old_current_uri = get_current_file().uri;
+    File_info_list list = get_selected_files();
+    foreach(File_info i, list) old_selected_uris << i.uri;
     old_scroll_pos.setX(ui->list->horizontalScrollBar()->value());
     old_scroll_pos.setY(ui->list->verticalScrollBar()->value());
   } else {
@@ -266,10 +265,20 @@ void Pane::directory_ready(File_info_list files) {
   ui->loading_indicator->hide();
 
   if (old_state_stored) {
-    //qDebug() << old_current_index;
-    //qDebug() << proxy_model->rowCount() << proxy_model->columnCount();
-    ui->list->setCurrentIndex(proxy_model->index(old_current_row, old_current_column));
-    ui->list->selectionModel()->select(old_selection, QItemSelectionModel::SelectCurrent);
+    QModelIndex index = file_list_model.index_for_uri(old_current_uri);
+    if (index.isValid()) {
+      ui->list->setCurrentIndex(proxy_model->mapFromSource(index));
+    }
+    ui->list->selectionModel()->clearSelection();
+    foreach(QString uri, old_selected_uris) {
+      QModelIndex i = file_list_model.index_for_uri(uri);
+      if (i.isValid()) {
+        ui->list->selectionModel()->select(proxy_model->mapFromSource(i), QItemSelectionModel::Select);
+      }
+    }
+
+//    ui->list->setCurrentIndex(proxy_model->index(old_current_row, old_current_column));
+//    ui->list->selectionModel()->select(old_selection, QItemSelectionModel::SelectCurrent);
     ui->list->horizontalScrollBar()->setValue(old_scroll_pos.x());
     ui->list->verticalScrollBar()->setValue(old_scroll_pos.y());
   }

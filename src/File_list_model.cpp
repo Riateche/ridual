@@ -145,6 +145,7 @@ Qt::ItemFlags File_list_model::flags(const QModelIndex &index) const {
 }
 
 QModelIndex File_list_model::index_for_uri(QString uri) {
+  if (uri.isEmpty()) return QModelIndex();
   for(int i = 0; i < list.count(); i++) {
     if (list[i].uri == uri) return index(i, 0);
   }
