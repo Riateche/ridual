@@ -7,6 +7,7 @@
 #include <QSettings>
 #include <QFileSystemWatcher>
 #include <QItemSelection>
+#include <QSortFilterProxyModel>
 
 namespace Ui {
   class Pane;
@@ -72,6 +73,7 @@ private slots:
 private:
   Ui::Pane *ui;
   bool ready;
+  QSortFilterProxyModel* proxy_model;
   File_list_model file_list_model;
   Main_window* main_window;
   Directory* directory, *pending_directory;

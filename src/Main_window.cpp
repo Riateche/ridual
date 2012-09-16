@@ -371,7 +371,7 @@ void Main_window::go_parent() {
 
 void Main_window::open_current() {
   File_info info = active_pane->get_current_file();
-  if (info.uri.isEmpty()) return;
+  //if (info.uri.isEmpty()) return;
   if (info.is_folder()) {
     active_pane->set_uri(info.uri);
     return;

@@ -12,12 +12,14 @@
 #include "Special_uri.h"
 
 
-
 Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   directory = 0;
   pending_directory = 0;
   ui->setupUi(this);
-  ui->list->setModel(&file_list_model);
+  proxy_model = new QSortFilterProxyModel();
+  proxy_model->setSourceModel(&file_list_model);
+  proxy_model->setDynamicSortFilter(true);
+  ui->list->setModel(proxy_model);
   ui->list->installEventFilter(this);
   ui->list->viewport()->installEventFilter(this);
   ui->list->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
@@ -156,9 +158,9 @@ QString Pane::get_uri() {
 }
 
 File_info_list Pane::get_selected_files() {
-  QModelIndexList indexes = ui->list->selectionModel()->selection().indexes();
+  QModelIndexList indexes = proxy_model->mapSelectionToSource(ui->list->selectionModel()->selection()).indexes();
   if (indexes.isEmpty()) {
-    File_info info = file_list_model.get_file_info(ui->list->currentIndex());
+    File_info info = file_list_model.get_file_info(proxy_model->mapToSource(ui->list->currentIndex()));
     if (info.uri.isEmpty()) {
       return File_info_list();
     } else {
@@ -178,7 +180,7 @@ File_info_list Pane::get_selected_files() {
 }
 
 File_info Pane::get_current_file() {
-  return file_list_model.get_file_info(ui->list->currentIndex());
+  return file_list_model.get_file_info(proxy_model->mapToSource(ui->list->currentIndex()));
 }
 
 void Pane::setFocus() {
@@ -253,8 +255,8 @@ void Pane::directory_ready(File_info_list files) {
   }
 
   file_list_model.set_data(files);
-  if (file_list_model.rowCount() > 0) {
-    ui->list->setCurrentIndex(file_list_model.index(0, 0));
+  if (proxy_model->rowCount() > 0) {
+    ui->list->setCurrentIndex(proxy_model->index(0, 0));
   }
   ui->list->clearSelection();
   ui->loading_indicator->hide();
@@ -266,7 +268,7 @@ void Pane::directory_ready(File_info_list files) {
     ui->list->verticalScrollBar()->setValue(old_scroll_pos.y());
   }
   if (!new_current_uri.isEmpty()) {
-    ui->list->selectionModel()->setCurrentIndex(file_list_model.index_for_uri(new_current_uri),
+    ui->list->selectionModel()->setCurrentIndex(proxy_model->mapFromSource(file_list_model.index_for_uri(new_current_uri)),
                               QItemSelectionModel::NoUpdate);
   }
 
@@ -290,8 +292,9 @@ void Pane::directory_error(QString message) {
 }
 
 void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
+  //todo: model must not know about current index
   if (is_active()) {
-    file_list_model.set_current_index(current);
+    file_list_model.set_current_index(proxy_model->mapToSource(current));
   } else {
     file_list_model.set_current_index(file_list_model.index(-1 , -1));
   }
@@ -301,7 +304,7 @@ void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
 
 
 void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
-  File_info file = file_list_model.get_file_info(ui->list->indexAt(pos));
+  File_info file = file_list_model.get_file_info(proxy_model->mapToSource(ui->list->indexAt(pos)));
   App_info_list apps = main_window->get_apps(file.mime_type);
   QMenu* menu = new QMenu(this);
   if (file.is_folder()) {
@@ -345,7 +348,7 @@ void Pane::action_launch_triggered() {
 
 void Pane::update_model_current_index() {
   if (ui->list->hasFocus()) {
-    file_list_model.set_current_index(ui->list->selectionModel()->currentIndex());
+    file_list_model.set_current_index(proxy_model->mapToSource(ui->list->selectionModel()->currentIndex()));
   } else {
     file_list_model.set_current_index(file_list_model.index(-1 , -1));
   }

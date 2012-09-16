@@ -2,7 +2,6 @@
 - bugs:
   - file icons slow for network fs
   - resizeable splitter between panes; saving state of splitter
-  - don't show undefined progress bar while waiting for answer
   - "execute" should not be accessible for "Places", "FS root" etc
   - fail with filenames in wrong encoding
   - cdup in smb mount folder fails (smb root isn't mapped to real fs)
