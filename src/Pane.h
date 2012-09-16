@@ -15,6 +15,7 @@ namespace Ui {
 
 class Main_window;
 class Directory;
+class File_list_proxy_model;
 
 class Pane : public QWidget {
   Q_OBJECT
@@ -86,7 +87,7 @@ private slots:
 private:
   Ui::Pane *ui;
   bool ready;
-  QSortFilterProxyModel* proxy_model;
+  File_list_proxy_model* proxy_model;
   File_list_model file_list_model;
   Main_window* main_window;
   Directory* directory, *pending_directory;

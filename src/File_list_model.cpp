@@ -5,8 +5,6 @@
 #include "Directory.h"
 #include "qt_gtk.h"
 
-
-
 File_list_model::File_list_model() {
 }
 
@@ -51,6 +49,8 @@ QVariant File_list_model::headerData(int section, Qt::Orientation orientation, i
 }
 
 QVariant File_list_model::data(const QModelIndex &index, int role) const {
+
+
   int row = index.row(), column = index.column();
   if (list.isEmpty() && row == 0) {
     if (role == Qt::DisplayRole) {
@@ -60,7 +60,7 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
 
   if (row < 0 || row >= list.count()) return QVariant();
   const File_info& file_info = list.at(row);
-  if (role == Qt::DisplayRole) {
+  if (role == Qt::DisplayRole || role == sort_role) {
     if (column < 0 || column >= current_columns.count()) return QVariant();
     switch (current_columns[column]) {
       case Column::file_name: {
@@ -101,13 +101,25 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
         return format_octal_permissions(file_info.permissions);
       }
       case Column::date_modified: {
-        return file_info.date_modified.toString(Qt::SystemLocaleShortDate);
+        if (role == sort_role) {
+          return file_info.date_modified;
+        } else {
+          return file_info.date_modified.toString(Qt::SystemLocaleShortDate);
+        }
       }
       case Column::date_created: {
-        return file_info.date_created.toString(Qt::SystemLocaleShortDate);
+        if (role == sort_role) {
+          return file_info.date_created;
+        } else {
+          return file_info.date_created.toString(Qt::SystemLocaleShortDate);
+        }
       }
       case Column::date_accessed: {
-        return file_info.date_accessed.toString(Qt::SystemLocaleShortDate);
+        if (role == sort_role) {
+          return file_info.date_accessed;
+        } else {
+          return file_info.date_accessed.toString(Qt::SystemLocaleShortDate);
+        }
       }
       case Column::mime_type: {
         return file_info.mime_type;

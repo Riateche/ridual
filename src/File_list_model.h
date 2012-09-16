@@ -28,6 +28,8 @@ public:
 
   void set_current_index(const QModelIndex& index);
 
+  static const int sort_role = 100;
+
 public slots:
   void set_columns(const Columns& new_columns);
 

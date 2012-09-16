@@ -10,15 +10,16 @@
 #include <QMenu>
 #include <QScrollBar>
 #include "Special_uri.h"
-
+#include "File_list_proxy_model.h"
 
 Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   directory = 0;
   pending_directory = 0;
   ui->setupUi(this);
-  proxy_model = new QSortFilterProxyModel();
+  proxy_model = new File_list_proxy_model();
   proxy_model->setSourceModel(&file_list_model);
   proxy_model->setDynamicSortFilter(true);
+  proxy_model->setSortRole(File_list_model::sort_role);
   ui->list->setModel(proxy_model);
   ui->list->installEventFilter(this);
   ui->list->viewport()->installEventFilter(this);
