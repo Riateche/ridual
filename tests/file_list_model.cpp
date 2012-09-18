@@ -30,6 +30,7 @@ TEST(File_list_model, columns) {
   EXPECT_EQ(columns1, model.get_current_columns());
 
   list.columns << Column::name << Column::type_description;
+  list.disable_sort = true;
   model.set_data(list);
   EXPECT_NE(columns1, model.get_current_columns());
   EXPECT_EQ(list.columns, model.get_current_columns());
@@ -50,6 +51,7 @@ TEST(File_list_model, cell_count) {
   EXPECT_EQ(model.get_current_columns().count(), model.columnCount());
 
   list.columns << Column::name << Column::extension;
+  list.disable_sort = true;
   model.set_data(list);
   EXPECT_EQ(3, model.rowCount());
   EXPECT_EQ(2, model.columnCount());

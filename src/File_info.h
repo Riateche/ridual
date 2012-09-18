@@ -34,8 +34,9 @@ public:
 
 class File_info_list: public QList<File_info> {
 public:
-  File_info_list() {}
+  File_info_list() : disable_sort(false) {}
   Columns columns;
+  bool disable_sort;
   //QStringList paths();
 };
 

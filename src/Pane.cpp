@@ -73,11 +73,9 @@ void Pane::set_uri(QString new_directory) {
   }
   if (pending_directory) delete pending_directory;
   if (directory != 0 &&
-      !new_directory.startsWith("/") &&
-      !new_directory.left(10).contains("://") &&
-      Special_uri(new_directory).name() == Special_uri::_invalid) {
+      Directory::is_relative(new_directory)) {
     //it's relative path
-    new_directory = QDir::cleanPath(directory->get_uri() + "/" + new_directory);
+    new_directory = directory->get_uri() + "/" + new_directory;
   }
   pending_directory = new Directory(main_window->get_core(), new_directory);
   connect(pending_directory, SIGNAL(ready(File_info_list)),
@@ -252,10 +250,8 @@ void Pane::show_loading_indicator() {
 void Pane::directory_ready(File_info_list files) {
   bool old_state_stored = false;
   QString new_current_uri;
- // int old_current_row, old_current_column;
   QString old_current_uri;
   QStringList old_selected_uris;
-//  QItemSelection old_selection;
   QPoint old_scroll_pos;
 
   if (sender() == pending_directory) {
@@ -283,12 +279,18 @@ void Pane::directory_ready(File_info_list files) {
   }
 
   file_list_model.set_data(files);
-  proxy_model->setSourceModel(&file_list_model); //hack?
+  proxy_model->setSourceModel(&file_list_model); //hack; proxy_model->index(0, 0) gives segfault if one remove this line
   if (proxy_model->rowCount() > 0) {
     ui->list->setCurrentIndex(proxy_model->index(0, 0));
   }
   ui->list->clearSelection();
   ui->loading_indicator->hide();
+
+  ui->list->setSortingEnabled(!files.disable_sort);
+  if (files.disable_sort) {
+    proxy_model->sort(-1);
+  } else {
+  }
 
   if (old_state_stored) {
     QModelIndex index = file_list_model.index_for_uri(old_current_uri);
@@ -412,12 +414,11 @@ void Pane::on_address_textEdited(const QString&) {
   QString uri = ui->address->text();
   bool parent_mode = !uri.endsWith("/");
   qDebug() << "uri0: " << uri;
-  if (directory != 0 && !uri.startsWith("/") && !uri.left(10).contains("://") && Special_uri(uri).name() == Special_uri::_invalid) {
-    //it's relative path
+  if (Directory::is_relative(uri)) {
     uri = directory->get_uri() + "/" + uri;
   }
   qDebug() << "uri1: " << uri;
-  uri = QDir::cleanPath(uri);
+  //uri = QDir::cleanPath(uri);
   qDebug() << "uri2: " << uri;
   if (parent_mode) uri = Directory::get_parent_uri(uri);
   qDebug() << "uri: " << uri;

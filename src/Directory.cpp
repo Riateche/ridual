@@ -52,7 +52,7 @@ QString Directory::canonize(QString uri) {
     uri = QDir::homePath() + uri.mid(1);
   }
 
-  if (uri.contains("//")) {
+  /*if (uri.contains("//")) {
     if (uri.startsWith("/")) {
       uri = "/" + uri.split("/", QString::SkipEmptyParts).join("/");
     } else {
@@ -60,6 +60,16 @@ QString Directory::canonize(QString uri) {
       uri = uri.left(start_index) +
           uri.mid(start_index).split("/", QString::SkipEmptyParts).join("/");
     }
+  }*/
+
+  if (uri.left(10).contains("://")) {
+    int index = uri.indexOf("://") + 3;
+    int index2 = uri.indexOf("/", index);
+    if (index2 > 0) {
+      uri = uri.left(index2) + QDir::cleanPath(uri.mid(index2));
+    }
+  } else {
+    uri = QDir::cleanPath(uri);
   }
 
   QRegExp network_root("^[^\\:]*\\://[^/]*/$");
@@ -108,6 +118,13 @@ QString Directory::find_real_path(QString uri, const QList<Gio_mount> &mounts) {
   }
   return uri;
 }
+
+bool Directory::is_relative(QString uri) {
+  return !uri.startsWith("/") &&
+      !uri.left(10).contains("://") &&
+      !uri.startsWith("places");
+}
+
 
 QString Directory::find_real_path(QString uri, Core *core) {
   return find_real_path(uri, core->get_mount_manager()->get_mounts());
@@ -212,6 +229,7 @@ void Directory::refresh() {
     }
 
     r.columns << Column::name << Column::uri;
+    r.disable_sort = true;
     emit ready(r);
     return;
   }

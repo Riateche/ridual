@@ -75,6 +75,10 @@ public:
 
 
 
+  static bool is_relative(QString uri);
+
+
+
 
   /*! Convert current Directory URI to real path. If no matching
     GIO mount is found, result of this function is the same is URI.
