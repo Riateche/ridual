@@ -1,6 +1,7 @@
 #include "mkdir.h"
 #include <sys/stat.h>
 #include <errno.h>
+#include <unistd.h>
 #include <QObject>
 
 bool ridual_mkdir(QString path, QString& error_string) {
