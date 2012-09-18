@@ -7,7 +7,6 @@ Ridual
 ### Description
 
 Ridual is dual-pane file manager for Ubuntu. **It's in development stage now, so using Ridual is not recommended.**
-Fully-functional release is sheduled on 2012/11/01. 
 
 Main advantages of Ridual:
 
@@ -78,6 +77,12 @@ To install Ridual, download sources and compile them: install
 
     cd project-dir
     tests/run.sh
+    
+    
+### Shedule
+
+- Half-functional release: 2012/11/01
+- Fully-functional release: 2013/02/01
     
 ### Collaboration
 
