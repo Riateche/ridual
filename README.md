@@ -93,7 +93,7 @@ please contact me first.
 ### See also
 
 - [PPA](https://launchpad.net/%7Estrahovp/+archive/ridual)
-- [Software Center page](https://myapps.developer.ubuntu.com/dev/apps/1201/)
+- [Software Center page](https://apps.ubuntu.com/cat/applications/ridual/)
 - [Article about Ridual](http://habrahabr.ru/post/149647/) (Russian)
 
 
