@@ -1,18 +1,30 @@
 Ridual
 ======
 
-Ridual is dual-pane file manager for Ubuntu.
-There are quite few dual-pane file managers for Linux. This one is
-developed especially for Ubuntu. We're trying to achieve high
-integration with Ubuntu-specific features.
-
-**This software was created for Ubuntu AppShowdown contest.
-Please vote for Ridual on [this page](http://www.surveymonkey.com/s/P56YNQ9) 
-to support further development.**
 
 ![screenshot](https://github.com/Riateche/ridual/raw/master/doc/screenshot.png)
 
-Ridual is written on C++/Qt and is distributed under MIT license (see LICENSE file).
+### Description
+
+Ridual is dual-pane file manager for Ubuntu. **It's in development stage now, so using Ridual is not recommended.**
+Fully-functional release is sheduled on 2012/11/01. 
+
+Main advantages of Ridual:
+
+- High integration with Ubuntu features: Ridual supports GVFS mounts, bookmarks and user dirs, 
+       removable drives list, file icons, applications accotiations.
+- Keyboard-oriented control: Ridual has adjustable shortcuts for everything, 
+       single-window dialogs and messages.
+- Usability. It's not just "yet another [file manager name] clone". Some of GUI features are innovations.
+- Advanced tasks and queues management.
+
+This application is the winner of Ubuntu AppShowdown community vote 
+(see [this page](http://developer.ubuntu.com/2012/09/announcing-the-ubuntu-app-showdown-community-winners/)
+for more details). We must thank all voters for their support.
+
+Ridual is written on C++/Qt and is totally free. It's distributed under MIT license. 
+
+### Implemented features
 
 Ridual will become the best of its kind because it:
 - uses system color theme. You will see no crazy colors.
@@ -31,12 +43,13 @@ can also choose another program in file's context menu.
 - supports gnome bookmarks and user directories (Documents, Desktop, Music etc.)
 - works in UTF-8 encoding.
 - supports translations (but there is no translations yet).
+- allows grouping tasks in separate queues.
 - is open source and totally free.
+
+### Planned features
 
 Ridual is still in development stage, so there are many important features
 that aren't implemented yet. The following features will be implemented soon:
-- Copying, moving files, creating links etc.
-- Grouping tasks in separate queues.
 - Convenient commands for selection changing.
 - Creating and unpacking archives.
 - Mounting archives to browse and edit them.
@@ -46,16 +59,15 @@ that aren't implemented yet. The following features will be implemented soon:
 - Setting maximal copy speed.
 - Undoing operations.
 - Using navigation history.
+- Files preview.
+- Embedded terminal.
 
 ### Installing Ridual
 
-If you're using Ubuntu Precise, you can install Ridual from [our PPA](https://launchpad.net/%7Estrahovp/+archive/ridual):
+Ridual will be available in [our PPA](https://launchpad.net/%7Estrahovp/+archive/ridual) after the
+fully-functional release. Now PPA packages are outdated. 
 
-    sudo add-apt-repository ppa:strahovp/ridual
-    sudo apt-get update
-    sudo apt-get install ridual
-
-You also can download sources and compile the project by yourself. Install
+To install Ridual, download sources and compile them: install
 `libglib2.0-dev` and `libgtk2.0-dev` packages, then run the following commands:
 
     qmake
@@ -66,6 +78,12 @@ You also can download sources and compile the project by yourself. Install
 
     cd project-dir
     tests/run.sh
+    
+### Collaboration
+
+Feel free to help in application development. If you can improve existing code, fix a bug, or add a test,
+it's always welcome. If you want to implement new features or bring large changes to existing code, 
+please contact me first.
 
 ### See also
 
