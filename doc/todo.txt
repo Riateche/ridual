@@ -9,7 +9,9 @@
 
 
 - must-have features:
-  - allow relative path in address bar; autocomplete in address bar on keyboard input
+  - autocomplete in address bar:
+    - show names without paths in suggestions;
+    - fix for '/tmp/../' case
   - fast filter file list by typing mask
   - file search
   - option "list folders before files"

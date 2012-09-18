@@ -11,10 +11,12 @@
 #include <QScrollBar>
 #include "Special_uri.h"
 #include "File_list_proxy_model.h"
+#include <QCompleter>
 
 Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   directory = 0;
   pending_directory = 0;
+  completion_directory = 0;
   ui->setupUi(this);
   proxy_model = new File_list_proxy_model();
   proxy_model->setSourceModel(&file_list_model);
@@ -42,6 +44,12 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(current_index_changed(QModelIndex,QModelIndex)));
   connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SIGNAL(selection_changed()));
   connect(ui->list->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SIGNAL(selection_changed()));
+
+
+  QCompleter* completer = new QCompleter();
+  completer->setCompletionMode(QCompleter::PopupCompletion);
+  completer->setModel(&uri_completion_model);
+  ui->address->setCompleter(completer);
 }
 
 Pane::~Pane() {
@@ -64,7 +72,10 @@ void Pane::set_uri(QString new_directory) {
     return;
   }
   if (pending_directory) delete pending_directory;
-  if (directory != 0 && !new_directory.startsWith("/") && !new_directory.left(10).contains("://")) {
+  if (directory != 0 &&
+      !new_directory.startsWith("/") &&
+      !new_directory.left(10).contains("://") &&
+      Special_uri(new_directory).name() == Special_uri::_invalid) {
     //it's relative path
     new_directory = QDir::cleanPath(directory->get_uri() + "/" + new_directory);
   }
@@ -125,6 +136,7 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
       if (!key_event) return false;
       if (key_event->key() == Qt::Key_Escape && key_event->modifiers() == Qt::NoModifier) {
         ui->list->setFocus();
+        ui->address->setText(directory ? directory->get_uri() : QString());
         return true;
       }
     }
@@ -330,6 +342,17 @@ void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
   Q_UNUSED(previous);
 }
 
+void Pane::completion_directory_ready(File_info_list files) {
+  uri_completion_model.clear();
+  foreach(File_info fi, files) {
+    if (fi.is_folder()) {
+      uri_completion_model.appendRow(new QStandardItem(fi.uri));
+    }
+  }
+  ui->address->completer()->complete();
+  qDebug() << "popup!";
+}
+
 
 
 void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
@@ -384,3 +407,27 @@ void Pane::update_model_current_index() {
 }
 
 
+
+void Pane::on_address_textEdited(const QString&) {
+  QString uri = ui->address->text();
+  bool parent_mode = !uri.endsWith("/");
+  qDebug() << "uri0: " << uri;
+  if (directory != 0 && !uri.startsWith("/") && !uri.left(10).contains("://") && Special_uri(uri).name() == Special_uri::_invalid) {
+    //it's relative path
+    uri = directory->get_uri() + "/" + uri;
+  }
+  qDebug() << "uri1: " << uri;
+  uri = QDir::cleanPath(uri);
+  qDebug() << "uri2: " << uri;
+  if (parent_mode) uri = Directory::get_parent_uri(uri);
+  qDebug() << "uri: " << uri;
+  if (completion_directory && completion_directory->get_uri() == uri) {
+    qDebug() << "keep old completion_directory";
+  } else {
+    qDebug() << "create new completion_directory";
+    if (completion_directory) delete completion_directory;
+    completion_directory = new Directory(main_window->get_core(), uri);
+    connect(completion_directory, SIGNAL(ready(File_info_list)), this, SLOT(completion_directory_ready(File_info_list)));
+    completion_directory->refresh();
+  }
+}

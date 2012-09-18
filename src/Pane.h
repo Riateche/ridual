@@ -8,6 +8,7 @@
 #include <QFileSystemWatcher>
 #include <QItemSelection>
 #include <QSortFilterProxyModel>
+#include <QStandardItemModel>
 
 namespace Ui {
   class Pane;
@@ -71,6 +72,7 @@ private slots:
   void directory_ready(File_info_list files);
   void directory_error(QString message);
   void current_index_changed(QModelIndex current, QModelIndex previous);
+  void completion_directory_ready(File_info_list files);
 
 
   void on_list_customContextMenuRequested(const QPoint &pos);
@@ -84,6 +86,8 @@ private slots:
 
 
 
+  void on_address_textEdited(const QString &);
+
 private:
   Ui::Pane *ui;
   bool ready;
@@ -94,6 +98,8 @@ private:
 
   void update_model_current_index();
   bool eventFilter(QObject* object, QEvent* event);
+  QStandardItemModel uri_completion_model;
+  Directory* completion_directory;
 
 };
 
