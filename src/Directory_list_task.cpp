@@ -5,9 +5,8 @@
 #include "qt_gtk.h"
 
 
-Directory_list_task::Directory_list_task(QString p_path, QString p_uri) :
-  path(p_path),
-  uri(p_uri)
+Directory_list_task::Directory_list_task(QString p_path) :
+  path(p_path)
 {
 }
 
@@ -15,6 +14,7 @@ Directory_list_task::~Directory_list_task() {
 }
 
 void Directory_list_task::run() {
+  //QDir current_dir(current_path);
   QDir dir(path);
   if (!dir.exists()) {
     emit error(tr("Directory '%1' does not exist.").arg(dir.absolutePath()));
@@ -26,14 +26,14 @@ void Directory_list_task::run() {
     deleteLater();
     return;
   }
+
   QFileInfoList list = dir.entryInfoList(QStringList(), QDir::AllEntries | QDir::NoDotAndDotDot);
   GError* gerror = 0;
   File_info_list r;
-  if (!uri.endsWith("/")) uri += "/";
   if (!path.endsWith("/")) path += "/";
   foreach (QFileInfo info, list) {
     File_info item;
-    item.uri = uri + info.fileName();
+    //item.uri = uri + info.fileName();
     item.path = path + info.fileName();
     item.is_file = info.isFile();
     if (item.is_file) {

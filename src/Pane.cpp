@@ -64,6 +64,10 @@ void Pane::set_uri(QString new_directory) {
     return;
   }
   if (pending_directory) delete pending_directory;
+  if (directory != 0 && !new_directory.startsWith("/") && !new_directory.left(10).contains("://")) {
+    //it's relative path
+    new_directory = QDir::cleanPath(directory->get_uri() + "/" + new_directory);
+  }
   pending_directory = new Directory(main_window->get_core(), new_directory);
   connect(pending_directory, SIGNAL(ready(File_info_list)),
           this, SLOT(directory_ready(File_info_list)));
@@ -267,6 +271,7 @@ void Pane::directory_ready(File_info_list files) {
   }
 
   file_list_model.set_data(files);
+  proxy_model->setSourceModel(&file_list_model); //hack?
   if (proxy_model->rowCount() > 0) {
     ui->list->setCurrentIndex(proxy_model->index(0, 0));
   }

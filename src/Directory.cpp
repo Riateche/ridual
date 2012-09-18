@@ -244,9 +244,9 @@ void Directory::refresh() {
 }
 
 void Directory::task_ready(File_info_list r) {
-  //QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
+  QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
   for(int i = 0; i < r.count(); i++) {
-    //r[i].uri = uri_prefix + QFileInfo(r[i].full_path).fileName();
+    r[i].uri = uri_prefix + QFileInfo(r[i].path).fileName();
     //we can't get icons in non-gui thread, because QFileIconProvider uses QPixmap
     //and it produces warning. We must do it in gui thread, it's bad because
     //it causes GUI to freeze.
@@ -273,7 +273,7 @@ void Directory::directory_changed(QString changed_path) {
 }
 
 void Directory::create_task(QString path) {
-  Directory_list_task* task = new Directory_list_task(path, uri);
+  Directory_list_task* task = new Directory_list_task(path);
   connect(task, SIGNAL(ready(File_info_list)), this, SLOT(task_ready(File_info_list)));
   connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
   //connect(task, SIGNAL(error(QString)), this, SLOT(test(QString)));

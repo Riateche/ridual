@@ -7,7 +7,7 @@
 class Directory_list_task : public QObject, public QRunnable {
   Q_OBJECT
 public:
-  explicit Directory_list_task(QString p_path, QString p_uri);
+  explicit Directory_list_task(QString p_path);
   ~Directory_list_task();
   void run();
   
@@ -29,8 +29,6 @@ public slots:
 
 private:
   QString path;
-  QString uri;
-
   
 };
 

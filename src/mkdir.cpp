@@ -23,7 +23,7 @@ bool ridual_rmdir(QString path, QString& error_string) {
   return r;
 }
 
-QString errno_to_string(QString& error_string) {
+void errno_to_string(QString& error_string) {
   switch(errno) {
     case EACCES:
     case EPERM:
