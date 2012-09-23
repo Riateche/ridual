@@ -1,7 +1,7 @@
 
 - bugs:
+  - Directory::async_result can be called after destructing Directory object
   - file icons slow for network fs
-  - resizeable splitter between panes; saving state of splitter
   - "execute" should not be accessible for "Places", "FS root" etc
   - fail with filenames in wrong encoding
   - cdup in smb mount folder fails (smb root isn't mapped to real fs)

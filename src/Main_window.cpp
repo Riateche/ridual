@@ -85,8 +85,6 @@ Main_window::Main_window(Core* c) :
   }
 
 
-  restoreState(s.value("main_window/state").toByteArray());
-  restoreGeometry(s.value("main_window/geometry").toByteArray());
 
   save_settings_timer.setInterval(10000); //ms
   connect(&save_settings_timer, SIGNAL(timeout()), this, SLOT(save_settings()));
@@ -140,6 +138,18 @@ Main_window::Main_window(Core* c) :
   connect(this,           SIGNAL(active_pane_changed()), this, SIGNAL(selection_changed()));
   connect(this, SIGNAL(selection_changed()), this, SLOT(slot_selection_changed()));
 
+
+  if (s.value("main_window/state").isValid()) {
+    restoreState(s.value("main_window/state").toByteArray());
+    restoreGeometry(s.value("main_window/geometry").toByteArray());
+    ui->panes_splitter->restoreState(s.value("panes_spliter_state").toByteArray());
+    show();
+  } else {
+    show();
+    setWindowState(Qt::WindowMaximized);
+    qDebug() << width() / 2;
+    ui->panes_splitter->setSizes(QList<int>() << width() / 2 << width() / 2);
+  }
 
 }
 
@@ -357,6 +367,7 @@ void Main_window::save_settings() {
   s.setValue("main_window/state", saveState());
   s.setValue("main_window/geometry", saveGeometry());
   s.setValue("recursive_fetch_option", static_cast<int>(get_recursive_fetch_option()));
+  s.setValue("panes_spliter_state", ui->panes_splitter->saveState());
 }
 
 

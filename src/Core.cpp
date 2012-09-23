@@ -22,7 +22,7 @@ Core::Core() {
 
 
   main_window = new Main_window(this);
-  main_window->show();
+  //main_window->show();
 }
 
 Core::~Core() {

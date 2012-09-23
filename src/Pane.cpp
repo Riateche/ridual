@@ -371,8 +371,9 @@ void Pane::completion_directory_ready(File_info_list files) {
       uri_completion_model.appendRow(item);
     }
   }
-  ui->address->completer()->complete();
-  qDebug() << "popup!";
+  if (ui->address->hasFocus()) {
+    ui->address->completer()->complete();
+  }
 }
 
 
