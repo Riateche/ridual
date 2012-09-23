@@ -2,13 +2,14 @@
 #include "utils.h"
 
 File_info::File_info():
-  is_file(false),
+  is_folder(false),
   permissions(-1)
 {
 }
 
 QString File_info::file_name() const {
   if (uri.isEmpty()) return "";
+  if (uri == "/") return "/";
   return uri.split("/", QString::SkipEmptyParts).last();
 }
 

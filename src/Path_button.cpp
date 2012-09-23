@@ -48,7 +48,7 @@ void Path_button::directory_ready(File_info_list files) {
     menu->addSeparator();
   }
   foreach(File_info i, files) {
-    if (i.is_folder()) {
+    if (i.is_folder) {
       QAction* a = menu->addAction(i.name, this, SLOT(menu_action_triggered()));
       if (i.uri == uri) {
         a->setEnabled(false);

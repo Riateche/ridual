@@ -164,7 +164,6 @@ void Pane::load_state(QSettings *s) {
 void Pane::save_state(QSettings *s) {
   s->setValue("path", get_uri());
   s->setValue("sort_column", proxy_model->sortColumn());
-  qDebug() << "store order" << proxy_model->sortOrder();
   s->setValue("sort_order", static_cast<int>(proxy_model->sortOrder()));
 }
 
@@ -347,7 +346,7 @@ void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
 void Pane::completion_directory_ready(File_info_list files) {
   uri_completion_model.clear();
   foreach(File_info fi, files) {
-    if (fi.is_folder()) {
+    if (fi.is_folder) {
       uri_completion_model.appendRow(new QStandardItem(fi.uri));
     }
   }
@@ -361,10 +360,10 @@ void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
   File_info file = file_list_model.get_file_info(proxy_model->mapToSource(ui->list->indexAt(pos)));
   App_info_list apps = main_window->get_apps(file.mime_type);
   QMenu* menu = new QMenu(this);
-  if (file.is_folder()) {
+  if (file.is_folder) {
     menu->addAction(tr("Browse"))->setEnabled(false);
   }
-  if (file.is_file) {
+  if (file.is_file()) {
     menu->addAction(main_window->get_ui()->action_view);
     menu->addAction(main_window->get_ui()->action_edit);
   }

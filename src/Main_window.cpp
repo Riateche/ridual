@@ -376,14 +376,14 @@ void Main_window::go_parent() {
 void Main_window::open_current() {
   File_info info = active_pane->get_current_file();
   //if (info.uri.isEmpty()) return;
-  if (info.is_folder()) {
+  if (info.is_folder) {
     active_pane->set_uri(info.uri);
     return;
   }
   File_info_list files = active_pane->get_selected_files();
   QMap<QString, QStringList> types;
   foreach (File_info i, files) {
-    if (i.is_file && !i.uri.isEmpty() && !i.mime_type.isEmpty()) {
+    if (i.is_file() && !i.uri.isEmpty() && !i.mime_type.isEmpty()) {
 //      types[i.mime_type] << i.uri;
       types[i.mime_type] << i.path;
     }
@@ -505,7 +505,7 @@ void Main_window::slot_selection_changed() {
     if (f.is_executable) {
       can_execute = true;
     }
-    if (f.is_file) {
+    if (f.is_file()) {
       can_edit = true;
     }
   }

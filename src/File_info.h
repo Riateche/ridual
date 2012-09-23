@@ -16,9 +16,9 @@ public:
   QString uri; //! item uri (required)
   QString path; //! Real path in file system
   QIcon icon;
-  bool is_file;
+  bool is_folder;
   bool is_executable;
-  bool is_folder() { return !is_file; }
+  bool is_file() { return !is_folder; }
   qint64 file_size; // in bytes; -1 if folder or unknown
 
   QString file_name() const;
