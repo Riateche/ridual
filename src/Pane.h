@@ -73,18 +73,8 @@ private slots:
   void directory_error(QString message);
   void current_index_changed(QModelIndex current, QModelIndex previous);
   void completion_directory_ready(File_info_list files);
-
-
   void on_list_customContextMenuRequested(const QPoint &pos);
   void action_launch_triggered();
-
-
-
-
-
-
-
-
 
   void on_address_textEdited(const QString &);
 
@@ -95,6 +85,7 @@ private:
   File_list_model file_list_model;
   Main_window* main_window;
   Directory* directory, *pending_directory;
+  QString last_completion_uri;
 
   void update_model_current_index();
   bool eventFilter(QObject* object, QEvent* event);

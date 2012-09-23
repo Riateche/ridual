@@ -121,6 +121,7 @@ QString Directory::find_real_path(QString uri, const QList<Gio_mount> &mounts) {
 
 bool Directory::is_relative(QString uri) {
   return !uri.startsWith("/") &&
+      !uri.startsWith("~") &&
       !uri.left(10).contains("://") &&
       !uri.startsWith("places");
 }
@@ -152,18 +153,20 @@ void Directory::refresh() {
     File_info fi;
     fi.name = tr("Filesystem root");
     fi.uri = "/";
+    fi.is_folder = true;
     r << fi;
     fi = File_info();
     fi.name = tr("Home");
     fi.uri = QDir::homePath();
+    fi.is_folder = true;
     r << fi;
-
 
     File_info_list mounts;
     foreach (Gio_mount m, core->get_mount_manager()->get_mounts()) {
       File_info i;
       i.name = m.name;
       i.uri = m.default_location;
+      i.is_folder = true;
       mounts << i;
     }
     if (!mounts.isEmpty()) {
@@ -180,6 +183,7 @@ void Directory::refresh() {
       if (!v->mounted) {
         File_info i;
         i.name = v->name + tr(" (unmounted)");
+        i.is_folder = true;
         i.uri = QString("places/mounts/%1").arg(id); //use number of volume in list as id
         volumes << i;
       }

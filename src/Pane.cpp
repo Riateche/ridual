@@ -48,7 +48,10 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
 
   QCompleter* completer = new QCompleter();
   completer->setCompletionMode(QCompleter::PopupCompletion);
+  //completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
   completer->setModel(&uri_completion_model);
+  completer->setCompletionRole(Qt::UserRole);
+  completer->setCaseSensitivity(Qt::CaseInsensitive);
   ui->address->setCompleter(completer);
 }
 
@@ -344,10 +347,28 @@ void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
 }
 
 void Pane::completion_directory_ready(File_info_list files) {
+  if (completion_directory == 0 || completion_directory != sender()) {
+    qWarning("invalid sender");
+    return;
+  }
+  QString uri = ui->address->text();
+  bool parent_mode = !uri.endsWith("/");
+  if (parent_mode) {
+    uri = Directory::get_parent_uri(uri);
+  }
+  if (!uri.isEmpty() && !uri.endsWith("/")) uri += "/";
+
   uri_completion_model.clear();
   foreach(File_info fi, files) {
     if (fi.is_folder) {
-      uri_completion_model.appendRow(new QStandardItem(fi.uri));
+      QString filename = fi.file_name();
+/*      QString completion_value = last_completion_uri;
+      if ( !completion_value.isEmpty() &&
+           !completion_value.endsWith("/")) completion_value += "/";
+      completion_value += filename; */
+      QStandardItem* item = new QStandardItem(filename);
+      item->setData(uri + filename, Qt::UserRole);
+      uri_completion_model.appendRow(item);
     }
   }
   ui->address->completer()->complete();
@@ -407,24 +428,22 @@ void Pane::update_model_current_index() {
   }
 }
 
-
-
 void Pane::on_address_textEdited(const QString&) {
   QString uri = ui->address->text();
   bool parent_mode = !uri.endsWith("/");
-  qDebug() << "uri0: " << uri;
   if (Directory::is_relative(uri)) {
     uri = directory->get_uri() + "/" + uri;
   }
-  qDebug() << "uri1: " << uri;
-  //uri = QDir::cleanPath(uri);
-  qDebug() << "uri2: " << uri;
-  if (parent_mode) uri = Directory::get_parent_uri(uri);
-  qDebug() << "uri: " << uri;
-  if (completion_directory && completion_directory->get_uri() == uri) {
+  if (parent_mode) {
+    uri = Directory::get_parent_uri(uri);
+  }
+  if (last_completion_uri == uri) {
+//  if (completion_directory && completion_directory->get_uri() == uri) {
     qDebug() << "keep old completion_directory";
   } else {
     qDebug() << "create new completion_directory";
+    last_completion_uri = uri;
+    uri_completion_model.clear();
     if (completion_directory) delete completion_directory;
     completion_directory = new Directory(main_window->get_core(), uri);
     connect(completion_directory, SIGNAL(ready(File_info_list)), this, SLOT(completion_directory_ready(File_info_list)));

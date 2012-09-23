@@ -54,6 +54,7 @@ void Bookmarks_file_parser::read() {
       if (f.uri.startsWith("file://")) {
         f.uri = f.uri.mid(7);
       }
+      f.is_folder = true;
       list << f;
     }
   } else if (format == format_xdg) {
@@ -84,6 +85,7 @@ void Bookmarks_file_parser::read() {
           File_info f;
           f.uri = value;
           f.name = known_dirs[key];
+          f.is_folder = true;
           list << f;
         }
       }
