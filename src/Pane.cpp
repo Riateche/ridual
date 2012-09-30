@@ -159,6 +159,7 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
   return false;
 }
 
+
 void Pane::load_state(QSettings *s) {
   QString uri = s->value("path", "").toString();
   if (uri.isEmpty()) {
