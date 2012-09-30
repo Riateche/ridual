@@ -44,10 +44,6 @@ Main_window::Main_window(Core* c) :
   qRegisterMetaType<File_info_list>("File_info_list");
   qRegisterMetaType<Error_type::Enum>("Error_type::Enum");
   ui->setupUi(this);
-  //ui->tasks_table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-  //ui->tasks_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-  ui->left_pane->set_main_window(this);
-  ui->right_pane->set_main_window(this);
 
   foreach(QAction* a, QList<QAction*>() << ui->action_recursive_fetch_auto
           << ui->action_recursive_fetch_off << ui->action_recursive_fetch_on) {
@@ -66,8 +62,7 @@ Main_window::Main_window(Core* c) :
 
   QVariant v = s.value("columns");
   columns = v.isValid()? Columns::deserialize(v): Columns::get_default();
-  ui->left_pane->set_columns(columns);
-  ui->right_pane->set_columns(columns);
+  emit columns_changed(columns);
 
   s.beginGroup("left_pane");
   ui->left_pane->load_state(&s);
@@ -604,8 +599,11 @@ void Main_window::slot_focus_question() {
   for(int i = 0; i < ui->questions_layout->count(); i++) {
     QWidget* w = ui->questions_layout->itemAt(i)->widget();
     if (w != 0) {
-      dynamic_cast<Question_widget*>(w)->start_editor();
-      return;
+      Question_widget* qw = dynamic_cast<Question_widget*>(w);
+      if (qw) {
+        qw->start_editor();
+        return;
+      }
     }
   }
 }

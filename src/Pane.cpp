@@ -10,19 +10,24 @@
 #include <QMenu>
 #include <QScrollBar>
 #include "Special_uri.h"
-#include "File_list_proxy_model.h"
 #include <QCompleter>
+#include "Core.h"
+#include "File_list_model.h"
 
-Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
+Pane::Pane(QWidget *parent) :
+  QWidget(parent),
+  Core_ally(dynamic_cast<Main_window*>(parent->window())->get_core()),
+  ui(new Ui::Pane)
+{
+  //core->get_main_window() not available yet in constructor
+  Main_window* mw = dynamic_cast<Main_window*>(parent->window());
+
+  file_list_model = new File_list_model(core);
   directory = 0;
   pending_directory = 0;
   completion_directory = 0;
   ui->setupUi(this);
-  proxy_model = new File_list_proxy_model();
-  proxy_model->setSourceModel(&file_list_model);
-  proxy_model->setDynamicSortFilter(true);
-  proxy_model->setSortRole(File_list_model::sort_role);
-  ui->list->setModel(proxy_model);
+  ui->list->setModel(file_list_model);
   ui->list->installEventFilter(this);
   ui->list->viewport()->installEventFilter(this);
   ui->list->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
@@ -33,7 +38,6 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
 
   ui->address->installEventFilter(this);
   ready = true;
-  main_window = 0;
   connect(ui->address, SIGNAL(returnPressed()), this, SLOT(on_go_clicked()));
 
   ui->loading_indicator->hide();
@@ -53,6 +57,15 @@ Pane::Pane(QWidget *parent) : QWidget(parent), ui(new Ui::Pane) {
   completer->setCompletionRole(Qt::UserRole);
   completer->setCaseSensitivity(Qt::CaseInsensitive);
   ui->address->setCompleter(completer);
+
+
+  connect(mw, SIGNAL(active_pane_changed()),
+          this, SLOT(active_pane_changed()));
+  connect(ui->list, SIGNAL(doubleClicked(QModelIndex)),
+          mw, SLOT(open_current()));
+  connect(mw, SIGNAL(columns_changed(Columns)),
+          file_list_model, SLOT(set_columns(Columns)));
+
 }
 
 Pane::~Pane() {
@@ -60,14 +73,6 @@ Pane::~Pane() {
   if (directory) delete directory;
 }
 
-void Pane::set_main_window(Main_window *p_main_window) {
-  main_window = p_main_window;
-  connect(main_window, SIGNAL(active_pane_changed()), this, SLOT(active_pane_changed()));
-  connect(ui->list, SIGNAL(doubleClicked(QModelIndex)), main_window, SLOT(open_current()));
-  connect(main_window, SIGNAL(columns_changed(Columns)),
-          &file_list_model, SLOT(set_columns(Columns)));
-
-}
 
 void Pane::set_uri(QString new_directory) {
   if (directory && new_directory == directory->get_uri()) {
@@ -80,7 +85,7 @@ void Pane::set_uri(QString new_directory) {
     //it's relative path
     new_directory = directory->get_uri() + "/" + new_directory;
   }
-  pending_directory = new Directory(main_window->get_core(), new_directory);
+  pending_directory = new Directory(core, new_directory);
   connect(pending_directory, SIGNAL(ready(File_info_list)),
           this, SLOT(directory_ready(File_info_list)));
   connect(pending_directory, SIGNAL(error(QString)),
@@ -120,11 +125,11 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
         }
       }*/
       if (key_event->key() == Qt::Key_Return && key_event->modifiers() == Qt::NoModifier) {
-        main_window->open_current();
+        core->get_main_window()->open_current();
         return true;
       }
     } else if (event->type() == QEvent::FocusIn) {
-      if (main_window) main_window->set_active_pane(this);
+      core->get_main_window()->set_active_pane(this);
       update_model_current_index();
     } else if (event->type() == QEvent::FocusOut) {
       update_model_current_index();
@@ -166,26 +171,27 @@ void Pane::load_state(QSettings *s) {
 
 void Pane::save_state(QSettings *s) {
   s->setValue("path", get_uri());
-  s->setValue("sort_column", proxy_model->sortColumn());
-  s->setValue("sort_order", static_cast<int>(proxy_model->sortOrder()));
+  s->setValue("sort_column", file_list_model->get_sort_column());
+  s->setValue("sort_order", file_list_model->get_sort_order());
 }
 
 bool Pane::is_active() const {
-  if (!main_window) return false;
-  return main_window->get_active_pane() == this;
+  return core->get_main_window()->get_active_pane() == this;
 }
 
 QString Pane::get_uri() {
   return directory? directory->get_uri(): QString();
 }
 
+
+
 File_info_list Pane::get_selected_files(bool fallback_to_current) {
-  QModelIndexList indexes = proxy_model->mapSelectionToSource(ui->list->selectionModel()->selection()).indexes();
+  QModelIndexList indexes = ui->list->selectionModel()->selection().indexes();
   if (indexes.isEmpty()) {
     if (!fallback_to_current) {
       return File_info_list();
     }
-    File_info info = file_list_model.get_file_info(proxy_model->mapToSource(ui->list->currentIndex()));
+    File_info info = file_list_model->get_file_info(ui->list->currentIndex());
     if (info.uri.isEmpty()) {
       return File_info_list();
     } else {
@@ -197,7 +203,7 @@ File_info_list Pane::get_selected_files(bool fallback_to_current) {
     File_info_list list;
     foreach (QModelIndex i, indexes) {
       if (i.column() == 0) {
-        list << file_list_model.get_file_info(i);
+        list << file_list_model->get_file_info(i);
       }
     }
     return list;
@@ -205,7 +211,7 @@ File_info_list Pane::get_selected_files(bool fallback_to_current) {
 }
 
 File_info Pane::get_current_file() {
-  return file_list_model.get_file_info(proxy_model->mapToSource(ui->list->currentIndex()));
+  return file_list_model->get_file_info(ui->list->currentIndex());
 }
 
 void Pane::setFocus() {
@@ -280,30 +286,29 @@ void Pane::directory_ready(File_info_list files) {
     return;
   }
 
-  file_list_model.set_data(files);
-  proxy_model->setSourceModel(&file_list_model); //hack; proxy_model->index(0, 0) gives segfault if one remove this line
-  if (proxy_model->rowCount() > 0) {
-    ui->list->setCurrentIndex(proxy_model->index(0, 0));
+  file_list_model->set_data(files);
+  if (file_list_model->rowCount() > 0) {
+    ui->list->setCurrentIndex(file_list_model->index(0, 0));
   }
   ui->list->clearSelection();
   ui->loading_indicator->hide();
 
-  ui->list->setSortingEnabled(!files.disable_sort);
+  /*ui->list->setSortingEnabled(!files.disable_sort);
   if (files.disable_sort) {
-    proxy_model->sort(-1);
+    //proxy_model->sort(-1);
   } else {
-  }
+  }*/
 
   if (old_state_stored) {
-    QModelIndex index = file_list_model.index_for_uri(old_current_uri);
+    QModelIndex index = file_list_model->index_for_uri(old_current_uri);
     if (index.isValid()) {
-      ui->list->setCurrentIndex(proxy_model->mapFromSource(index));
+      ui->list->setCurrentIndex(index);
     }
     ui->list->selectionModel()->clearSelection();
     foreach(QString uri, old_selected_uris) {
-      QModelIndex i = file_list_model.index_for_uri(uri);
+      QModelIndex i = file_list_model->index_for_uri(uri);
       if (i.isValid()) {
-        ui->list->selectionModel()->select(proxy_model->mapFromSource(i), QItemSelectionModel::Select);
+        ui->list->selectionModel()->select(i, QItemSelectionModel::Select);
       }
     }
 
@@ -313,7 +318,7 @@ void Pane::directory_ready(File_info_list files) {
     ui->list->verticalScrollBar()->setValue(old_scroll_pos.y());
   }
   if (!new_current_uri.isEmpty()) {
-    ui->list->selectionModel()->setCurrentIndex(proxy_model->mapFromSource(file_list_model.index_for_uri(new_current_uri)),
+    ui->list->selectionModel()->setCurrentIndex(file_list_model->index_for_uri(new_current_uri),
                               QItemSelectionModel::NoUpdate);
   }
 
@@ -333,15 +338,15 @@ void Pane::directory_error(QString message) {
     qWarning("Unknown sender");
     return;
   }
-  main_window->show_message(tr("Failed to get file list: %1").arg(message), Icon::error);
+  core->get_main_window()->show_message(tr("Failed to get file list: %1").arg(message), Icon::error);
 }
 
 void Pane::current_index_changed(QModelIndex current, QModelIndex previous) {
   //todo: model must not know about current index
   if (is_active()) {
-    file_list_model.set_current_index(proxy_model->mapToSource(current));
+    file_list_model->set_current_index(current);
   } else {
-    file_list_model.set_current_index(file_list_model.index(-1 , -1));
+    file_list_model->set_current_index(file_list_model->index(-1 , -1));
   }
   Q_UNUSED(previous);
 }
@@ -379,18 +384,18 @@ void Pane::completion_directory_ready(File_info_list files) {
 
 
 void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
-  File_info file = file_list_model.get_file_info(proxy_model->mapToSource(ui->list->indexAt(pos)));
-  App_info_list apps = main_window->get_apps(file.mime_type);
+  File_info file = file_list_model->get_file_info(ui->list->indexAt(pos));
+  App_info_list apps = core->get_main_window()->get_apps(file.mime_type);
   QMenu* menu = new QMenu(this);
   if (file.is_folder) {
     menu->addAction(tr("Browse"))->setEnabled(false);
   }
   if (file.is_file()) {
-    menu->addAction(main_window->get_ui()->action_view);
-    menu->addAction(main_window->get_ui()->action_edit);
+    menu->addAction(core->get_main_window()->get_ui()->action_view);
+    menu->addAction(core->get_main_window()->get_ui()->action_edit);
   }
   if (file.is_executable) {
-    menu->addAction(main_window->get_ui()->action_execute);
+    menu->addAction(core->get_main_window()->get_ui()->action_execute);
   }
   if (menu->actions().count() > 0) menu->addSeparator();
 
@@ -418,14 +423,14 @@ void Pane::action_launch_triggered() {
   }
   App_info app = data[0].value<App_info>();
   File_info file = data[1].value<File_info>();
-  app.launch(Directory::find_real_path(file.uri, main_window->get_core()));
+  app.launch(Directory::find_real_path(file.uri, core));
 }
 
 void Pane::update_model_current_index() {
   if (ui->list->hasFocus()) {
-    file_list_model.set_current_index(proxy_model->mapToSource(ui->list->selectionModel()->currentIndex()));
+    file_list_model->set_current_index(ui->list->selectionModel()->currentIndex());
   } else {
-    file_list_model.set_current_index(file_list_model.index(-1 , -1));
+    file_list_model->set_current_index(file_list_model->index(-1 , -1));
   }
 }
 
@@ -446,8 +451,9 @@ void Pane::on_address_textEdited(const QString&) {
     last_completion_uri = uri;
     uri_completion_model.clear();
     if (completion_directory) delete completion_directory;
-    completion_directory = new Directory(main_window->get_core(), uri);
+    completion_directory = new Directory(core, uri);
     connect(completion_directory, SIGNAL(ready(File_info_list)), this, SLOT(completion_directory_ready(File_info_list)));
     completion_directory->refresh();
   }
 }
+

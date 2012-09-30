@@ -7,11 +7,14 @@
 #include <QFileIconProvider>
 #include "Columns.h"
 #include <QCache>
+#include "Core_ally.h"
 
-class File_list_model : public QAbstractTableModel {
+typedef QPair<File_info, QVariant> Sorting_pair;
+
+class File_list_model : public QAbstractTableModel, public Core_ally {
   Q_OBJECT
 public:
-  File_list_model();
+  File_list_model(Core* c);
   void set_data(File_info_list list);
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -30,19 +33,35 @@ public:
 
   static const int sort_role = 100;
 
+
+  void sort(int column, Qt::SortOrder order);
+
+  inline int get_sort_column() { return sort_column; }
+  inline Qt::SortOrder get_sort_order() { return sort_order; }
+
 public slots:
   void set_columns(const Columns& new_columns);
 
+private slots:
+  void sort_folders_before_files_changed();
+
 private:
-  File_info_list list;
+  File_info_list list, unsorted_list;
   QModelIndex current_index;
   Columns columns;
   Columns current_columns;
-  void update_current_columns();
 
-  void emit_row_changed(int row);
 
   static QHash<QString, QString> mime_descriptions;
+
+  int sort_column;
+  Qt::SortOrder sort_order;
+
+  void update_current_columns();
+  File_info_list sort_list(QList<Sorting_pair> &list, Qt::SortOrder order);
+  void emit_row_changed(int row);
+  inline void resort() { sort(sort_column, sort_order); }
+
 
 };
 

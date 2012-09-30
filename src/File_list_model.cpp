@@ -4,14 +4,21 @@
 #include <QFont>
 #include "Directory.h"
 #include "qt_gtk.h"
+#include "Core.h"
 
-File_list_model::File_list_model() {
+
+File_list_model::File_list_model(Core *c) : Core_ally(c) {
+  connect(core, SIGNAL(sort_folders_before_files_changed()),
+          this, SLOT(sort_folders_before_files_changed()));
+  sort_column = -1;
 }
 
 void File_list_model::set_data(File_info_list p_list) {
   emit layoutAboutToBeChanged();
+  unsorted_list = p_list;
   list = p_list;
   update_current_columns();
+  resort();
   emit layoutChanged();
 }
 
@@ -20,6 +27,10 @@ void File_list_model::set_columns(const Columns &new_columns) {
   columns = new_columns;
   update_current_columns();
   emit layoutChanged();
+}
+
+void File_list_model::sort_folders_before_files_changed() {
+  resort();
 }
 
 int File_list_model::rowCount(const QModelIndex &parent) const {
@@ -184,6 +195,72 @@ void File_list_model::set_current_index(const QModelIndex &new_index) {
   emit_row_changed(new_index.row());
 }
 
+
+bool my_qvariant_sort(const Sorting_pair& v1, const Sorting_pair& v2) {
+  QVariant::Type t1 = v1.second.type();
+  QVariant::Type t2 = v2.second.type();
+  if (t1 == QVariant::Int &&
+      t2 == QVariant::Int) {
+    return v1.second.toInt() < v2.second.toInt();
+  }
+  if ( (t1 == QVariant::Date || t1 == QVariant::DateTime) &&
+       (t2 == QVariant::Date || t2 == QVariant::DateTime) ) {
+    return v1.second.toDateTime() < v2.second.toDateTime();
+  }
+  return QLocale::system().toLower(v1.second.toString()) <
+         QLocale::system().toLower(v2.second.toString());
+}
+
+void File_list_model::sort(int column, Qt::SortOrder order) {
+  if (list.disable_sort) return;
+  sort_column = column;
+  sort_order = order;
+  if (list.isEmpty()) return;
+  emit layoutAboutToBeChanged();
+  if (column == -1) {
+    list = unsorted_list;
+    if (core->get_sort_folders_before_files()) {
+      File_info_list folders, files;
+      foreach(File_info fi, list) {
+        (fi.is_folder ? folders:files) << fi;
+      }
+      list = folders;
+      list.append(files);
+    }
+  } else {
+    QList<Sorting_pair> r;
+    for(int row = 0; row < list.count(); row++) {
+      r << qMakePair(list[row], data(index(row, column), sort_role));
+    }
+    if (core->get_sort_folders_before_files()) {
+      QList<Sorting_pair> folders, files;
+      foreach(Sorting_pair pair, r) {
+        (pair.first.is_folder ? folders : files) << pair;
+      }
+      list = sort_list(folders, order);
+      list.append(sort_list(files, order));
+    } else {
+      list = sort_list(r, order);
+    }
+  }
+  emit layoutChanged();
+}
+
+
+File_info_list File_list_model::sort_list(QList<Sorting_pair>& some_list,
+                                          Qt::SortOrder order) {
+  qSort(some_list.begin(), some_list.end(), my_qvariant_sort);
+  File_info_list result;
+  foreach(Sorting_pair pair, some_list) {
+    if (order == Qt::DescendingOrder) {
+      result.prepend(pair.first);
+    } else {
+      result.append(pair.first);
+    }
+  }
+  return result;
+}
+
 void File_list_model::update_current_columns()  {
   if (!list.columns.isEmpty()) {
     current_columns = list.columns;
@@ -192,6 +269,7 @@ void File_list_model::update_current_columns()  {
   }
 
 }
+
 
 void File_list_model::emit_row_changed(int row) {
   if (row < 0) return;

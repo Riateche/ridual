@@ -3,12 +3,14 @@
 
 #include <QWidget>
 #include <QDir>
-#include "File_list_model.h"
 #include <QSettings>
 #include <QFileSystemWatcher>
 #include <QItemSelection>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
+#include "Core_ally.h"
+#include "File_info.h"
+
 
 namespace Ui {
   class Pane;
@@ -16,9 +18,9 @@ namespace Ui {
 
 class Main_window;
 class Directory;
-class File_list_proxy_model;
+class File_list_model;
 
-class Pane : public QWidget {
+class Pane : public QWidget, public Core_ally {
   Q_OBJECT
   
 public:
@@ -38,10 +40,6 @@ public:
   /*! Get the uri of location which content is displayed in file list. This can be empty.
     */
   QString get_uri();
-
-  /*! Set columns used by file list table.
-    */
-  inline void set_columns(Columns columns) { file_list_model.set_columns(columns); }
 
   /*! Get list of selected files. If  fallback_to_current is true (default) and
     none is selected but there is a current row, this row is treated as selected.
@@ -75,15 +73,13 @@ private slots:
   void completion_directory_ready(File_info_list files);
   void on_list_customContextMenuRequested(const QPoint &pos);
   void action_launch_triggered();
-
   void on_address_textEdited(const QString &);
+  //
 
 private:
   Ui::Pane *ui;
   bool ready;
-  File_list_proxy_model* proxy_model;
-  File_list_model file_list_model;
-  Main_window* main_window;
+  File_list_model* file_list_model;
   Directory* directory, *pending_directory;
   QString last_completion_uri;
 

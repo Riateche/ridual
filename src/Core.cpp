@@ -19,15 +19,23 @@ Core::Core() {
   watcher_thread->start();
   watcher->moveToThread(watcher_thread);
 
-
+  QSettings settings;
+  sort_folders_before_files = settings.value("sort_folders_before_files").toBool();
 
   main_window = new Main_window(this);
-  //main_window->show();
 }
 
 Core::~Core() {
   watcher_thread->quit();
   watcher_thread->wait();
 
+}
+
+void Core::set_sort_folders_before_files(bool v) {
+  if (v == sort_folders_before_files) return;
+  sort_folders_before_files = v;
+  QSettings s;
+  s.setValue("sort_folders_before_files", v);
+  emit sort_folders_before_files_changed();
 }
 

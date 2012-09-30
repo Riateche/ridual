@@ -20,7 +20,11 @@ public:
   inline Mount_manager* get_mount_manager() {  return mount_manager; }
   inline Directory_watcher* get_directory_watcher() { return watcher; }
 
+  inline bool get_sort_folders_before_files() { return sort_folders_before_files; }
+  void set_sort_folders_before_files(bool v);
+
 signals:
+  void sort_folders_before_files_changed();
   
 private slots:
 
@@ -31,6 +35,8 @@ private:
   Mount_manager* mount_manager;
   Directory_watcher* watcher;
   QThread* watcher_thread;
+
+  bool sort_folders_before_files;
 
 
 };

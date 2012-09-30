@@ -5,46 +5,14 @@
   - "execute" should not be accessible for "Places", "FS root" etc
   - fail with filenames in wrong encoding
   - cdup in smb mount folder fails (smb root isn't mapped to real fs)
+  - deny closing main window when tasks are executing
 
 
 
-- must-have features:
-  - autocomplete in address bar:
-    - show names without paths in suggestions;
-    - fix for '/tmp/../' case
-  - fast filter file list by typing mask
-  - file search
-  - option "list folders before files"
-  - display count of selected items, total space used by them, free space on current volume
-  - select all, unselect all, invert selection, select/unselect by regexp
-  - navigation history; hotkeys; quick search in history
-  - back/forward
-  - extract archive to destination, extract here, browse into archive
-  - set max copy speed
-  - ctrl+x/c/v (!)
-  - drag and drop
-  - F7 - create folder
-  - Shift+F4 - create file
-  - F2 - rename
-  - mass rename tool (F2 for many files)
-  - F8 - move to trash
-  - create link dialog:
-    - hard link
-    - absolute soft link
-    - relative soft link
-
-  - gvfs mount with password and other questions
-  - predefined templates for new file based on specified filename for creation (regexp match)
-    (for example: *.py - create file with python header, *.cpp - create hello world)
+- stage1:
   - pause and abort tasks with keyboard or mouse
   - shortcut to abort last created task
   - advanced error options (not only skip/abort/retry)
-  - task context menu:
-    * Pause/Resume (for started tasks) [+button]
-    * Abort [+button]
-    * Stop recursive fetch
-    * Auto-answer settings
-    * Max speed
   - auto answering system
     - when user changes task settings, it must affect current question (if any)
     - popup dialog for editing task auto-answering settings:
@@ -54,31 +22,55 @@
       * new tasks in the future
     - if the rule is enabled for new tasks, warning should be displayed
       at main window until this rule is removed (like "task will be placed in queue")
-  - deny closing main window when tasks are executing
-  - trash support: http://developer.gnome.org/gio/2.29/ch27.html#id531086
-  - auto max speed tool based on destination and source folder
+  - fast filter file list by typing mask
+  - navigation history; hotkeys; quick search in history
+  - back/forward
+  - ctrl+x/c/v
+  - F7 - create folder
+  - Shift+F4 - create file
+  - F2 - rename
+  - F8 - move to trash: http://developer.gnome.org/gio/2.29/ch27.html#id531086
+  - sound on messages
   - If some files was skipped or overwritten without propmt, the message about this must
   appear after the task is completed
+  - align path buttons to the right when right pane is active
+  - get icon using libnautilus-private/nautilus-icon-info.c
+  - terminal support
+
+- stage2:
+  - run-time permission granting
   - undo
+  - file search
+  - display count of selected items, total space used by them, free space on current volume
+  - select all, unselect all, invert selection, select/unselect by regexp
+  - extract archive to destination, extract here, browse into archive
+  - set max copy speed
+  - auto max speed tool based on destination and source folder
+  - drag and drop
+  - mass rename tool (F2 for many files)
+  - create link dialog:
+    - hard link
+    - absolute soft link
+    - relative soft link
+  - gvfs mount with password and other questions
+  - predefined templates for new file based on specified filename for creation (regexp match)
+    (for example: *.py - create file with python header, *.cpp - create hello world)
+  - Shift+F5, Shift+F6 - modify paths before copying
+  - Option to stop currently running recursive fetch
   - edit bookmarks
   - check for free space before operations
-
-- important features:
-  - separate tab for all (current and pending) tasks; long description of each task here
-  - Option "Follow symlinks"
   - warning about too many (>3) queues
-  - hotkeys for 2nd, 3rd associated apps
+  - Option "Follow symlinks"
   - unmount, eject, safely remove
+  - hotkeys for 2nd, 3rd associated apps
   - unix drives list
+  - separate tab for all (current and pending) tasks; long description of each task here
   - permissions as "rwxrwxrwx"
 
 
-
 - ideas:
-  - align path buttons to the right when right pane is active
   - if average size of file is small, display total progress based on files count
   instead of size
-  - get icon using libnautilus-private/nautilus-icon-info.c
 
 - other features:
   - ability to select view and open commands from gio apps list
@@ -106,8 +98,7 @@
   - plugins
     - for file preview
     - see FAR plugins
-  - terminal support
+    - see DoubleCommander plugins
   - mouse gestures (Thunar)
-  - run-time permission granting
 
 

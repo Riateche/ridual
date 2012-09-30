@@ -15,7 +15,7 @@ Settings_dialog::Settings_dialog(Core* core) :
   QSettings s;
   ui->edit_command->setText(s.value("edit_command", "gedit %U").toString());
   ui->view_command->setText(s.value("view_command", "gedit %U").toString());
-  ui->show_folders_before_files->setChecked(s.value("show_folders_before_files").toBool());
+  ui->show_folders_before_files->setChecked(core->get_sort_folders_before_files());
   fill_columns(false);
 }
 
@@ -27,7 +27,8 @@ void Settings_dialog::on_buttonBox_accepted() {
   QSettings s;
   s.setValue("edit_command", ui->edit_command->text());
   s.setValue("view_command", ui->view_command->text());
-  s.setValue("show_folders_before_files", ui->show_folders_before_files->isChecked());
+  //s.setValue("show_folders_before_files",
+  core->set_sort_folders_before_files(ui->show_folders_before_files->isChecked());
 
   Columns c;
   foreach(QListWidgetItem* item,
