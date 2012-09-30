@@ -1,0 +1,11 @@
+<RCC>
+<qresource prefix="/">
+        <file>resources/images/loading.gif</file>
+        <file>resources/images/info.png</file>
+        <file>resources/images/warning.png</file>
+        <file>resources/images/error.png</file>
+        <file>resources/images/success.png</file>
+        <file>resources/about.html</file>
+        <file>VERSION</file>
+    </qresource>
+</RCC>

@@ -50,6 +50,9 @@ public:
   void set_columns(Columns v);
 
 
+  QString get_version();
+
+
 
 
   /*! Get all currently existing queues. Note that any queue is deleted

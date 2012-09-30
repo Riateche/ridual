@@ -1,6 +1,9 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
+
+#include <QResource>
+#include <QTextBrowser>
 #include "Directory.h"
 #include "Action_state_widget.h"
 #include "Message_widget.h"
@@ -211,6 +214,11 @@ void Main_window::set_columns(Columns v) {
   emit columns_changed(v);
 }
 
+QString Main_window::get_version() {
+  QResource r(":/VERSION");
+  return QString::fromUtf8(reinterpret_cast<const char*>(r.data()));
+}
+
 Action_queue *Main_window::create_queue() {
   QSet<int> ids;
   foreach(Action_queue* q, get_queues()) ids << q->get_id();
@@ -328,7 +336,12 @@ void Main_window::keyPressEvent(QKeyEvent *event) {
 
 
 void Main_window::on_action_about_triggered() {
-  QDesktopServices::openUrl(QUrl("https://github.com/Riateche/ridual"));
+  QTextBrowser* b = new QTextBrowser();
+  QResource r(":/resources/about.html");
+  QString s = QString::fromUtf8(reinterpret_cast<const char*>(r.data()));
+  s = s.replace("%v", get_version());
+  b->setHtml(s);
+  b->show();
 }
 
 void Main_window::on_action_remove_triggered() {
@@ -622,3 +635,4 @@ void Main_window::question_widget_destroyed(QObject *object) {
     question_widgets[i]->start_editor();
   }
 }
+
