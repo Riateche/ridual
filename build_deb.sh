@@ -9,7 +9,7 @@ if [[ $1 == ppa ]]
 then
   echo "Mode: uploading to PPA"
 else
-  echo "Model: local build"
+  echo "Mode: local build"
 fi
 
 rm -rf ${BUILD_PATH}/$VERSION

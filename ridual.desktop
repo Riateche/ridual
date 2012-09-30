@@ -8,4 +8,3 @@ Icon=/usr/share/ridual/data/ridual.svg
 Exec=/usr/bin/ridual
 Categories=System;Filesystem;Utility;
 
-Name[en]=ridual.desktop
