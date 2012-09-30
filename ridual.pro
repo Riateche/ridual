@@ -138,6 +138,13 @@ testing {
 }
 
 
+version.target = version.h
+version.commands = git --git-dir="$$_PRO_FILE_PWD_/.git" describe > VERSION
+#version.depends = .git
+QMAKE_EXTRA_TARGETS += version
+
+PRE_TARGETDEPS += version.h
+
 
 RESOURCES += \
     resources/1.qrc
