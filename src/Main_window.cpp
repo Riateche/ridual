@@ -337,6 +337,8 @@ void Main_window::keyPressEvent(QKeyEvent *event) {
 
 void Main_window::on_action_about_triggered() {
   QTextBrowser* b = new QTextBrowser();
+  b->setWindowTitle(tr("About Ridual"));
+  b->setOpenExternalLinks(true);
   QResource r(":/resources/about.html");
   QString s = QString::fromUtf8(reinterpret_cast<const char*>(r.data()));
   s = s.replace("%v", get_version());
