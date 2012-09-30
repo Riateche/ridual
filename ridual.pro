@@ -7,14 +7,14 @@
 QT       += core gui
 
 TARGET = ridual
-target.path = /opt/extras.ubuntu.com/ridual
+target.path = /usr/bin
 INSTALLS += target
 
-data.path = /opt/extras.ubuntu.com/ridual/data
+data.path = /usr/share/ridual/data
 data.files = data/*
 INSTALLS += data
 
-install_desktop.files = extras-ridual.desktop
+install_desktop.files = ridual.desktop
 install_desktop.path = /usr/share/applications
 INSTALLS += install_desktop
 

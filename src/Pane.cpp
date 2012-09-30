@@ -19,8 +19,6 @@ Pane::Pane(QWidget *parent) :
   Core_ally(dynamic_cast<Main_window*>(parent->window())->get_core()),
   ui(new Ui::Pane)
 {
-  //core->get_main_window() not available yet in constructor
-  Main_window* mw = dynamic_cast<Main_window*>(parent->window());
 
   file_list_model = new File_list_model(core);
   directory = 0;
@@ -59,11 +57,11 @@ Pane::Pane(QWidget *parent) :
   ui->address->setCompleter(completer);
 
 
-  connect(mw, SIGNAL(active_pane_changed()),
+  connect(core->get_main_window(), SIGNAL(active_pane_changed()),
           this, SLOT(active_pane_changed()));
   connect(ui->list, SIGNAL(doubleClicked(QModelIndex)),
-          mw, SLOT(open_current()));
-  connect(mw, SIGNAL(columns_changed(Columns)),
+          core->get_main_window(), SLOT(open_current()));
+  connect(core->get_main_window(), SIGNAL(columns_changed(Columns)),
           file_list_model, SLOT(set_columns(Columns)));
 
 }

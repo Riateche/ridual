@@ -23,6 +23,7 @@ Core::Core() {
   sort_folders_before_files = settings.value("sort_folders_before_files").toBool();
 
   main_window = new Main_window(this);
+  main_window->init();
 }
 
 Core::~Core() {

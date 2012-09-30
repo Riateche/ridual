@@ -34,6 +34,8 @@ class Main_window : public QMainWindow, Core_ally {
 public:
   explicit Main_window(Core *c);
   ~Main_window();
+  void init();
+
   void set_active_pane(Pane* pane);
   inline Pane* get_active_pane() { return active_pane; }
 

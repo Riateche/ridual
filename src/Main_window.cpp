@@ -35,9 +35,23 @@ Main_window::Main_window(Core* c) :
   QMainWindow(0)
 , Core_ally(c)
 , ui(new Ui::Main_window)
+, active_pane(0)
 , hotkeys(this)
 , current_queue(0)
 {
+
+}
+
+Main_window::~Main_window() {
+
+  save_settings();
+  //tasks_thread->interrupt();
+  //delete tasks_thread;
+  delete ui;
+}
+
+
+void Main_window::init() {
   setAttribute(Qt::WA_DeleteOnClose);
 
   QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
@@ -149,14 +163,6 @@ Main_window::Main_window(Core* c) :
     ui->panes_splitter->setSizes(QList<int>() << width() / 2 << width() / 2);
   }
 
-}
-
-Main_window::~Main_window() {
-
-  save_settings();
-  //tasks_thread->interrupt();
-  //delete tasks_thread;
-  delete ui;
 }
 
 void Main_window::set_active_pane(Pane *pane) {
