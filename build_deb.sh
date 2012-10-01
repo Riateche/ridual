@@ -7,9 +7,12 @@ VERSION=`cat $REPO_PATH/VERSION`
 
 if [[ $1 == ppa ]]
 then
-  echo "Mode: uploading to PPA"
-else
+  echo "Mode: upload to PPA"
+elif [[ $1 == local ]]
+then
   echo "Mode: local build"
+else
+  echo "Mode: copy only" 
 fi
 
 rm -rf ${BUILD_PATH}/$VERSION
@@ -35,7 +38,8 @@ if [[ $1 == ppa ]]
 then
   ## Send package to PPA
   dput ppa:strahovp/ridual ../*.changes
-else
+elif [[ $1 == local ]]
+then
   ## Build package locally (it will appear in '/var/cache/pbuilder/result')
   sudo pbuilder build ../*.dsc
 fi

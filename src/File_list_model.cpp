@@ -207,8 +207,9 @@ bool my_qvariant_sort(const Sorting_pair& v1, const Sorting_pair& v2) {
        (t2 == QVariant::Date || t2 == QVariant::DateTime) ) {
     return v1.second.toDateTime() < v2.second.toDateTime();
   }
-  return QLocale::system().toLower(v1.second.toString()) <
-         QLocale::system().toLower(v2.second.toString());
+  return v1.second.toString().toLower() < v2.second.toString().toLower();
+ // return QLocale::system().toLower(v1.second.toString()) <
+ //        QLocale::system().toLower(v2.second.toString());
 }
 
 void File_list_model::sort(int column, Qt::SortOrder order) {

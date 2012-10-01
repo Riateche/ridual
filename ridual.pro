@@ -57,7 +57,8 @@ SOURCES += src/Main_window.cpp \
     src/Mount_manager.cpp \
     src/Core_ally.cpp \
     src/Message_widget.cpp \
-    src/Action_state_widget.cpp
+    src/Action_state_widget.cpp \
+    src/Elapsed_timer.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -97,7 +98,8 @@ HEADERS  += src/Main_window.h \
     src/Mount_manager.h \
     src/Core_ally.h \
     src/Message_widget.h \
-    src/Action_state_widget.h
+    src/Action_state_widget.h \
+    src/Elapsed_timer.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \

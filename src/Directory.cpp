@@ -38,7 +38,7 @@ Directory::Directory(Core *c, QString p_uri) :
   QTimer* t = new QTimer(this);
   connect(t, SIGNAL(timeout()), this, SLOT(refresh_timeout()));
   t->start(watcher_refresh_timeout);
-  refresh_timer.start();
+  refresh_timer.restart();
 }
 
 Directory::~Directory() {

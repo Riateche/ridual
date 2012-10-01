@@ -4,16 +4,19 @@
 #include <QObject>
 #include <QStringList>
 #include <QVariant>
-#include <QElapsedTimer>
+#include <QTimer>
 #include <QTimer>
 #include "File_info.h"
 #include "gio/Mount.h"
 #include "Error_reaction.h"
 #include "types.h"
+#include "Elapsed_timer.h"
 
 #define BUFFER_SIZE 65535
 
 class Action_queue;
+
+
 
 
 
@@ -96,7 +99,7 @@ private:
   qint64 current_size;
   int current_count;
 
-  QElapsedTimer signal_timer; //! The timer used for sending Action::state_changed singal sometimes.
+  Elapsed_timer signal_timer; //! The timer used for sending Action::state_changed singal sometimes.
   static const int signal_interval = 300; //! Minimum interval (in ms) before two Action::state_changed signals.
 
   /*! Maximum files count for Recursive_fetch_option::auto.

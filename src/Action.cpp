@@ -180,7 +180,7 @@ void Action::run() {
 
   state.current_action = tr("Starting");
   emit state_changed(state);
-  signal_timer.start();
+  signal_timer.restart();
 
   try {
     if (data.recursive_fetch_option != recursive_fetch_off) {
