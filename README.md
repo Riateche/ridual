@@ -63,11 +63,31 @@ that aren't implemented yet. The following features will be implemented soon:
 
 ### Installing Ridual
 
-Ridual will be available in [our PPA](https://launchpad.net/%7Estrahovp/+archive/ridual) after the
-fully-functional release. Now PPA packages are outdated. 
+#### Ubuntu (all supported versions)
 
-To install Ridual, download sources and compile them: install
-`libglib2.0-dev` and `libgtk2.0-dev` packages, then run the following commands:
+Ridual can be installed from [our PPA](https://launchpad.net/%7Estrahovp/+archive/ridual):
+
+    sudo add-apt-repository ppa:strahovp/ridual
+    sudo apt-get update
+    sudo apt-get install ridual
+
+#### Arch Linux
+
+Package `ridual` is available in AUR.
+
+#### Building from sourses
+
+This option should be used for other Linux distributions. 
+You can download 'stable' version from [Tags](https://github.com/Riateche/ridual/tags) page.
+You can also clone repository to get the latest source but it can be broken or unstable.
+
+Install build dependencies (package names are given as in Ubuntu): 
+
+- `libglib2.0-dev`
+- `libgtk2.0-dev` 
+- `libqt4-dev` 
+ 
+Then run the following commands in the folder containing the source code:
 
     qmake
     make
