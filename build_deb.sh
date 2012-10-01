@@ -8,7 +8,7 @@ VERSION=`cat $REPO_PATH/VERSION`
 if [[ $1 == ppa ]]
 then
   echo "Mode: upload to PPA"
-  DISTRIBUTIONS="lucid natty oneiric precise quantal"
+  DISTRIBUTIONS="lucid"
 elif [[ $1 == local ]]
 then
   echo "Mode: local build"
