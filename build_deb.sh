@@ -8,11 +8,14 @@ VERSION=`cat $REPO_PATH/VERSION`
 if [[ $1 == ppa ]]
 then
   echo "Mode: upload to PPA"
+  DISTRIBUTIONS="lucid natty oneiric precise quantal"
 elif [[ $1 == local ]]
 then
   echo "Mode: local build"
+  DISTRIBUTIONS="precise"
 else
   echo "Mode: copy only" 
+  DISTRIBUTIONS="precise"
 fi
 
 rm -rf ${BUILD_PATH}/$VERSION
@@ -21,7 +24,8 @@ mkdir ${BUILD_PATH}/$VERSION/${PROG_NAME}_$VERSION
 cp -R ${REPO_PATH}/* ${BUILD_PATH}/$VERSION/${PROG_NAME}_$VERSION/
 cd ${BUILD_PATH}/$VERSION/${PROG_NAME}_$VERSION
 
-echo "${PROG_NAME} ($VERSION-1) precise; urgency=low
+for distribution in $DISTRIBUTIONS; do
+  echo "${PROG_NAME} ($VERSION-1) $distribution; urgency=low
 
   * No information.
 
@@ -29,21 +33,22 @@ echo "${PROG_NAME} ($VERSION-1) precise; urgency=low
 
 " >> debian/changelog
 
-tar -pzcf ../${PROG_NAME}_$VERSION.orig.tar.gz *
+  tar -pzcf ../${PROG_NAME}_$VERSION.orig.tar.gz *
 
-## generate .dsc and .changes files
-debuild -S
+  ## generate .dsc and .changes files
+  debuild -S
 
-if [[ $1 == ppa ]]
-then
-  ## Send package to PPA
-  dput ppa:strahovp/ridual ../*.changes
-elif [[ $1 == local ]]
-then
-  ## Build package locally (it will appear in '/var/cache/pbuilder/result')
-  sudo pbuilder build ../*.dsc
-fi
+  if [[ $1 == ppa ]]
+  then
+    ## Send package to PPA
+    dput ppa:strahovp/ridual ../*.changes
+  elif [[ $1 == local ]]
+  then
+    ## Build package locally (it will appear in '/var/cache/pbuilder/result')
+    sudo pbuilder build ../*.dsc
+  fi
 
+done
 
 
 
