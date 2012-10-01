@@ -6,11 +6,17 @@ Ridual
 
 ### Description
 
-Ridual is dual-pane file manager for Ubuntu. **It's in development stage now, so using Ridual is not recommended.**
+Ridual is dual-pane file manager for Gnome environment. 
+**It's in development stage now, so using Ridual is not recommended.**
+
+Sheduled releases:
+
+- Half-functional release: 2012/11/01
+- Fully-functional release: 2013/02/01
 
 Main advantages of Ridual:
 
-- High integration with Ubuntu features: Ridual supports GVFS mounts, bookmarks and user dirs, 
+- High integration with Gnome environment: Ridual supports GVFS mounts, bookmarks and user dirs, 
        removable drives list, file icons, applications accotiations.
 - Keyboard-oriented control: Ridual has adjustable shortcuts for everything, 
        single-window dialogs and messages.
@@ -92,23 +98,22 @@ Then run the following commands in the folder containing the source code:
     qmake
     make
     sudo checkinstall
-
-### Running tests
-
-    cd project-dir
-    tests/run.sh
-    
-    
-### Shedule
-
-- Half-functional release: 2012/11/01
-- Fully-functional release: 2013/02/01
     
 ### Collaboration
 
-Feel free to help in application development. If you can improve existing code, fix a bug, or add a test,
+Feel free to help in the application development. If you want to improve existing code, 
+fix a bug, add a test, suggest a feature, or build packages for your Linux distribution, 
 it's always welcome. If you want to implement new features or bring large changes to existing code, 
-please contact me first.
+please contact me first.     
+    
+
+    
+### Running tests
+
+Tests are incomplete and broken sometimes, but one cat try:
+
+    cd project_dir
+    tests/run.sh
 
 ### See also
 
