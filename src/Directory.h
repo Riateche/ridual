@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include "File_info.h"
-#include <QFileIconProvider>
 #include "Elapsed_timer.h"
 #include "Core_ally.h"
 
@@ -132,7 +131,6 @@ private slots:
 private:
   QString uri;
   QString path; //real path
-  QFileIconProvider icon_provider;
   Elapsed_timer refresh_timer;
 
   void create_task(QString path);

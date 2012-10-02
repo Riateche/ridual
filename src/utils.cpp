@@ -1,27 +1,33 @@
 #include "utils.h"
-/*
+#include "qt_gtk.h"
 #include <QDebug>
-#include <magic.h>
+#include <QCache>
 
-QString get_mime_type(const QString &filename) {
-  QString result("application/octet-stream");
-  magic_t magicMimePredictor;
-  magicMimePredictor = magic_open(MAGIC_MIME_TYPE); // Open predictor
-  if (!magicMimePredictor) {
-    qDebug() << "libmagic: Unable to initialize magic library";
-  } else if (magic_load(magicMimePredictor, 0)) { // if not 0 - error
-    qDebug() << "libmagic: Can't load magic database - " +
-                QString(magic_error(magicMimePredictor));
-    magic_close(magicMimePredictor); // Close predictor
+QIcon get_file_icon(const QString& content_type) {
+  static QCache<QString, QIcon> cache;
+  cache.setMaxCost(100);
+  if (cache.contains(content_type)) return QIcon(*(cache.object(content_type)));
+  QByteArray ba = content_type.toLocal8Bit();
+  GIcon* gicon = g_content_type_get_icon(ba.constData());
+  if (G_IS_THEMED_ICON(gicon)) {
+    const gchar * const * names = g_themed_icon_get_names(reinterpret_cast<GThemedIcon*>(gicon));
+    if (names != 0 && names[0] != 0) {
+      QString name = QString::fromLocal8Bit(names[0]);
+      QIcon r = QIcon::fromTheme(name);
+      if (r.isNull()) {
+        qDebug() << "get_file_icon: no icon from theme for name: " << name;
+      } else {
+        cache.insert(content_type, new QIcon(r));
+        g_object_unref(gicon);
+        return r;
+      }
+    } else {
+      qDebug() << "get_file_icon: empty or invalid result of g_themed_icon_get_names";
+    }
   } else {
-    char *file = filename.toLocal8Bit().data();
-    const char *mime;
-    mime = magic_file(magicMimePredictor, file); // getting mime-type
-    result = QString(mime);
-    magic_close(magicMimePredictor); // Close predictor
+    qDebug() << "get_file_icon: gicon is not themed icon";
   }
-
-  //qDebug() << "get_mime_type(" << filename << ") = " << result;
-  return result;
+  qDebug() << "get_file_icon: returning null icon";
+  g_object_unref(gicon);
+  return QIcon();
 }
-*/

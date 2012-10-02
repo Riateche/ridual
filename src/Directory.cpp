@@ -10,6 +10,7 @@
 #include "Core.h"
 #include "Mount_manager.h"
 #include "Bookmarks_file_parser.h"
+#include "utils.h"
 
 Directory::Directory(Core *c, QString p_uri) :
   Core_ally(c),
@@ -269,11 +270,7 @@ void Directory::task_ready(File_info_list r) {
   QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
   for(int i = 0; i < r.count(); i++) {
     r[i].uri = uri_prefix + QFileInfo(r[i].path).fileName();
-    //we can't get icons in non-gui thread, because QFileIconProvider uses QPixmap
-    //and it produces warning. We must do it in gui thread, it's bad because
-    //it causes GUI to freeze.
-    r[i].icon = icon_provider.icon(r[i].path);
-    //todo: this is slow for network fs
+    r[i].icon = get_file_icon(r[i].mime_type);
   }
   emit ready(r);
 }
