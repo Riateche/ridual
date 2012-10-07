@@ -292,9 +292,14 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
               ask_question(Question_data(tr("Failed to create file '%1': %2").arg(new_path).arg(errno_to_string()), Error_type::create_failed, false));
             }
 
-            file1.seekg(0, std::ios::end);
-            int file_size = file1.tellg();
-            file1.seekg(0);
+            int file_size = 0;
+            try {
+              file1.seekg(0, std::ios::end);
+              file_size = file1.tellg();
+              file1.seekg(0);
+            } catch (std::ios_base::failure e) {
+              ask_question(Question_data(tr("Failed to determine size of file '%1': %2").arg(path).arg(errno_to_string()), Error_type::read_failed, false));
+            }
 
             while(file1.tellg() != file_size) {
               if (signal_timer.elapsed() > signal_interval) {

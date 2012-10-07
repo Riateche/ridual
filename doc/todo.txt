@@ -8,8 +8,9 @@
 
 
 - stage1:
+  - ctrl+x/c/v using QClipboard
+  - terminal support
   - pause and abort tasks with keyboard (shortcut to abort last created task)
-  - "no space" error
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
   - fix behaviour: file write error -> retry -> file already exists
   - advanced error options (not only skip/abort/retry)
@@ -25,7 +26,6 @@
   - fast filter file list by typing mask
   - navigation history; hotkeys; quick search in history
   - back/forward
-  - ctrl+x/c/v
   - F7 - create folder
   - Shift+F4 - create file
   - F2 - rename
@@ -34,8 +34,6 @@
   - If some files was skipped or overwritten without propmt, the message about this must
   appear after the task is completed
   - align path buttons to the right when right pane is active
-  - get icon using libnautilus-private/nautilus-icon-info.c
-  - terminal support
 
 - stage2:
   - run-time permission granting
@@ -102,3 +100,15 @@
   - mouse gestures (Thunar)
 
 
+clipboard:
+  http://www.le-web.org/2008/12/04/pygtk-copy-a-file-to-clipboard-paste-it-in-nautilus/
+
+  #include <QClipboard>
+  #include <QMimeData>
+  #include <QDebug>
+  #include <QStringList>
+  QClipboard *clipboard = QApplication::clipboard();
+  const QMimeData* d = clipboard->mimeData();
+  qDebug() << d->formats();
+  qDebug() << d->data("x-special/gnome-copied-files");
+  return 0;
