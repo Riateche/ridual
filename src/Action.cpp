@@ -330,8 +330,8 @@ void Action::question_answered(Error_reaction::Enum reaction) {
   error_reaction = reaction;
 }
 
-void Action::toggle_pause() {
-  paused = !paused;
+void Action::set_paused(bool v) {
+  paused = v;
 }
 
 void Action::abort() {

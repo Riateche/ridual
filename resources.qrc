@@ -1,5 +1,5 @@
 <RCC>
-<qresource prefix="/">
+    <qresource prefix="/">
         <file>resources/images/loading.gif</file>
         <file>resources/images/info.png</file>
         <file>resources/images/warning.png</file>
@@ -7,5 +7,8 @@
         <file>resources/images/success.png</file>
         <file>resources/about.html</file>
         <file>VERSION</file>
+        <file>resources/images/pause.png</file>
+        <file>resources/images/play.png</file>
+        <file>resources/images/stop.png</file>
     </qresource>
 </RCC>

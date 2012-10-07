@@ -171,7 +171,7 @@ private:
 
 public slots:
   void question_answered(Error_reaction::Enum reaction);
-  void toggle_pause();
+  void set_paused(bool v);
   void abort();
 
 signals:
