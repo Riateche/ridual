@@ -10,6 +10,8 @@
 #include <QFSFileEngine>
 #include "mkdir.h"
 #include "Core.h"
+#include <fstream>
+#include <errno.h>
 
 Action::Action(const Action_data &p_data)
 : data(p_data)
@@ -270,22 +272,35 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
           } //remove or move
         } else {
           if (data.type == Action_type::copy || data.type == Action_type::move) {
-            QFile file1(path);
-            QFile file2(new_path);
-            if (file2.exists()) {
+            std::ifstream file1;
+            file1.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            std::ofstream file2;
+            file2.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
+            try {
+              file1.open(path.toLocal8Bit(), std::ifstream::in | std::ifstream::binary);
+            } catch (std::ios_base::failure e) {
+              ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(errno_to_string()), Error_type::read_failed, false));
+            }
+
+            if (QFile(new_path).exists()) {
               ask_question(Question_data(tr("File '%1' already exists").arg(new_path), Error_type::exists, false));
             }
-            if (!file1.open(QFile::ReadOnly)) {
-              ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(file1.errorString()), Error_type::read_failed, false));
+
+            try {
+              file2.open(new_path.toLocal8Bit(), std::ifstream::out | std::ifstream::trunc | std::ifstream::binary);
+            } catch (std::ios_base::failure e) {
+              ask_question(Question_data(tr("Failed to create file '%1': %2").arg(new_path).arg(errno_to_string()), Error_type::create_failed, false));
             }
-            if (!file2.open(QFile::WriteOnly)) {
-              ask_question(Question_data(tr("Failed to create file '%1': %2").arg(new_path).arg(file2.errorString()), Error_type::create_failed, false));
-            }
-            while(!file1.atEnd()) {
+
+            file1.seekg(0, std::ios::end);
+            int file_size = file1.tellg();
+            file1.seekg(0);
+
+            while(file1.tellg() != file_size) {
               if (signal_timer.elapsed() > signal_interval) {
                 process_events();
                 state.current_action = tr("Copying '%1'").arg(path);
-                state.current_progress = 1.0 * file1.pos() / file1.size();
+                state.current_progress = 1.0 * file1.tellg() / file_size;
                 if (total_size > 0) {
                   state.total_progress = 1.0 * current_size / total_size;
                 } else {
@@ -296,16 +311,23 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
                 signal_timer.restart();
               }
               char copy_buffer[BUFFER_SIZE];
-              int count = file1.read(copy_buffer, BUFFER_SIZE);
-              if (count < 0) {
-                ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(file1.errorString()), Error_type::read_failed, false));
+              int count = 0;
+              try {
+                count = file1.readsome(copy_buffer, BUFFER_SIZE);
+              } catch (std::ios_base::failure e) {
+                ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(errno_to_string()), Error_type::read_failed, false));
               }
-              int count2 = file2.write(copy_buffer, count);
-              if (count2 < count) {
-                ask_question(Question_data(tr("Failed to write to file '%1': %2").arg(new_path).arg(file2.errorString()), Error_type::write_failed, false));
+              try {
+                file2.write(copy_buffer, count);
+              } catch (std::ios_base::failure e) {
+                ask_question(Question_data(tr("Failed to write to file '%1': %2").arg(new_path).arg(errno_to_string()), Error_type::write_failed, false));
               }
               current_size += count;
             } //end if file
+            if (!QFile(new_path).setPermissions(QFile(path).permissions())) {
+              qDebug() << "Failed to copy permissions";
+            }
+
           } //copy or move
           if (data.type == Action_type::remove || data.type == Action_type::move) {
             QFile f(path);

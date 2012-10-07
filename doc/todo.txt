@@ -10,7 +10,8 @@
 - stage1:
   - pause and abort tasks with keyboard (shortcut to abort last created task)
   - "no space" error
-  - ask question "delete incomplete file?" after interrupting a task
+  - ask question "delete incomplete file?" after interrupting a task or skipping a file
+  - fix behaviour: file write error -> retry -> file already exists
   - advanced error options (not only skip/abort/retry)
   - auto answering system
     - when user changes task settings, it must affect current question (if any)
