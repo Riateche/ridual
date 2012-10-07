@@ -39,6 +39,8 @@ public:
   inline int get_sort_column() { return sort_column; }
   inline Qt::SortOrder get_sort_order() { return sort_order; }
 
+  inline Columns get_current_columns() { return current_columns; } //for testing
+
 public slots:
   void set_columns(const Columns& new_columns);
 

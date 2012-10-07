@@ -1,6 +1,5 @@
 
 - bugs:
-  - Directory::async_result can be called after destructing Directory object
   - file icons slow for network fs
   - "execute" should not be accessible for "Places", "FS root" etc
   - fail with filenames in wrong encoding

@@ -34,6 +34,7 @@ public:
   QVariant serialize();
   static Columns deserialize(QVariant data);
   static QString name(Column::Enum column);
+  QString to_string() const;
 
 
 

@@ -218,6 +218,7 @@ void Pane::setFocus() {
 }
 
 void Pane::go_parent() {
+  qDebug() << "index: " << file_list_model->index(0, 0);
   set_uri(directory->get_parent_uri());
 }
 

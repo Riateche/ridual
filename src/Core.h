@@ -13,6 +13,7 @@ class Core : public QObject {
 public:
   explicit Core();
   ~Core();
+  void init_gui();
 
   inline Main_window* get_main_window() { return main_window; }
   inline Bookmarks_file_parser* get_bookmarks() { return bookmarks; }

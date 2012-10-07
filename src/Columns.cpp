@@ -68,4 +68,10 @@ QString Columns::name(Column::Enum r) {
   return QObject::tr("Invalid column");
 }
 
+QString Columns::to_string() const {
+  QStringList list;
+  foreach(Column::Enum c, *this) list << name(c);
+  return QString("Columns(%1)").arg(list.join(", "));
+}
+
 

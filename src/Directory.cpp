@@ -6,11 +6,12 @@
 #include "Special_uri.h"
 #include "Directory_watcher.h"
 #include <QThreadPool>
-#include "qt_gtk.h"
 #include "Core.h"
 #include "Mount_manager.h"
 #include "Bookmarks_file_parser.h"
 #include "utils.h"
+#include <stdexcept>
+#include <QApplication>
 
 Directory::Directory(Core *c, QString p_uri) :
   Core_ally(c),
@@ -24,6 +25,7 @@ Directory::Directory(Core *c, QString p_uri) :
           this, SLOT(directory_changed(QString)));
 
   async_result_type = async_result_unexpected;
+  gcancellable = 0;
   need_update = false;
   watcher_created = false;
   uri = canonize(uri);
@@ -46,6 +48,7 @@ Directory::~Directory() {
   if (watcher_created) {
     emit unwatch(path);
   }
+  interrupt_gio_operation();
 }
 
 QString Directory::canonize(QString uri) {
@@ -130,6 +133,15 @@ bool Directory::is_relative(QString uri) {
 
 QString Directory::find_real_path(QString uri, Core *core) {
   return find_real_path(uri, core->get_mount_manager()->get_mounts());
+}
+
+void Directory::interrupt_gio_operation() {
+  if (gcancellable) {
+    g_cancellable_cancel(gcancellable);
+    while(async_result_type != async_result_unexpected) {
+      QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    }
+  }
 }
 
 
@@ -247,8 +259,10 @@ void Directory::refresh() {
       return;
     }
     GVolume* volume = volumes.at(id)->get_gvolume();
+    interrupt_gio_operation();
+    gcancellable = g_cancellable_new();
     async_result_type = async_result_mount_volume;
-    g_volume_mount(volume, GMountMountFlags(), 0, 0, async_result, this);
+    g_volume_mount(volume, GMountMountFlags(), 0, gcancellable, async_result, this);
     return;
   }
 
@@ -261,9 +275,12 @@ void Directory::refresh() {
 
   //address not recognized. try to pass it to gio
   GFile* file = g_file_new_for_uri(uri.toLocal8Bit());
-  async_result_type = async_result_mount_location;
   qDebug() << "Trying to mount this location";
-  g_file_mount_enclosing_volume(file, GMountMountFlags(), 0, 0, async_result, this);
+
+  interrupt_gio_operation();
+  async_result_type = async_result_mount_location;
+  gcancellable = g_cancellable_new();
+  g_file_mount_enclosing_volume(file, GMountMountFlags(), 0, gcancellable, async_result, this);
 }
 
 void Directory::task_ready(File_info_list r) {
@@ -313,14 +330,17 @@ void Directory::create_task(QString path) {
 
 void Directory::async_result(GObject *source_object, GAsyncResult *res, gpointer p_this) {
   Directory* _this = static_cast<Directory*>(p_this);
-  if (_this->async_result_type == _this->async_result_unexpected) {
-    qWarning("Directory::async_result: unexpected call");
-  }
+  g_object_unref(_this->gcancellable);
+  _this->gcancellable = 0;
+  Async_result_type t = _this->async_result_type;
+  _this->async_result_type = async_result_unexpected;
   GError* e = 0;
-  if (_this->async_result_type == _this->async_result_mount_location) {
+  if (t == _this->async_result_mount_location) {
     g_file_mount_enclosing_volume_finish(reinterpret_cast<GFile*>(source_object), res, &e);
     if (e) {
-      if (e->code == G_IO_ERROR_NOT_SUPPORTED) {
+      if (e->code == G_IO_ERROR_CANCELLED) {
+        qDebug() << "Operation was cancelled";
+      } else if (e->code == G_IO_ERROR_NOT_SUPPORTED) {
         //error "volume doesn't implement mount"  occurs on invalid address
         emit _this->error(tr("Address not recognized"));
       } else {
@@ -334,12 +354,16 @@ void Directory::async_result(GObject *source_object, GAsyncResult *res, gpointer
     // location is mounted now, retry
     _this->refresh();
 
-  } else if (_this->async_result_type == _this->async_result_mount_volume) {
+  } else if (t == _this->async_result_mount_volume) {
     GVolume* volume = reinterpret_cast<GVolume*>(source_object);
     g_volume_mount_finish(volume, res, &e);
     if (e) {
-      emit _this->error( tr("Error %1: %2").arg(e->message)
-                         .arg(QString::fromLocal8Bit(e->message)) );
+      if (e->code == G_IO_ERROR_CANCELLED) {
+        qDebug() << "Operation was cancelled";
+      } else {
+        emit _this->error( tr("Error %1: %2").arg(e->message)
+                           .arg(QString::fromLocal8Bit(e->message)) );
+      }
       g_error_free(e);
       return;
     }
@@ -361,6 +385,11 @@ void Directory::async_result(GObject *source_object, GAsyncResult *res, gpointer
     g_object_unref(f);
     g_object_unref(mount);
     _this->refresh();
+  } else {
+    qWarning("Directory::async_result: unexpected call");
+    qDebug() << "type: " << t;
+    #ifdef TESTS_MODE
+      throw std::runtime_error("Directory::async_result: unexpected call");
+    #endif
   }
-  _this->async_result_type = _this->async_result_unexpected;
 }

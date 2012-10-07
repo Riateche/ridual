@@ -58,8 +58,6 @@ void Main_window::init() {
 
   QThreadPool::globalInstance()->setMaxThreadCount(5);
 
-  qRegisterMetaType<File_info_list>("File_info_list");
-  qRegisterMetaType<Error_type::Enum>("Error_type::Enum");
   ui->setupUi(this);
 
   foreach(QAction* a, QList<QAction*>() << ui->action_recursive_fetch_auto

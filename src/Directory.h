@@ -5,6 +5,7 @@
 #include "File_info.h"
 #include "Elapsed_timer.h"
 #include "Core_ally.h"
+#include "qt_gtk.h"
 
 typedef struct _GObject GObject;
 typedef struct _GAsyncResult GAsyncResult;
@@ -88,6 +89,8 @@ public:
 
 
 
+  void interrupt_gio_operation();
+
   
 signals:
   /*!
@@ -142,12 +145,14 @@ private:
 
   enum Async_result_type {
     async_result_unexpected,
+    async_result_deadly_unexpected,
     async_result_mount_location,
     async_result_mount_volume
   };
 
   // async_result is used for several purposes, we need to determine what was requested
   Async_result_type async_result_type;
+  GCancellable* gcancellable;
 
   static void async_result(GObject *source_object, GAsyncResult *res, gpointer _this);
   

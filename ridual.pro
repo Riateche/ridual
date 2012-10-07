@@ -134,6 +134,7 @@ testing {
   SOURCES += $$_PRO_FILE_PWD_/tests/*.cpp
   HEADERS += $$_PRO_FILE_PWD_/tests/*.h
   TARGET = ridual-test
+  DEFINES += "TESTS_MODE"
   #DEFINES += "TEST_ENV_PATH=\\\"$$_PRO_FILE_PWD_/tests/env\\\""
 } else {
   SOURCES += src/main.cpp

@@ -1,15 +1,17 @@
 #include "debug_output.h"
 #include <QDebug>
-#include <QElapsedTimer>
+#include "Elapsed_timer.h"
 #include <QTest>
 
-::std::ostream& operator<<(::std::ostream& os, const QString& s) {
-  return os << qPrintable(s);
+
+void PrintTo(const QString& bar, ::std::ostream* os) {
+  *os << qPrintable(bar);
 }
 
+
 bool wait_for_signal(QSignalSpy* spy, int max_time) {
-  QElapsedTimer  t;
-  t.start();
+  Elapsed_timer t;
+  t.restart();
   while(spy->isEmpty()) {
     if (t.elapsed() > max_time) return false;
     QTest::qWait(50);
@@ -17,7 +19,7 @@ bool wait_for_signal(QSignalSpy* spy, int max_time) {
   return true;
 }
 
-::std::ostream& operator<<(::std::ostream& os, const Columns& c) {
-  return os << qPrintable(c.to_string());
+void PrintTo(const Columns& bar, ::std::ostream* os) {
+  PrintTo(bar.to_string(), os);
 }
 

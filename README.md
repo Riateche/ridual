@@ -115,6 +115,11 @@ Tests are incomplete and broken sometimes, but one cat try:
     cd project_dir
     tests/run.sh
 
+Command line options are passed to gtest, e.g.
+
+    tests/run.sh --gtest_filter=File_list_model.\*
+
+
 ### See also
 
 - [PPA](https://launchpad.net/%7Estrahovp/+archive/ridual)

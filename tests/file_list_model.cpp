@@ -3,6 +3,9 @@
 #include "File_list_model.h"
 #include "debug_output.h"
 #include <QListView>
+#include "Core.h"
+#include <QTableView>
+#include <QTest>
 
 TEST(File_list_model, get_mime_description) {
   EXPECT_FALSE(File_list_model::get_mime_description("text/plain").isEmpty());
@@ -21,7 +24,8 @@ TEST(File_list_model, format_octal_permissions) {
 }
 
 TEST(File_list_model, columns) {
-  File_list_model model;
+  Core core;
+  File_list_model model(&core);
   Columns columns1;
   columns1 << Column::uri << Column::mime_type;
   model.set_columns(columns1);
@@ -43,7 +47,8 @@ TEST(File_list_model, columns) {
 
 
 TEST(File_list_model, cell_count) {
-  File_list_model model;
+  Core core;
+  File_list_model model(&core);
   File_info_list list;
   list << File_info() << File_info() << File_info();
   model.set_data(list);
@@ -65,7 +70,10 @@ TEST(File_list_model, cell_count) {
 
 
 TEST(File_list_model, index_for_uri) {
-  File_list_model model;
+  Core core;
+  File_list_model model(&core);
+  Columns columns; columns << Column::uri;
+  model.set_columns(columns);
   File_info_list list;
   File_info fi;
   fi.uri = "/usr";
@@ -80,9 +88,7 @@ TEST(File_list_model, index_for_uri) {
   list << fi;
   model.set_data(list);
 
-  //qDebug() << model.index(0, 0);
   EXPECT_EQ(0, model.index(0, 0).row()) << "Failed to create QModelIndex.";
-
   EXPECT_EQ(2, model.index_for_uri("/etc").row()) << "Wrong result of index_for_uri.";
   EXPECT_EQ(0, model.index_for_uri("/etc").column()) << "Wrong result of index_for_uri.";
 
@@ -92,7 +98,10 @@ TEST(File_list_model, index_for_uri) {
 
 
 TEST(File_list_model, current_line_header) {
-  File_list_model model;
+  Core core;
+  File_list_model model(&core);
+  Columns columns; columns << Column::uri;
+  model.set_columns(columns);
   File_info_list list;
   list << File_info() << File_info() << File_info();
   model.set_data(list);
