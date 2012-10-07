@@ -1,7 +1,12 @@
 #!/bin/bash
+# Usage:
+# ./build_deb.sh          - only prepare build directory
+# ./build_deb.sh local    - build deb using pbuilder
+# ./build_deb.sh ppa      - send build task to ppa
+
 
 REPO_PATH=.
-BUILD_PATH=../build
+BUILD_PATH=/tmp/ridual_build_deb
 PROG_NAME=ridual
 VERSION=`cat $REPO_PATH/VERSION`
 
