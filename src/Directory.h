@@ -73,8 +73,6 @@ public:
 
   inline QString get_parent_uri() { return get_parent_uri(uri); }
 
-
-
   static bool is_relative(QString uri);
 
 

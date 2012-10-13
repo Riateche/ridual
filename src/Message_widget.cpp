@@ -15,7 +15,7 @@ Message_widget::Message_widget(QString message, Icon::Enum icon) {
     case Icon::success: icon_name = "success";  break;
     case Icon::info:    icon_name = "info";     break;
   }
-  icon_label->setPixmap(QPixmap(QString(":/images/%1.png").arg(icon_name)));
+  icon_label->setPixmap(QPixmap(QString(":/resources/images/%1.png").arg(icon_name)));
   layout->addWidget(icon_label);
   QLabel* message_label = new QLabel(message);
   message_label->setWordWrap(true);

@@ -113,6 +113,9 @@ private:
 
   void keyPressEvent(QKeyEvent* event);
 
+  Action_data get_auto_target_and_destination(Action_type::Enum action_type);
+  void copy_or_cut_files_to_clipboard(bool cut);
+
 
 private slots:
   void on_action_hotkeys_triggered();
@@ -141,6 +144,12 @@ private slots:
   void slot_focus_question();
   void action_started();
   void question_widget_destroyed(QObject* object);
+
+  void on_action_clipboard_copy_triggered();
+
+  void on_action_cut_triggered();
+
+  void on_action_paste_triggered();
 
 public slots:
   void open_current();

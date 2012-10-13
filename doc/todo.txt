@@ -75,6 +75,8 @@
   - progress in unity taskbar
   - copy selected files names to clipboard (only filename, full path, full network path)
   - icons for "places" menus
+  - paste data from clipboard to file (text, html etc)
+  - auto numbering when pasting from clipboard to the same directory
 
 ----------------------
 - alternatives:
@@ -103,12 +105,5 @@
 clipboard:
   http://www.le-web.org/2008/12/04/pygtk-copy-a-file-to-clipboard-paste-it-in-nautilus/
 
-  #include <QClipboard>
-  #include <QMimeData>
-  #include <QDebug>
-  #include <QStringList>
-  QClipboard *clipboard = QApplication::clipboard();
-  const QMimeData* d = clipboard->mimeData();
-  qDebug() << d->formats();
-  qDebug() << d->data("x-special/gnome-copied-files");
+
   return 0;

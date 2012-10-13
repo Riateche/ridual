@@ -1,7 +1,8 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
-
+#include <QClipboard>
+#include <QMimeData>
 #include <QResource>
 #include <QTextBrowser>
 #include "Directory.h"
@@ -133,6 +134,9 @@ void Main_window::init() {
   hotkeys.add("move",     ui->action_move);
   hotkeys.add("remove",     ui->action_remove);
   hotkeys.add("choose_queue", tr("Choose queue"), ui->action_queue_choose);
+  hotkeys.add("clipboard_copy",     tr("Copy files to clipboard"),  ui->action_clipboard_copy);
+  hotkeys.add("clipboard_cut",      tr("Cut files to clipboard"),  ui->action_cut);
+  hotkeys.add("clipboard_paste",    tr("Paste files from clipboard"),  ui->action_paste);
 
   connect(ui->action_go_parent_directory, SIGNAL(triggered()),
           this, SLOT(go_parent()));
@@ -257,14 +261,13 @@ void Main_window::create_action(Action_data data) {
     show_message(tr("Invalid target for this operation."), Icon::error);
     return;
   }
-  data.targets = active_pane->get_selected_files();
   if (data.type != Action_type::remove) {
-    data.destination = get_destination_pane()->get_uri();
     if (data.destination == Special_uri(Special_uri::places).uri()) {
       show_message(tr("Can't use 'Places' special location as destination."), Icon::error);
       return;
     }
   }
+
   Action* a = new Action(data);
   a->set_mounts(core->get_mount_manager()->get_mounts());
   Action_queue* q = get_current_queue();
@@ -338,6 +341,20 @@ void Main_window::keyPressEvent(QKeyEvent *event) {
   }
 }
 
+Action_data Main_window::get_auto_target_and_destination(Action_type::Enum action_type) {
+  Action_data data;
+  data.type = action_type;
+  foreach(File_info fi, active_pane->get_selected_files()) {
+    data.targets << fi.uri;
+  }
+  if (data.type != Action_type::remove) {
+    data.destination = get_destination_pane()->get_uri();
+  }
+  return data;
+}
+
+
+
 
 void Main_window::on_action_about_triggered() {
   QTextBrowser* b = new QTextBrowser();
@@ -351,14 +368,12 @@ void Main_window::on_action_about_triggered() {
 }
 
 void Main_window::on_action_remove_triggered() {
-  Action_data data;
-  data.type = Action_type::remove;
+  Action_data data = get_auto_target_and_destination(Action_type::remove);
   create_action(data);
 }
 
 void Main_window::on_action_move_triggered() {
-  Action_data data;
-  data.type = Action_type::move;
+  Action_data data = get_auto_target_and_destination(Action_type::move);
   create_action(data);
 }
 
@@ -599,8 +614,7 @@ void Main_window::on_action_edit_triggered() {
 }
 
 void Main_window::on_action_copy_triggered() {
-  Action_data data;
-  data.type = Action_type::copy;
+  Action_data data = get_auto_target_and_destination(Action_type::copy);
   create_action(data);
 }
 
@@ -642,3 +656,61 @@ void Main_window::question_widget_destroyed(QObject *object) {
   }
 }
 
+void Main_window::copy_or_cut_files_to_clipboard(bool cut) {
+  QStringList list;
+  foreach(File_info fi, active_pane->get_selected_files()) {
+    QString uri = fi.uri;
+    if (uri.startsWith("/")) {
+      uri = "file://" + uri;
+    }
+    list << QString::fromAscii(QUrl::toPercentEncoding(uri, ":/"));
+  }
+  QClipboard* clipboard = QApplication::clipboard();
+  QMimeData* d = new QMimeData();
+  d->setData("x-special/gnome-copied-files", QString("%1\n%2")
+             .arg(cut? "cut": "copy")
+             .arg(list.join("\n"))
+             .toUtf8());
+  d->setText(list.join("\n").toUtf8());
+  clipboard->setMimeData(d);
+}
+
+void Main_window::on_action_clipboard_copy_triggered() {
+  copy_or_cut_files_to_clipboard(false);
+}
+
+void Main_window::on_action_cut_triggered() {
+  copy_or_cut_files_to_clipboard(true);
+}
+
+void Main_window::on_action_paste_triggered() {
+  QClipboard* clipboard = QApplication::clipboard();
+  const QMimeData* d = clipboard->mimeData();
+  foreach(QString s, d->formats()) {
+    qDebug() << s << d->data(s);
+  }
+
+  if (!d->hasFormat("x-special/gnome-copied-files")) {
+    show_message(tr("Failed to paste from clipboard."), Icon::error);
+    return;
+  }
+  QStringList list = QString::fromUtf8(d->data("x-special/gnome-copied-files")).split("\n");
+  QString mode = list.first().trimmed();
+  list.removeFirst();
+  QStringList normal_list;
+  foreach(QString s, list) {
+    normal_list << Directory::canonize(QUrl::fromPercentEncoding(s.toAscii()));
+  }
+  Action_data data;
+  data.targets = normal_list;
+  data.destination = active_pane->get_uri();
+  if (mode == "copy") {
+    data.type = Action_type::copy;
+  } else if (mode == "cut") {
+    data.type = Action_type::move;
+  } else {
+    show_message(tr("Failed to paste from clipboard."), Icon::error);
+    return;
+  }
+  create_action(data);
+}

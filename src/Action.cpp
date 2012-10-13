@@ -84,8 +84,8 @@ void Action::process_events() {
 
 void Action::iterate_all(bool prepare) {
   try {
-    foreach(File_info target, data.targets) {
-      QString root_path = Directory::find_real_path(target.uri, mounts);
+    foreach(QString target_uri, data.targets) {
+      QString root_path = Directory::find_real_path(target_uri, mounts);
       if (root_path.endsWith("/")) root_path = root_path.left(root_path.length() - 1);
       QStack<QDirIterator*> stack;
       try {

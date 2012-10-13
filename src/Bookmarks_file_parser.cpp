@@ -4,7 +4,7 @@
 #include <QUrl>
 #include <QTextStream>
 #include <QDebug>
-
+#include "Directory.h"
 
 Bookmarks_file_parser::Bookmarks_file_parser(QString file_path,
                                              Format _format,
@@ -39,18 +39,22 @@ void Bookmarks_file_parser::read() {
       if (s.isEmpty()) continue;
       File_info f;
       int i = s.indexOf(' ');
+      QString uri;
       if (i >= 0) {
-        f.uri = QUrl::fromPercentEncoding(s.left(i).toAscii());
+        uri = s.left(i).toAscii();
+        //f.uri = QUrl::fromPercentEncoding(s.left(i).toAscii());
         f.name = s.mid(i + 1);
       } else {
-        f.uri = QUrl::fromPercentEncoding(s.toAscii());
-        QStringList parts = f.uri.split("/");
+        uri = s;
+        //f.uri = QUrl::fromPercentEncoding(s.toAscii());
+        QStringList parts = uri.split("/");
         if (parts.last().isEmpty()) {
-          f.name = f.uri;
+          f.name = uri;
         } else {
           f.name = parts.last();
         }
       }
+      f.uri = Directory::canonize(QUrl::fromPercentEncoding(uri.toAscii()));
       if (f.uri.startsWith("file://")) {
         f.uri = f.uri.mid(7);
       }

@@ -116,7 +116,7 @@
      <x>0</x>
      <y>0</y>
      <width>623</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_file">
@@ -176,7 +176,16 @@
     </property>
     <addaction name="action_about"/>
    </widget>
+   <widget class="QMenu" name="menuClipboard">
+    <property name="title">
+     <string>Clipboard</string>
+    </property>
+    <addaction name="action_clipboard_copy"/>
+    <addaction name="action_cut"/>
+    <addaction name="action_paste"/>
+   </widget>
    <addaction name="menu_file"/>
+   <addaction name="menuClipboard"/>
    <addaction name="menu_task"/>
    <addaction name="menu_go"/>
    <addaction name="menu_queue"/>
@@ -352,6 +361,30 @@
   <action name="action_about">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="action_clipboard_copy">
+   <property name="text">
+    <string>Copy files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="action_cut">
+   <property name="text">
+    <string>Cut files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="action_paste">
+   <property name="text">
+    <string>Paste files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>
