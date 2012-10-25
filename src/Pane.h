@@ -27,7 +27,6 @@ public:
   explicit Pane(QWidget* parent);
   ~Pane();
   void set_main_window(Main_window* main_window);
-  void set_uri(QString dir);
 
 
   void load_state(QSettings* s);
@@ -62,6 +61,7 @@ public slots:
   void go_parent();
   void focus_address_line();
   void refresh();
+  void set_uri(QString dir);
 
 private slots:
   void on_go_clicked();
@@ -82,11 +82,15 @@ private:
   File_list_model* file_list_model;
   Directory* directory, *pending_directory;
   QString last_completion_uri;
+  QStandardItemModel uri_completion_model;
+  Directory* completion_directory;
+  File_info_list old_path_items;
 
   void update_model_current_index();
   bool eventFilter(QObject* object, QEvent* event);
-  QStandardItemModel uri_completion_model;
-  Directory* completion_directory;
+  void resizeEvent(QResizeEvent *);
+
+  void refresh_path_toolbar();
 
 };
 

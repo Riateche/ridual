@@ -15,8 +15,11 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="margin">
-    <number>0</number>
+    <number>5</number>
    </property>
+   <item>
+    <widget class="Path_widget" name="path_widget" native="true"/>
+   </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -92,6 +95,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Path_widget</class>
+   <extends>QWidget</extends>
+   <header>Path_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

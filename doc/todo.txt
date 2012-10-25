@@ -8,7 +8,6 @@
 
 
 - stage1:
-  - pause and abort tasks with keyboard (shortcut to abort last created task)
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
   - fix behaviour: file write error -> retry -> file already exists
   - advanced error options (not only skip/abort/retry)
@@ -32,7 +31,7 @@
   - sound on messages
   - If some files was skipped or overwritten without propmt, the message about this must
   appear after the task is completed
-  - align path buttons to the right when right pane is active
+  - pause and abort every task with keyboard
 
 - stage2:
   - run-time permission granting

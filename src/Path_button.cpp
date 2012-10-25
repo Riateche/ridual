@@ -49,7 +49,13 @@ void Path_button::directory_ready(File_info_list files) {
   }
   foreach(File_info i, files) {
     if (i.is_folder) {
-      QAction* a = menu->addAction(i.name, this, SLOT(menu_action_triggered()));
+      QString caption;
+      if (!i.name.isEmpty()) {
+        caption = i.name;
+      } else {
+        caption = i.file_name();
+      }
+      QAction* a = menu->addAction(caption, this, SLOT(menu_action_triggered()));
       if (i.uri == uri) {
         a->setEnabled(false);
       }

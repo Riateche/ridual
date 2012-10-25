@@ -109,10 +109,10 @@ void Main_window::init() {
   connect(ui->action_go_parent_directory, SIGNAL(triggered()),
           this, SLOT(go_parent()));
 
-  connect(ui->left_pane,  SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
-  connect(ui->right_pane, SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
-  connect(this, SIGNAL(active_pane_changed()),   this, SLOT(refresh_path_toolbar()));
-  refresh_path_toolbar();
+  //connect(ui->left_pane,  SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
+  //connect(ui->right_pane, SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
+  //connect(this, SIGNAL(active_pane_changed()),   this, SLOT(refresh_path_toolbar()));
+  //refresh_path_toolbar();
 
   connect(ui->left_pane,  SIGNAL(selection_changed()),   this, SIGNAL(selection_changed()));
   connect(ui->right_pane, SIGNAL(selection_changed()),   this, SIGNAL(selection_changed()));
@@ -249,9 +249,6 @@ void Main_window::switch_focus_question(Question_widget *target, int direction) 
 }
 
 
-void Main_window::resizeEvent(QResizeEvent *) {
-  ui->path_widget->refresh();
-}
 
 void Main_window::view_or_edit_selected(bool edit) {
   File_info_list list = active_pane->get_selected_files();
@@ -387,100 +384,10 @@ void Main_window::focus_address_line() {
 
 
 
-void Main_window::refresh_path_toolbar() {
-  File_info_list path_items;
-  QString real_path = active_pane->get_uri();
-  QString headless_path;
-  bool root_found = false;
-  QList<Special_uri> special_uris;
-  special_uris << Special_uri(Special_uri::mounts) <<
-                  Special_uri(Special_uri::bookmarks) <<
-                  Special_uri(Special_uri::userdirs);
-  foreach(Special_uri u, special_uris) {
-    if (real_path.startsWith(u.uri())) {
-      File_info f;
-      f.uri = u.uri();
-      f.name = u.caption();
-      path_items << f;
-      break;
-    }
-  }
 
-  foreach(Gio_mount mount, core->get_mount_manager()->get_mounts()) {
-    QString uri_prefix = mount.uri;
-    if (!uri_prefix.isEmpty() && real_path.startsWith(uri_prefix)) {
-      File_info file_info;
-      file_info.uri = uri_prefix;
-      file_info.name = mount.name;
-      path_items << file_info;
-      if (!uri_prefix.endsWith("/")) {
-        uri_prefix += "/";
-      }
-      headless_path = real_path.mid(uri_prefix.count());
-      root_found = true;
-    }
-  }
-  QString home = QDir::homePath();
-  if (!root_found && real_path.startsWith(home)) {
-    File_info file_info;
-    file_info.uri = home;
-    file_info.name = tr("Home");
-    path_items << file_info;
-    if (!home.endsWith("/")) home += "/";
-    headless_path = real_path.mid(home.length());
-    root_found = true;
-  }
-  if (!root_found && real_path.startsWith("/")) {
-    File_info file_info;
-    file_info.uri = "/";
-    file_info.name = tr("Root");
-    path_items << file_info;
-    headless_path = real_path.mid(1);
-    root_found = true;
-  }
-  if (root_found && !headless_path.isEmpty()) {
-    QStringList parts = headless_path.split("/");
-    for(int i = 0; i < parts.count(); i++) {
-      File_info file_info;
-      file_info.name = parts[i];
-      file_info.uri = path_items.last().uri;
-      if (!file_info.uri.endsWith("/")) {
-        file_info.uri += "/";
-      }
-      file_info.uri += parts[i];
-      path_items << file_info;
-    }
-  }
-
-  for(int i = 0; i < old_path_items.count(); i++) {
-    if (i < path_items.count() &&
-        old_path_items[i].uri != path_items[i].uri) break;
-    if (i >= path_items.count()) {
-      path_items << old_path_items[i];
-    }
-  }
-  old_path_items = path_items;
-
-  File_info places;
-  places.name = Special_uri(Special_uri::places).caption();
-  places.uri = Special_uri(Special_uri::places).uri();
-  path_items.prepend(places);
-  QList<Path_button*> buttons;
-  for(int i = 0; i < path_items.count(); i++) {
-    QString caption = path_items[i].name;
-    if (i < path_items.count() - 1) {
-      caption += tr(" ‣");
-    }
-    Path_button* b = new Path_button(core, caption, path_items[i].uri);
-    b->setChecked(path_items[i].uri == real_path);
-    connect(b, SIGNAL(go_to(QString)), this, SLOT(go_to(QString)));
-    buttons << b;
-  }
-  ui->path_widget->set_buttons(buttons);
-}
 
 void Main_window::go_to(QString uri) {
-  refresh_path_toolbar();
+  //refresh_path_toolbar();
   active_pane->set_uri(uri);
 }
 

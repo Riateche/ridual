@@ -85,13 +85,12 @@ private:
   QTimer save_settings_timer;
   Pane* active_pane;
   Hotkeys hotkeys;
-  File_info_list old_path_items;
+
   Action_queue* current_queue;
   QList<Question_widget*> question_widgets;
-    Columns columns;
+  Columns columns;
 
   Action_queue* create_queue();
-  void resizeEvent(QResizeEvent *);
   void view_or_edit_selected(bool edit);
   void send_answer(int index);
   bool eventFilter(QObject *object, QEvent *event);
@@ -123,7 +122,6 @@ private slots:
   void save_settings();
   void go_parent();
   void focus_address_line();
-  void refresh_path_toolbar();
   void go_to(QString uri);
   void slot_selection_changed();
   void actions_recursive_fetch_triggered();
