@@ -6,6 +6,7 @@
 #include "Directory_watcher.h"
 #include <QDir>
 #include <QThread>
+#include "Actions_manager.h"
 
 Core::Core() {
   qRegisterMetaType<File_info_list>("File_info_list");
@@ -18,10 +19,13 @@ Core::Core() {
   user_dirs = new Bookmarks_file_parser(QDir::home().absoluteFilePath(".config/user-dirs.dirs"),
                                         Bookmarks_file_parser::format_xdg);
   mount_manager = new Mount_manager(this);
-  watcher = new Directory_watcher();
-  watcher_thread = new QThread();
+  watcher = new Directory_watcher(0);
+  watcher_thread = new QThread(this);
   watcher_thread->start();
   watcher->moveToThread(watcher_thread);
+
+  actions_manager = new Actions_manager(this);
+  actions_manager->set_mount_manager(mount_manager);
 
   QSettings settings;
   sort_folders_before_files = settings.value("sort_folders_before_files").toBool();

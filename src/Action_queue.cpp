@@ -9,27 +9,31 @@ Action_queue::Action_queue(int p_id) {
 }
 
 void Action_queue::run() {
-  while(!actions.isEmpty()) {
-    QMutexLocker locker(&access_mutex);
-    Action* a = actions.dequeue();
+  while(true) {
+    Action* a;
+    {
+      QMutexLocker locker(&access_mutex);
+      if (actions.isEmpty()) return;
+      a = actions.dequeue();
+    }
     a->run();
     delete a;
   }
 }
 
-void Action_queue::add_action(Action *t) {
+void Action_queue::add_action(Action *a) {
   QMutexLocker locker(&access_mutex);
-  actions.enqueue(t);
-  t->set_queue(this);
-  t->moveToThread(this);
-  //connect(t, SIGNAL(finished()), this, SLOT(launch_action()));
-  //emit task_added(t);
+  actions.enqueue(a);
+  a->set_queue(this);
+  emit action_added(a); //must be before moveToThread
+  a->moveToThread(this);
   if (!isRunning()) {
     start();
   }
 }
 
 QQueue<Action *> Action_queue::get_actions() {
+  QMutexLocker locker(&access_mutex);
   return actions;
 }
 

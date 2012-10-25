@@ -11,12 +11,14 @@ class Action;
   All operations with Action_queue must be executed from GUI thread.
   Accessing from other threads is forbidden. Use signal-slot system
   to interact with queues.
+
+  Use Actions_manager to create new queues.
   */
 class Action_queue : public QThread {
   Q_OBJECT
 public:
   virtual ~Action_queue();
-  void add_action(Action* t);
+  void add_action(Action* a);
 
   /*! Get the id of queue. Id is an unique positive number.
     This function must be called only from the thread
@@ -30,11 +32,13 @@ public:
 
   
 signals:
-  //void task_added(Action* task);
+  /*! Emitted when action is added to the queue but not launched yet.
+    */
+  void action_added(Action* action);
   
 private:
   explicit Action_queue(int p_id);
-  friend class Main_window;
+  friend class Actions_manager;
   QQueue<Action*> actions;
   QMutex access_mutex;
   int id;

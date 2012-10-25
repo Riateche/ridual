@@ -163,6 +163,8 @@
     <addaction name="action_rename"/>
     <addaction name="action_remove"/>
     <addaction name="action_move_to_trash"/>
+    <addaction name="separator"/>
+    <addaction name="action_abort_last_created_task"/>
    </widget>
    <widget class="QMenu" name="menu_queue">
     <property name="title">
@@ -385,6 +387,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="action_abort_last_created_task">
+   <property name="text">
+    <string>Abort last created task</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
    </property>
   </action>
  </widget>

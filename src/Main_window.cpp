@@ -1,6 +1,7 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
+#include "Actions_manager.h"
 #include <QClipboard>
 #include <QMimeData>
 #include <QResource>
@@ -63,7 +64,7 @@ void Main_window::init() {
 
   foreach(QAction* a, QList<QAction*>() << ui->action_recursive_fetch_auto
           << ui->action_recursive_fetch_off << ui->action_recursive_fetch_on) {
-    connect(a, SIGNAL(triggered()), this, SLOT(slot_actions_recursive_fetch_triggered()));
+    connect(a, SIGNAL(triggered()), this, SLOT(actions_recursive_fetch_triggered()));
   }
 
   ui->current_queue_notice->hide();
@@ -103,44 +104,10 @@ void Main_window::init() {
 
   set_active_pane(ui->left_pane);
 
-  hotkeys.add("switch_active_pane",
-              tr("Switch between panes"),
-              "Tab",
-              this, SLOT(switch_active_pane())
-              );
-
-  hotkeys.add("focus_question",
-              tr("Focus question dialog"),
-              "Ctrl+E",
-              this, SLOT(slot_focus_question())
-              );
-
-
-  //ui->menu_file->addAction(test);
-
-  hotkeys.add("Focus address bar",
-              tr("Focus address bar"),
-              "Ctrl+L",
-              this, SLOT(focus_address_line())
-              );
-
-  hotkeys.add("go_parent_directory", tr("Go to parent directory"), ui->action_go_parent_directory);
-  hotkeys.add("go_root",             tr("Go to filesystem root"),  ui->action_go_root);
-  hotkeys.add("go_places",           tr("Go to places"),           ui->action_go_places);
-  hotkeys.add("execute",  ui->action_execute);
-  hotkeys.add("view",     ui->action_view);
-  hotkeys.add("edit",     ui->action_edit);
-  hotkeys.add("copy",     ui->action_copy);
-  hotkeys.add("move",     ui->action_move);
-  hotkeys.add("remove",     ui->action_remove);
-  hotkeys.add("choose_queue", tr("Choose queue"), ui->action_queue_choose);
-  hotkeys.add("clipboard_copy",     tr("Copy files to clipboard"),  ui->action_clipboard_copy);
-  hotkeys.add("clipboard_cut",      tr("Cut files to clipboard"),  ui->action_cut);
-  hotkeys.add("clipboard_paste",    tr("Paste files from clipboard"),  ui->action_paste);
+  init_hotkeys();
 
   connect(ui->action_go_parent_directory, SIGNAL(triggered()),
           this, SLOT(go_parent()));
-
 
   connect(ui->left_pane,  SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
   connect(ui->right_pane, SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
@@ -164,6 +131,9 @@ void Main_window::init() {
     qDebug() << width() / 2;
     ui->panes_splitter->setSizes(QList<int>() << width() / 2 << width() / 2);
   }
+
+  connect(core->get_actions_manager(), SIGNAL(queue_destroyed(Action_queue*)), this, SLOT(queue_destroyed(Action_queue*)));
+  connect(core->get_actions_manager(), SIGNAL(action_added(Action*)), this, SLOT(action_added(Action*)));
 
 }
 
@@ -227,26 +197,6 @@ QString Main_window::get_version() {
   return QString::fromUtf8(reinterpret_cast<const char*>(r.data()));
 }
 
-Action_queue *Main_window::create_queue() {
-  QSet<int> ids;
-  foreach(Action_queue* q, get_queues()) ids << q->get_id();
-  int id = 1;
-  while(ids.contains(id)) id++;
-  Action_queue* q = new Action_queue(id);
-  q->setParent(this);
-  connect(q, SIGNAL(destroyed(QObject*)), this, SLOT(slot_queue_destroyed(QObject*)));
-  return q;
-}
-
-QList<Action_queue*> Main_window::get_queues() {
-  return findChildren<Action_queue*>();
-}
-
-Action_queue *Main_window::get_current_queue() {
-  if (current_queue) return current_queue;
-  return create_queue();
-}
-
 void Main_window::set_current_queue(Action_queue* queue) {
   current_queue = queue;
   ui->current_queue_notice->setVisible(current_queue != 0);
@@ -268,16 +218,13 @@ void Main_window::create_action(Action_data data) {
     }
   }
 
-  Action* a = new Action(data);
-  a->set_mounts(core->get_mount_manager()->get_mounts());
-  Action_queue* q = get_current_queue();
-  connect(a, SIGNAL(question(Question_data)), this, SLOT(slot_action_question(Question_data)));
-  Action_state_widget* w = new Action_state_widget(a);
-  connect(w, SIGNAL(show_requested()), this, SLOT(action_started()));
-
-  //connect(a, SIGNAL(started()), this, SLOT(action_started()));
-  q->add_action(a);
-  emit action_added(a);
+  Action_queue* q;
+  if (current_queue) {
+    q = current_queue;
+  } else {
+    q = core->get_actions_manager()->create_queue();
+  }
+  q->add_action(new Action(data));
 }
 
 Recursive_fetch_option Main_window::get_recursive_fetch_option() {
@@ -554,7 +501,7 @@ void Main_window::slot_selection_changed() {
   ui->action_edit->setEnabled(can_edit);
 }
 
-void Main_window::slot_actions_recursive_fetch_triggered() {
+void Main_window::actions_recursive_fetch_triggered() {
   foreach(QAction* a, QList<QAction*>() << ui->action_recursive_fetch_auto
           << ui->action_recursive_fetch_off << ui->action_recursive_fetch_on) {
     if (a == sender()) {
@@ -618,7 +565,7 @@ void Main_window::on_action_copy_triggered() {
   create_action(data);
 }
 
-void Main_window::slot_queue_destroyed(QObject *object) {
+void Main_window::queue_destroyed(Action_queue* object) {
   if (object == current_queue) {
     set_current_queue(0);
   }
@@ -675,6 +622,42 @@ void Main_window::copy_or_cut_files_to_clipboard(bool cut) {
   clipboard->setMimeData(d);
 }
 
+void Main_window::init_hotkeys() {
+  hotkeys.add("switch_active_pane",
+              tr("Switch between panes"),
+              "Tab",
+              this, SLOT(switch_active_pane())
+              );
+
+  hotkeys.add("focus_question",
+              tr("Focus question dialog"),
+              "Ctrl+E",
+              this, SLOT(slot_focus_question())
+              );
+
+  hotkeys.add("Focus address bar",
+              tr("Focus address bar"),
+              "Ctrl+L",
+              this, SLOT(focus_address_line())
+              );
+
+  hotkeys.add("go_parent_directory", tr("Go to parent directory"), ui->action_go_parent_directory);
+  hotkeys.add("go_root",             tr("Go to filesystem root"),  ui->action_go_root);
+  hotkeys.add("go_places",           tr("Go to places"),           ui->action_go_places);
+  hotkeys.add("execute",  ui->action_execute);
+  hotkeys.add("view",     ui->action_view);
+  hotkeys.add("edit",     ui->action_edit);
+  hotkeys.add("copy",     ui->action_copy);
+  hotkeys.add("move",     ui->action_move);
+  hotkeys.add("remove",     ui->action_remove);
+  hotkeys.add("choose_queue", tr("Choose queue"), ui->action_queue_choose);
+  hotkeys.add("clipboard_copy",     tr("Copy files to clipboard"),  ui->action_clipboard_copy);
+  hotkeys.add("clipboard_cut",      tr("Cut files to clipboard"),  ui->action_cut);
+  hotkeys.add("clipboard_paste",    tr("Paste files from clipboard"),  ui->action_paste);
+  hotkeys.add("abort_last_created_task",     ui->action_abort_last_created_task);
+
+}
+
 void Main_window::on_action_clipboard_copy_triggered() {
   copy_or_cut_files_to_clipboard(false);
 }
@@ -713,4 +696,20 @@ void Main_window::on_action_paste_triggered() {
     return;
   }
   create_action(data);
+}
+
+void Main_window::on_action_abort_last_created_task_triggered() {
+  QList<Action*> actions = core->get_actions_manager()->get_actions();
+  if (actions.isEmpty()) {
+    show_message(tr("No actions exist"), Icon::error);
+    return;
+  }
+  Action* a = actions.last();
+  QMetaObject::invokeMethod(a, "abort");
+}
+
+void Main_window::action_added(Action* a) {
+  connect(a, SIGNAL(question(Question_data)), this, SLOT(slot_action_question(Question_data)));
+  Action_state_widget* w = new Action_state_widget(a);
+  connect(w, SIGNAL(show_requested()), this, SLOT(action_started()));
 }

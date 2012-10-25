@@ -51,22 +51,7 @@ public:
   inline Columns get_columns() { return columns; }
   void set_columns(Columns v);
 
-
   QString get_version();
-
-
-
-
-  /*! Get all currently existing queues. Note that any queue is deleted
-    when it becomes empty.
-    */
-  QList<Action_queue*> get_queues();
-
-  /*! Return the current queue e.g. the queue for new task to be placed at.
-    If there is no current queue this function calls Main_window::create_queue
-    and returns a pointer to new queue.
-    */
-  Action_queue* get_current_queue();
 
   void set_current_queue(Action_queue *queue);
 
@@ -117,6 +102,9 @@ private:
   void copy_or_cut_files_to_clipboard(bool cut);
 
 
+  void init_hotkeys();
+
+
 private slots:
   void on_action_hotkeys_triggered();
   void on_action_go_places_triggered();
@@ -138,8 +126,8 @@ private slots:
   void refresh_path_toolbar();
   void go_to(QString uri);
   void slot_selection_changed();
-  void slot_actions_recursive_fetch_triggered();
-  void slot_queue_destroyed(QObject* object);
+  void actions_recursive_fetch_triggered();
+  void queue_destroyed(Action_queue* object);
   void slot_action_question(Question_data data);
   void slot_focus_question();
   void action_started();
@@ -151,6 +139,10 @@ private slots:
 
   void on_action_paste_triggered();
 
+  void on_action_abort_last_created_task_triggered();
+
+  void action_added(Action* a);
+
 public slots:
   void open_current();
   void switch_active_pane();
@@ -158,9 +150,7 @@ public slots:
 
 signals:
   void active_pane_changed();
-  //void signal_add_task(Task task);
   void selection_changed();
-  void action_added(Action*);
   void columns_changed(Columns);
 
 };
