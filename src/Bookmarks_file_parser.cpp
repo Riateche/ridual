@@ -39,22 +39,22 @@ void Bookmarks_file_parser::read() {
       if (s.isEmpty()) continue;
       File_info f;
       int i = s.indexOf(' ');
-      QString uri;
+      //QString uri;
       if (i >= 0) {
-        uri = s.left(i).toAscii();
-        //f.uri = QUrl::fromPercentEncoding(s.left(i).toAscii());
+        //uri = s.left(i).toAscii();
+        f.uri = QUrl::fromPercentEncoding(s.left(i).toAscii());
         f.name = s.mid(i + 1);
       } else {
-        uri = s;
-        //f.uri = QUrl::fromPercentEncoding(s.toAscii());
-        QStringList parts = uri.split("/");
+        //uri = s;
+        f.uri = QUrl::fromPercentEncoding(s.toAscii());
+        QStringList parts = f.uri.split("/");
         if (parts.last().isEmpty()) {
-          f.name = uri;
+          f.name = f.uri;
         } else {
           f.name = parts.last();
         }
       }
-      f.uri = Directory::canonize(QUrl::fromPercentEncoding(uri.toAscii()));
+      f.uri = Directory::canonize(f.uri);
       if (f.uri.startsWith("file://")) {
         f.uri = f.uri.mid(7);
       }

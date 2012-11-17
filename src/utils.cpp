@@ -15,15 +15,13 @@ QIcon get_file_icon(const QString& content_type) {
       int i = 0;
       while(names[i] != 0) {
         QString name = QString::fromLocal8Bit(names[i]);
-        if (name != "(null)") { // hack for ubuntu 12.10
-          QIcon r = QIcon::fromTheme(name);
-          if (r.isNull()) {
-            qDebug() << "get_file_icon: no icon from theme for name: " << name;
-          } else {
-            cache.insert(content_type, new QIcon(r));
-            g_object_unref(gicon);
-            return r;
-          }
+        QIcon r = QIcon::fromTheme(name);
+        if (r.isNull()) {
+          qDebug() << "get_file_icon: no icon from theme for name: " << name;
+        } else {
+          cache.insert(content_type, new QIcon(r));
+          g_object_unref(gicon);
+          return r;
         }
         i++;
       }
