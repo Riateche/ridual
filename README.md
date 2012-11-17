@@ -110,7 +110,7 @@ please contact me first.
     
 ### Running tests
 
-Tests are incomplete and broken sometimes, but one cat try:
+Tests are incomplete and broken sometimes, but one can try:
 
     cd project_dir
     tests/run.sh
