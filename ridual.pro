@@ -59,7 +59,9 @@ SOURCES += src/Main_window.cpp \
     src/Message_widget.cpp \
     src/Action_state_widget.cpp \
     src/Elapsed_timer.cpp \
-    src/Actions_manager.cpp
+    src/Actions_manager.cpp \
+    src/File_system_engine.cpp \
+    src/Real_file_system_engine.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -101,7 +103,9 @@ HEADERS  += src/Main_window.h \
     src/Message_widget.h \
     src/Action_state_widget.h \
     src/Elapsed_timer.h \
-    src/Actions_manager.h
+    src/Actions_manager.h \
+    src/File_system_engine.h \
+    src/Real_file_system_engine.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \

@@ -35,3 +35,21 @@ QIcon get_file_icon(const QString& content_type) {
   g_object_unref(gicon);
   return QIcon();
 }
+
+QString get_mime_type(const QString &filename) {
+  GFile *file = g_file_new_for_path (filename.toLocal8Bit());
+  GError* gerror = 0;
+  GFileInfo* gfileinfo = g_file_query_info(file, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE, GFileQueryInfoFlags(), 0, &gerror);
+  if (gerror) {
+    qDebug("gio error: %s", gerror->message);
+    g_error_free(gerror);
+    gerror = 0;
+  }
+  if (gfileinfo) {
+    const char* content_type = g_file_info_get_content_type(gfileinfo);
+    QString result = QString::fromLocal8Bit(content_type);
+    g_object_unref(gfileinfo);
+    return result;
+  }
+  return "application/octet-stream";
+}
