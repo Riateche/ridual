@@ -8,6 +8,7 @@ class Mount_manager;
 class Bookmarks_file_parser;
 class Directory_watcher;
 class Actions_manager;
+class File_system_engine;
 
 class Core : public QObject {
   Q_OBJECT
@@ -25,6 +26,8 @@ public:
 
   inline bool get_sort_folders_before_files() { return sort_folders_before_files; }
   void set_sort_folders_before_files(bool v);
+
+  File_system_engine* get_new_file_system_engine();
 
 signals:
   void sort_folders_before_files_changed();

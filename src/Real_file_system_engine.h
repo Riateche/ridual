@@ -6,25 +6,38 @@
 #include <fstream>
 
 class Real_file_system_engine: public File_system_engine {
+  Q_OBJECT
 public:
   Real_file_system_engine();
   Iterator* list(const QString& uri);
   Operation* copy(const QString& source, const QString& destination);
   Operation* move(const QString& source, const QString& destination);
+
+  enum Move_mode {
+    move_mode_auto,
+    move_mode_copy,
+    move_mode_system
+  };
+
+  Operation* move(const QString& source, const QString& destination, Move_mode mode);
   void remove(const QString& uri);
   void make_directory(const QString& uri);
   QString get_real_file_name(const QString& uri);
   bool is_responsible_for(const QString& uri);
 
-private:
+
   class Real_fs_iterator: public Iterator {
   public:
-    QDirIterator* iterator;
+    Real_fs_iterator(QDirIterator* i);
     bool has_next();
-    File_info get_next();
+    File_info get_next_internal();
 
+  private:
+    QDirIterator* iterator;
 
   };
+
+private:
 
   class Copy_operation: public Operation {
   public:

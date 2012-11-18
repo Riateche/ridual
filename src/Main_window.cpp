@@ -1,6 +1,7 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
+#include "File_system_engine.h"
 #include "Actions_manager.h"
 #include <QClipboard>
 #include <QMimeData>
@@ -252,9 +253,10 @@ void Main_window::switch_focus_question(Question_widget *target, int direction) 
 
 void Main_window::view_or_edit_selected(bool edit) {
   File_info_list list = active_pane->get_selected_files();
+  File_system_engine* fs_engine = core->get_new_file_system_engine();
   foreach(File_info f, list) {
     QProcess* p = new QProcess(this);
-    p->setWorkingDirectory(Directory::find_real_path(Directory::get_parent_uri(f.uri), core));
+    p->setWorkingDirectory(Directory::get_parent_uri(f.path));
     QString command = QSettings().value(edit? "edit_command": "view_command", "gedit %U").toString();
     command = command.replace("%U", QString("\"%1\"").arg(f.uri));
     command = command.replace("%F", QString("\"%1\"").arg(f.path));
@@ -263,6 +265,7 @@ void Main_window::view_or_edit_selected(bool edit) {
     //todo: catch errors
     //todo: run in tasks thread
   }
+  delete fs_engine;
 
 }
 
@@ -447,7 +450,7 @@ void Main_window::on_action_execute_triggered() {
   File_info_list list = active_pane->get_selected_files();
   foreach(File_info f, list) {
     QProcess* p = new QProcess(this);
-    p->setWorkingDirectory(Directory::find_real_path(Directory::get_parent_uri(f.uri), core));
+    p->setWorkingDirectory(Directory::get_parent_uri(f.path));
     p->start(f.path);
     //todo: catch errors
     //todo: run in tasks thread

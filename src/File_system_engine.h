@@ -5,17 +5,23 @@
 
 #define FS_ENGINE_BUFFER_SIZE 65535
 
-class File_system_engine {
+class File_system_engine : public QObject {
+  Q_OBJECT
 public:
 
   class Iterator {
   public:
     virtual bool has_next() = 0;
-    virtual File_info get_next() = 0;
+    File_info get_next();
+    File_info get_current() { return current; }
     virtual ~Iterator() {}
 
   protected:
     Iterator() {}
+    virtual File_info get_next_internal() = 0;
+
+  private:
+    File_info current;
 
   };
 
@@ -77,6 +83,7 @@ public:
     Exception(error_type type, error_cause cause, QString path1 = QString(), QString path2 = QString());
     inline error_type get_type() { return type; }
     inline error_cause get_cause() { return cause; }
+    QString get_message();
 
   private:
     error_type type;

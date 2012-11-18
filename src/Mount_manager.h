@@ -24,7 +24,7 @@ public:
 
   
 signals:
-  void mounts_changed();
+  void mounts_changed(QList<Gio_mount> new_mounts);
 
 private:
   QList<Gio_volume*> volumes;

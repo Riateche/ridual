@@ -113,6 +113,7 @@ QString Directory::get_parent_uri(QString target_uri) {
   return s;
 }
 
+//todo: remove this
 QString Directory::find_real_path(QString uri, const QList<Gio_mount> &mounts) {
   if (uri.startsWith("/")) return uri;
   foreach(Gio_mount mount, mounts) {
@@ -284,9 +285,9 @@ void Directory::refresh() {
 }
 
 void Directory::task_ready(File_info_list r) {
-  QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
+  //QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
   for(int i = 0; i < r.count(); i++) {
-    r[i].uri = uri_prefix + QFileInfo(r[i].path).fileName();
+    //r[i].uri = uri_prefix + QFileInfo(r[i].path).fileName();
     r[i].icon = get_file_icon(r[i].mime_type);
   }
   emit ready(r);
@@ -308,8 +309,9 @@ void Directory::directory_changed(QString changed_path) {
   }
 }
 
-void Directory::create_task(QString path) {
-  Directory_list_task* task = new Directory_list_task(path);
+void Directory::create_task(QString uri) {
+  Directory_list_task* task = new Directory_list_task(uri, core->get_new_file_system_engine());
+  task->setAutoDelete(true);
   connect(task, SIGNAL(ready(File_info_list)), this, SLOT(task_ready(File_info_list)));
   connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
   //connect(task, SIGNAL(error(QString)), this, SLOT(test(QString)));

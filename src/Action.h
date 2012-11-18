@@ -15,7 +15,7 @@
 #define BUFFER_SIZE 65535
 
 class Action_queue;
-
+class File_system_engine;
 
 
 
@@ -65,9 +65,7 @@ public:
     */
   void set_queue(Action_queue* q);
 
-  /*! Set list of mounts used to convert URIs to real paths.
-    This should be called from gui thread before starting the task. */
-  void set_mounts(const QList<Gio_mount>& _mounts) { mounts = _mounts; }
+  void set_fs_engine(File_system_engine* v);
 
   /*! This function executes main operations for this action.
     When Action::run is finished, Action is deleted by Action_queue.
@@ -78,13 +76,9 @@ public:
 
 private:
   Action_data data; //! Data passed to the constructor.
+  File_system_engine* fs_engine;
 
-  /*! data.destination converted from URI (see Directory) to
-    real filesystem path and with removed trailing slash (if any).
-    */
-  QString normalized_destination;
   Action_queue* queue;
-  QList<Gio_mount> mounts;
 
   /*! Total size (in bytes) and count of all target files for the operation.
     These values may be calculated before performing main operation.

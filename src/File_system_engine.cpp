@@ -63,3 +63,14 @@ File_system_engine::Exception::Exception(File_system_engine::error_type p_type,
 
 }
 
+QString File_system_engine::Exception::get_message() {
+  //todo: implement this properly
+  return QObject::tr("Error %1; cause: %2; filenames: '%3', '%4'")
+      .arg( (int) type).arg( (int) cause).arg(path1).arg(path2);
+}
+
+File_info File_system_engine::Iterator::get_next() {
+  current = get_next_internal();
+  return current;
+}
+

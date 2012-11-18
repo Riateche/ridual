@@ -12,9 +12,12 @@
 #include "Core.h"
 #include <fstream>
 #include <errno.h>
+#include "File_system_engine.h"
+
 
 Action::Action(const Action_data &p_data)
 : data(p_data)
+, fs_engine(0)
 {
   total_size = 0;
   current_size = 0;
@@ -37,19 +40,9 @@ void Action::set_queue(Action_queue *q) {
   queue = q;
 }
 
-/*QString Action::get_real_dir(QString uri) {
-  if (uri.startsWith("/")) return uri;
-  foreach(Gio_mount mount, mounts) {
-    if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
-      //convert uri e.g. "ftp://user@host/path"
-      //to real path e.g. "/home/user/.gvfs/FTP as user on host/path"
-      QString real_dir = mount.path + "/" + uri.mid(mount.uri.length());
-      return real_dir;
-    }
-  }
-  return uri;
+void Action::set_fs_engine(File_system_engine *v) {
+  fs_engine = v;
 }
-*/
 
 Error_reaction::Enum Action::ask_question(Question_data data) {
   state.current_action = tr("Waiting for answer");
@@ -85,42 +78,44 @@ void Action::process_events() {
 void Action::iterate_all(bool prepare) {
   try {
     foreach(QString target_uri, data.targets) {
-      QString root_path = Directory::find_real_path(target_uri, mounts);
-      if (root_path.endsWith("/")) root_path = root_path.left(root_path.length() - 1);
-      QStack<QDirIterator*> stack;
+      //QString root_path = Directory::find_real_path(target_uri, mounts);
+      if (target_uri.endsWith("/")) target_uri = target_uri.left(target_uri.length() - 1);
+      QStack<File_system_engine::Iterator*> stack;
       try {
         if (prepare) {
-          prepare_one(root_path, root_path, QDir(root_path).exists());
+          prepare_one(target_uri, target_uri, QDir(target_uri).exists());
         } else {
-          process_one(root_path, root_path, QDir(root_path).exists(), true);
+          process_one(target_uri, target_uri, QDir(target_uri).exists(), true);
         }
       } catch(Skip_exception) {
         continue;
       }
-      if (QDir(root_path).exists()) {
-        stack.push(new QDirIterator(root_path, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags));
+      //todo: catch list() exceptions here
+      if (QDir(target_uri).exists()) {
+        stack.push(fs_engine->list(target_uri)); //new QDirIterator(target_uri, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags));
         while(!stack.isEmpty()) {
-          while(stack.top()->hasNext()) {
-            QString path = stack.top()->next();
-            bool is_dir = QDir(path).exists();
+          while(stack.top()->has_next()) {
+            File_info i = stack.top()->get_next();
+            //QString path = i.uri; // stack.top()->next();
+            //bool is_dir = QDir(path).exists();
             try {
               if (prepare) {
-                prepare_one(path, root_path, is_dir);
+                prepare_one(i.uri, target_uri, i.is_folder);
               } else {
-                process_one(path, root_path, is_dir, true);
+                process_one(i.uri, target_uri, i.is_folder, true);
               }
             } catch(Skip_exception) {
               continue;
             }
-            if (is_dir) {
-              stack.push(new QDirIterator(path, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags));
+            if (i.is_folder) {
+              stack.push(fs_engine->list(i.uri)); //new QDirIterator(path, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags));
             }
           }
           delete stack.pop();
           if (!prepare && !stack.isEmpty()) {
-            QString path = stack.top()->filePath();
+            File_info i = stack.top()->get_current();
             try {
-              process_one(path, root_path, true, false);
+              process_one(i.uri, target_uri, true, false);
             } catch(Skip_exception) {
               continue;
             }
@@ -128,7 +123,7 @@ void Action::iterate_all(bool prepare) {
         }
         if (!prepare) {
           try {
-            process_one(root_path, root_path, QDir(root_path).exists(), false);
+            process_one(target_uri, target_uri, QDir(target_uri).exists(), false);
           } catch(Skip_exception) {
             continue;
           }
@@ -171,13 +166,15 @@ void Action::prepare_one(const QString &path, const QString &root_path, bool is_
 }
 
 void Action::run() {
+  if (!fs_engine) {
+    qFatal("no fs engine for action");
+    return;
+  }
+  fs_engine->moveToThread(thread()); //dangerous! need to test
   emit started();
   state.queue_id = queue->get_id();
-  if (!data.destination.isEmpty()) {
-    normalized_destination = Directory::find_real_path(data.destination, mounts);
-    if (normalized_destination.endsWith("/")) {
-      normalized_destination = normalized_destination.left(normalized_destination.length() - 1);
-    }
+  if (data.destination.endsWith("/")) {
+    data.destination = data.destination.left(data.destination.length() - 1);
   }
 
   state.current_action = tr("Starting");
@@ -199,9 +196,9 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
     //qDebug() << "path: " << path;
     int index = root_path.lastIndexOf("/");
     QString relative_path = path.mid(index + 1);
-    QString new_path = normalized_destination + "/" + relative_path;
+    QString new_path = data.destination + "/" + relative_path;
     //qDebug() << "new_path: " << new_path;
-    if (normalized_destination.startsWith(path)) {
+    if (data.destination.startsWith(path)) {
       ask_question(Question_data(tr("Failed to copy '%1' to '%2': can't copy folder inside itself.").arg(path).arg(new_path), Error_type::destination_inside_source, is_dir));
     }
 
@@ -244,71 +241,36 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
         if (is_dir) {
           if (data.type == Action_type::copy || data.type == Action_type::move) {
             if (dir_before) {
-              if (!QDir(path).isReadable()) {
-                //Error_reaction r =
-                ask_question(Question_data(tr("Directory '%1' is not readable").arg(path), Error_type::read_failed, true));
-
-              }
-              bool failure1 = QDir(new_path).exists();
-              bool failure2 = QFile(new_path).exists();
-              if (failure1 || failure2) {
-                //Error_reaction r =
-                ask_question(Question_data(tr("%1 '%2' already exists").arg(failure1? "Directory": "File").arg(new_path), Error_type::exists, true));
-              }
-              QString mkdir_error;
-              if (!ridual_mkdir(new_path, mkdir_error)) {
-                //Error_reaction r =
-                ask_question(Question_data(tr("Failed to create directory '%1': %2").arg(new_path).arg(mkdir_error), Error_type::create_failed, true));
-              }
+              fs_engine->make_directory(new_path);
             } // if dir_before
           } //copy or move
           if (data.type == Action_type::remove || data.type == Action_type::move) {
             if (!dir_before) {
-              QString rmdir_error;
+              fs_engine->remove(path);
+              /*QString rmdir_error;
               if (!ridual_rmdir(path, rmdir_error)) {
                 ask_question(Question_data(tr("Failed to remove directory '%1': %2").arg(path).arg(rmdir_error), Error_type::delete_failed, true));
-              }
+              }*/
             }
           } //remove or move
-        } else {
-          if (data.type == Action_type::copy || data.type == Action_type::move) {
-            std::ifstream file1;
-            file1.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-            std::ofstream file2;
-            file2.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
-            try {
-              file1.open(path.toLocal8Bit(), std::ifstream::in | std::ifstream::binary);
-            } catch (std::ios_base::failure e) {
-              ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(errno_to_string()), Error_type::read_failed, false));
-            }
-
-            if (QFile(new_path).exists()) {
-              ask_question(Question_data(tr("File '%1' already exists").arg(new_path), Error_type::exists, false));
-            }
-
-            try {
-              file2.open(new_path.toLocal8Bit(), std::ifstream::out | std::ifstream::trunc | std::ifstream::binary);
-            } catch (std::ios_base::failure e) {
-              ask_question(Question_data(tr("Failed to create file '%1': %2").arg(new_path).arg(errno_to_string()), Error_type::create_failed, false));
-            }
-
-            int file_size = 0;
-            try {
-              file1.seekg(0, std::ios::end);
-              file_size = file1.tellg();
-              file1.seekg(0);
-            } catch (std::ios_base::failure e) {
-              ask_question(Question_data(tr("Failed to determine size of file '%1': %2").arg(path).arg(errno_to_string()), Error_type::read_failed, false));
-            }
-
-            //todo: replace to fs engine api
-
-            while(file1.tellg() != file_size) {
+        } else { // above - for dirs, below - for files
+          File_system_engine::Operation* operation = 0;
+          if (data.type == Action_type::copy) {
+            operation = fs_engine->copy(path, new_path);
+          } else if (data.type == Action_type::move) {
+            operation = fs_engine->move(path, new_path);
+          } else if (data.type == Action_type::remove) {
+            fs_engine->remove(path);
+          } //remove or move
+          if (operation) {
+            while(!operation->is_finished()) {
               if (signal_timer.elapsed() > signal_interval) {
                 process_events();
-                state.current_action = tr("Copying '%1'").arg(path);
-                state.current_progress = 1.0 * file1.tellg() / file_size;
+                //todo: add real operation name here
+                state.current_action = tr("Processing '%1'").arg(path);
+                state.current_progress = operation->get_progress();
                 if (total_size > 0) {
+                  //todo: reimplement progress calculation
                   state.total_progress = 1.0 * current_size / total_size;
                 } else {
                   state.total_progress_text = tr("Files count: %1").arg(current_count);
@@ -317,31 +279,10 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
                 emit state_changed(state);
                 signal_timer.restart();
               }
-              char copy_buffer[BUFFER_SIZE];
-              int count = 0;
-              try {
-                count = file1.readsome(copy_buffer, BUFFER_SIZE);
-              } catch (std::ios_base::failure e) {
-                ask_question(Question_data(tr("Failed to read from file '%1': %2").arg(path).arg(errno_to_string()), Error_type::read_failed, false));
-              }
-              try {
-                file2.write(copy_buffer, count);
-              } catch (std::ios_base::failure e) {
-                ask_question(Question_data(tr("Failed to write to file '%1': %2").arg(new_path).arg(errno_to_string()), Error_type::write_failed, false));
-              }
-              current_size += count;
-            } //end if file
-            if (!QFile(new_path).setPermissions(QFile(path).permissions())) {
-              qDebug() << "Failed to copy permissions";
+              operation->run_iteration();
             }
-
-          } //copy or move
-          if (data.type == Action_type::remove || data.type == Action_type::move) {
-            QFile f(path);
-            if (!f.remove()) {
-              ask_question(Question_data(tr("Failed to remove file '%1': %2").arg(path).arg(f.errorString()), Error_type::delete_failed, false));
-            }
-          } //remove or move
+            delete operation;
+          }
         } //is file
         current_count++;
       } catch (Retry_exception) {

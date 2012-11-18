@@ -4,10 +4,12 @@
 #include "File_info.h"
 #include <QRunnable>
 
+class File_system_engine;
+
 class Directory_list_task : public QObject, public QRunnable {
   Q_OBJECT
 public:
-  explicit Directory_list_task(QString p_path);
+  explicit Directory_list_task(QString p_uri, File_system_engine* e);
   ~Directory_list_task();
   void run();
   
@@ -28,7 +30,8 @@ signals:
 public slots:
 
 private:
-  QString path;
+  QString uri;
+  File_system_engine* fs_engine;
   
 };
 

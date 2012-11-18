@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QThread>
 #include "Actions_manager.h"
+#include "gio/Gio_file_system_engine.h"
 
 Core::Core() {
   qRegisterMetaType<File_info_list>("File_info_list");
@@ -50,5 +51,9 @@ void Core::set_sort_folders_before_files(bool v) {
   QSettings s;
   s.setValue("sort_folders_before_files", v);
   emit sort_folders_before_files_changed();
+}
+
+File_system_engine *Core::get_new_file_system_engine() {
+  return new Gio_file_system_engine(mount_manager);
 }
 

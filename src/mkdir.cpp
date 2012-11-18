@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <QObject>
 
+//todo: remove this file
+
 bool ridual_mkdir(QString path, QString& error_string) {
   bool r = mkdir(path.toLocal8Bit(), 0755) == 0;
   if (!r) {

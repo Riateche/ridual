@@ -134,7 +134,7 @@ private:
   QString path; //real path
   Elapsed_timer refresh_timer;
 
-  void create_task(QString path);
+  void create_task(QString uri);
 
   static const int watcher_refresh_timeout = 1000; //ms
 

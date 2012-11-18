@@ -16,9 +16,7 @@ File_system_engine::Iterator *Real_file_system_engine::list(const QString &uri) 
     //todo: find out cause
     throw Exception(directory_list_failed, unknown_cause, uri);
   }
-  Real_fs_iterator* i = new Real_fs_iterator();
-  i->iterator = new QDirIterator(uri, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
-  return i;
+  return new Real_fs_iterator(new QDirIterator(uri, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags));
 }
 
 File_system_engine::Operation *Real_file_system_engine::copy(const QString &source, const QString &destination) {
@@ -65,10 +63,18 @@ File_system_engine::Operation *Real_file_system_engine::copy(const QString &sour
     delete o;
     throw Exception(file_not_seekable, get_cause_from_errno(), source);
   }
+
+  if (!QFile(destination).setPermissions(QFile(source).permissions())) {
+    qDebug() << "Failed to copy permissions";
+  }
   return o;
 }
 
 File_system_engine::Operation *Real_file_system_engine::move(const QString &source, const QString &destination) {
+  return move(source, destination, move_mode_auto);
+}
+
+File_system_engine::Operation *Real_file_system_engine::move(const QString &source, const QString &destination, Move_mode move_mode) {
   if (!source.startsWith("/")) {
     qWarning("Real_file_system_engine supports only absolute paths");
     throw Exception(move_failed, invalid_path, source);
@@ -80,14 +86,22 @@ File_system_engine::Operation *Real_file_system_engine::move(const QString &sour
   if (!QFile(source).exists()) {
     throw Exception(move_failed, not_found, source);
   }
-  struct stat r;
-  bool ok1, ok2;
-  ok1 = lstat(source.toLocal8Bit(), &r) == 0;
-  dev_t source_device = r.st_dev;
-  QString destination_dir = QFileInfo(destination).absolutePath();
-  ok2 = lstat(destination_dir.toLocal8Bit(), &r) == 0;
-  dev_t destination_device = r.st_dev;
-  if (ok1 && ok2 && source_device == destination_device) {
+  if (move_mode == move_mode_auto) {
+    struct stat r;
+    bool ok1, ok2;
+    ok1 = lstat(source.toLocal8Bit(), &r) == 0;
+    dev_t source_device = r.st_dev;
+    QString destination_dir = QFileInfo(destination).absolutePath();
+    ok2 = lstat(destination_dir.toLocal8Bit(), &r) == 0;
+    dev_t destination_device = r.st_dev;
+    if (ok1 && ok2 && source_device == destination_device) {
+      move_mode = move_mode_system;
+    } else {
+      move_mode = move_mode_copy;
+    }
+  }
+  qDebug() << "move mode: " << (move_mode == move_mode_system ? "system" : "copy");
+  if (move_mode == move_mode_system) {
     /* If both files are on the same device, we must not copy
       them using buffer. Note that all GIO mountpoints considered
       as the same device, so we must not use this for GIO mountpoints.
@@ -96,14 +110,18 @@ File_system_engine::Operation *Real_file_system_engine::move(const QString &sour
       throw Exception(move_failed, unknown_cause, source, destination);
     }
     return new Done_operation();
-  }
-  Copy_operation* o = dynamic_cast<Copy_operation*>(copy(source, destination));
-  if (!o) {
-    qWarning("unexpected dynamic cast fail");
+  } else if (move_mode == move_mode_copy) {
+    Copy_operation* o = dynamic_cast<Copy_operation*>(copy(source, destination));
+    if (!o) {
+      qWarning("unexpected dynamic cast fail");
+      throw Exception(move_failed, unknown_cause, source, destination);
+    }
+    o->must_delete_source = true;
+    return o;
+  } else {
+    qWarning("unexpected situation");
     throw Exception(move_failed, unknown_cause, source, destination);
   }
-  o->must_delete_source = true;
-  return o;
 }
 
 void Real_file_system_engine::remove(const QString &uri) {
@@ -151,15 +169,20 @@ bool Real_file_system_engine::is_responsible_for(const QString &uri) {
   return uri.startsWith("/");
 }
 
+Real_file_system_engine::Real_fs_iterator::Real_fs_iterator(QDirIterator *i)
+  : iterator(i)
+{
+}
+
 bool Real_file_system_engine::Real_fs_iterator::has_next() {
   return iterator->hasNext();
 }
 
-File_info Real_file_system_engine::Real_fs_iterator::get_next() {
+File_info Real_file_system_engine::Real_fs_iterator::get_next_internal() {
   iterator->next();
   File_info item;
-  item.uri = iterator->filePath();
-  QFileInfo info(item.uri);
+  item.path = iterator->filePath();
+  QFileInfo info(item.path);
   item.is_folder = info.isDir();
   if (item.is_file()) {
     item.file_size = info.size();
@@ -174,7 +197,8 @@ File_info Real_file_system_engine::Real_fs_iterator::get_next() {
   item.date_modified = info.lastModified();
   item.date_created = info.created();
   item.is_executable = item.is_file() && info.isExecutable();
-  item.mime_type = get_mime_type(item.uri);
+  item.mime_type = get_mime_type(item.path);
+  item.uri = item.path;
   return item;
 }
 
