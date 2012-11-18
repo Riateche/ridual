@@ -27,6 +27,10 @@ void Directory_list_task::run() {
     return;
   }
 
+  //todo: replace to fs engine api
+  //todo: send result by 100-files chunks
+
+
   QFileInfoList list = dir.entryInfoList(QStringList(), QDir::AllEntries | QDir::NoDotAndDotDot);
   GError* gerror = 0;
   File_info_list r;

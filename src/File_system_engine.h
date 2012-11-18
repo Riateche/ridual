@@ -30,6 +30,13 @@ public:
     Operation() {}
   };
 
+  class Done_operation: public Operation {
+  public:
+    bool is_finished() { return true; }
+    double get_progress() { return 1.0; }
+    void run_iteration() { qWarning("invalid use of run_iteration"); }
+  };
+
 
 
   enum error_type {
@@ -37,7 +44,8 @@ public:
     directory_list_failed,
     source_file_read_failed,
     destination_file_write_failed,
-    file_remove_failed
+    file_remove_failed,
+    move_failed
   };
 
   enum error_cause {

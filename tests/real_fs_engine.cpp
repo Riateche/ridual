@@ -96,4 +96,48 @@ TEST(Real_fs_engine, copy_test) {
   EXPECT_TRUE(f.exists());
   EXPECT_TRUE(f.open(QFile::ReadOnly));
   EXPECT_EQ("Source file contents", f.readAll());
+
+  QFile old_f(dir.absoluteFilePath("source.txt"));
+  EXPECT_TRUE(old_f.exists());
+  EXPECT_TRUE(old_f.open(QFile::ReadOnly));
+  EXPECT_EQ("Source file contents", old_f.readAll());
+}
+
+TEST(Real_fs_engine, move_test) {
+  Real_file_system_engine engine;
+  QDir dir(TEST_ENV_PATH);
+  EXPECT_TRUE(dir.cd("dir3"));
+  Real_file_system_engine::Operation* o =
+      engine.move(dir.absoluteFilePath("source.txt"), dir.absoluteFilePath("dest2.txt"));
+  while(!o->is_finished()) {
+    o->run_iteration();
+  }
+  delete o;
+  QFile f(dir.absoluteFilePath("dest2.txt"));
+  EXPECT_TRUE(f.exists());
+  EXPECT_TRUE(f.open(QFile::ReadOnly));
+  EXPECT_EQ("Source file contents", f.readAll());
+
+  QFile old_f(dir.absoluteFilePath("source.txt"));
+  EXPECT_FALSE(old_f.exists());
+}
+
+TEST(Real_fs_engine, move_fail_test) {
+  Real_file_system_engine engine;
+  QDir dir(TEST_ENV_PATH);
+  EXPECT_TRUE(dir.cd("dir3"));
+
+  try {
+    Real_file_system_engine::Operation* o =
+        engine.move(dir.absoluteFilePath("no-such-file.txt"), dir.absoluteFilePath("dest3.txt"));
+    while(!o->is_finished()) {
+      o->run_iteration();
+    }
+    delete o;
+  } catch (Real_file_system_engine::Exception e) {
+    EXPECT_EQ(Real_file_system_engine::move_failed, e.get_type());
+    EXPECT_EQ(Real_file_system_engine::not_found, e.get_cause());
+    return;
+  }
+  EXPECT_TRUE(false) << "Exception was not thrown";
 }

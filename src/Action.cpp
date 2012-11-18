@@ -301,6 +301,8 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
               ask_question(Question_data(tr("Failed to determine size of file '%1': %2").arg(path).arg(errno_to_string()), Error_type::read_failed, false));
             }
 
+            //todo: replace to fs engine api
+
             while(file1.tellg() != file_size) {
               if (signal_timer.elapsed() > signal_interval) {
                 process_events();

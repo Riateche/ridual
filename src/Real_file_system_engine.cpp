@@ -1,6 +1,7 @@
 #include "Real_file_system_engine.h"
 #include "utils.h"
-
+#include <sys/stat.h>
+#include <QDebug>
 
 Real_file_system_engine::Real_file_system_engine()
 {
@@ -51,8 +52,35 @@ File_system_engine::Operation *Real_file_system_engine::copy(const QString &sour
   return o;
 }
 
-File_system_engine::Operation *Real_file_system_engine::move(const QString &source, const QString &destination)
-{
+File_system_engine::Operation *Real_file_system_engine::move(const QString &source, const QString &destination) {
+  if (!QFile(source).exists()) {
+    throw Exception(move_failed, not_found);
+  }
+  struct stat r;
+  lstat(source.toLocal8Bit(), &r);
+  dev_t source_device = r.st_dev;
+  QString destination_dir = QFileInfo(destination).absolutePath();
+  lstat(destination_dir.toLocal8Bit(), &r);
+  dev_t destination_device = r.st_dev;
+  if (source_device == destination_device) {
+    qDebug() << "the same device";
+    /* If both files are on the same device, we must not copy
+      them using buffer. Note that all GIO mountpoints considered
+      as the same device, so we must not use this for GIO mountpoints.
+      */
+    if (!QFile::rename(source, destination)) {
+      throw Exception(move_failed, unknown_cause);
+    }
+    return new Done_operation();
+  }
+  qDebug() << "different devices" << source << destination_dir;
+  Copy_operation* o = dynamic_cast<Copy_operation*>(copy(source, destination));
+  if (!o) {
+    qWarning("unexpected dynamic cast fail");
+    throw Exception(move_failed, unknown_cause);
+  }
+  o->must_delete_source = true;
+  return o;
 }
 
 void Real_file_system_engine::remove(const QString &uri)
