@@ -42,10 +42,17 @@ public:
   enum error_type {
     unknown_error,
     directory_list_failed,
-    source_file_read_failed,
-    destination_file_write_failed,
+    cant_open_file_for_read,
+    cant_open_file_for_write,
+    copy_failed,
+    move_failed,
+    file_not_seekable,
     file_remove_failed,
-    move_failed
+    file_read_failed,
+    file_write_failed,
+    stat_failed,
+    mkdir_failed,
+    rmdir_failed
   };
 
   enum error_cause {
@@ -61,18 +68,20 @@ public:
     not_directory,
     path_too_long,
     symbolic_links_loop,
-    io_error
+    io_error,
+    directory_not_empty
   };
 
   class Exception {
   public:
-    Exception(error_type type, error_cause cause);
+    Exception(error_type type, error_cause cause, QString path1 = QString(), QString path2 = QString());
     inline error_type get_type() { return type; }
     inline error_cause get_cause() { return cause; }
 
   private:
     error_type type;
     error_cause cause;
+    QString path1, path2;
 
   };
 

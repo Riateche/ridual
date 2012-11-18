@@ -82,7 +82,7 @@ TEST(Real_fs_engine, unreadable_list) {
   EXPECT_TRUE(false) << "Exception was not thrown";
 }
 
-TEST(Real_fs_engine, copy_test) {
+TEST(Real_fs_engine, copy) {
   Real_file_system_engine engine;
   QDir dir(TEST_ENV_PATH);
   EXPECT_TRUE(dir.cd("dir3"));
@@ -103,7 +103,7 @@ TEST(Real_fs_engine, copy_test) {
   EXPECT_EQ("Source file contents", old_f.readAll());
 }
 
-TEST(Real_fs_engine, move_test) {
+TEST(Real_fs_engine, move) {
   Real_file_system_engine engine;
   QDir dir(TEST_ENV_PATH);
   EXPECT_TRUE(dir.cd("dir3"));
@@ -122,7 +122,7 @@ TEST(Real_fs_engine, move_test) {
   EXPECT_FALSE(old_f.exists());
 }
 
-TEST(Real_fs_engine, move_fail_test) {
+TEST(Real_fs_engine, move_fail) {
   Real_file_system_engine engine;
   QDir dir(TEST_ENV_PATH);
   EXPECT_TRUE(dir.cd("dir3"));
@@ -140,4 +140,14 @@ TEST(Real_fs_engine, move_fail_test) {
     return;
   }
   EXPECT_TRUE(false) << "Exception was not thrown";
+}
+
+TEST(Real_fs_engine, remove) {
+  Real_file_system_engine engine;
+  QDir dir(TEST_ENV_PATH);
+  EXPECT_TRUE(dir.cd("dir3"));
+  QString filename = dir.absoluteFilePath("file1.ini");
+  EXPECT_TRUE(QFile(filename).exists());
+  engine.remove(filename);
+  EXPECT_FALSE(QFile(filename).exists());
 }

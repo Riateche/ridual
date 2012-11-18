@@ -34,6 +34,7 @@ private:
     bool finished;
     qint64 file_size;
     QString source_filename;
+    QString destination_filename;
     char copy_buffer[FS_ENGINE_BUFFER_SIZE];
 
     inline bool is_finished() { return finished; }

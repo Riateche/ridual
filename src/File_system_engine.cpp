@@ -44,13 +44,22 @@ File_system_engine::error_cause File_system_engine::get_cause_from_errno() {
     case EIO:
       return io_error;
       break;
+  case ENOTEMPTY:
+      return directory_not_empty;
     default:
       return unknown_cause;
   }
 }
 
-File_system_engine::Exception::Exception(File_system_engine::error_type p_type, error_cause p_cause)
-  : type(p_type), cause(p_cause) {
+File_system_engine::Exception::Exception(File_system_engine::error_type p_type,
+                                         error_cause p_cause,
+                                         QString p_path1,
+                                         QString p_path2)
+: type(p_type)
+, cause(p_cause)
+, path1(p_path1)
+, path2(p_path2)
+{
 
 }
 
