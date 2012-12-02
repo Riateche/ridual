@@ -2,9 +2,11 @@
 #include "ui_Action_state_widget.h"
 #include "Action.h"
 #include <QTextDocument>
+#include <QDebug>
 
 Action_state_widget::Action_state_widget(Action* action) :
   ui(new Ui::Action_state_widget)
+, paused(false)
 {
   ui->setupUi(this);
   icon_pause = QIcon(":/resources/images/pause.png");
@@ -53,6 +55,7 @@ void Action_state_widget::state_changed(Action_state state) {
 
 void Action_state_widget::on_pause_clicked() {
   paused = !paused;
+  qDebug() << paused;
   ui->pause->setIcon(paused ? icon_resume : icon_pause);
   emit set_paused(paused);
 }

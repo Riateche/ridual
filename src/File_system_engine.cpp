@@ -101,7 +101,7 @@ QString File_system_engine::Exception::get_message() {
   QString cause_string;
   switch(cause) {
   case File_system_engine::unknown_cause:
-    cause_string = tr("unknown cause"); break;
+    cause_string = tr("unknown"); break;
   case File_system_engine::not_found:
     cause_string = tr("not found"); break;
   case File_system_engine::permission_denied:
@@ -133,8 +133,7 @@ QString File_system_engine::Exception::get_message() {
     cause_string = tr("unknown cause");
   }
 
-  //todo: implement this properly
-  return QObject::tr("%1: %2 while processing '%3'%4")
+  return QObject::tr("%1: '%3'%4. Reason: %2")
       .arg(type_string).arg(cause_string).arg(path1)
       .arg(path2.isEmpty() ? "" : QObject::tr(", '%1'").arg(path2));
 }

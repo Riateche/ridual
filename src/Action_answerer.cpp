@@ -14,7 +14,7 @@ Action_answerer::Action_answerer(Main_window *mw, Question_data data) :
     buttons << Button_settings(2, tr("Retry"), static_cast<int>(Error_reaction::retry));
   }
   buttons << Button_settings(3, tr("Abort"), static_cast<int>(Error_reaction::abort));
-  set_message(data.message);
+  set_message(data.get_message());
   set_buttons(buttons);
 }
 

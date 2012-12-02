@@ -80,6 +80,7 @@ public:
 
   class Exception {
   public:
+    Exception() {}
     Exception(error_type type, error_cause cause, QString path1 = QString(), QString path2 = QString());
     inline error_type get_type() { return type; }
     inline error_cause get_cause() { return cause; }

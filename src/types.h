@@ -4,6 +4,7 @@
 #include <QString>
 #include <QVariant>
 #include "File_info.h"
+#include "File_system_engine.h"
 
 namespace Action_type {
   enum Enum {
@@ -52,31 +53,38 @@ Q_DECLARE_METATYPE(Action_state)
 
 namespace Error_type {
   enum Enum {
-    no_error,
-    not_found,
-    read_failed,
-    create_failed,
-    write_failed,
-    delete_failed,
-    exists,
-    destination_inside_source
+    destination_inside_source,
+    file_system_error
   };
 }
 Q_DECLARE_METATYPE(Error_type::Enum)
 
 class Action;
+
 class Question_data {
 public:
   Question_data() {}
-  Question_data(QString m, Error_type::Enum t, bool d) :
-    message(m)
-  , error_type(t)
-  , is_dir(d) {}
+  Question_data(Action* a, Error_type::Enum t) :
+    action(a),
+    error_type(t) {}
+  Question_data(Action* a, File_system_engine::Exception e) :
+    action(a),
+    error_type(Error_type::file_system_error),
+    fs_exception(e) {}
 
-  QString message;
-  Error_type::Enum error_type;
-  bool is_dir;
+  QString get_message() {
+    switch(error_type) {
+    case Error_type::destination_inside_source:
+      return QObject::tr("Cannot copy a directory inside itself.");
+    case Error_type::file_system_error:
+      return fs_exception.get_message();
+    }
+    return QString();
+  }
+
   Action* action;
+  Error_type::Enum error_type;
+  File_system_engine::Exception fs_exception;
 };
 Q_DECLARE_METATYPE(Question_data)
 
@@ -88,6 +96,7 @@ namespace Icon {
     success
   };
 }
+
 Q_DECLARE_METATYPE(Icon::Enum)
 
 #endif // TYPES_H

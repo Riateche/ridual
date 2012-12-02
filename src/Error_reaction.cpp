@@ -20,27 +20,29 @@ QString error_reaction_to_string(Error_reaction::Enum reaction) {
 
 }
 
-QList<Error_reaction::Enum> get_error_reactions(Error_type::Enum error_type,
-                                     bool is_dir,
-                                     bool is_interactive) {
-  if (error_type == Error_type::no_error) {
-    qWarning("Error_reaction::get_all: 'no_error' is not allowed");
-    return QList<Error_reaction::Enum>();
-  }
+QList<Error_reaction::Enum> get_error_reactions(Question_data data, bool is_interactive) {
   QList<Error_reaction::Enum> r;
-  r << Error_reaction::skip;
-  if (error_type == Error_type::exists) {
-    if (is_dir) {
-      r << Error_reaction::merge_dir;
-    }
-    r << Error_reaction::delete_existing
-      << Error_reaction::rename_existing
-      << Error_reaction::rename_new;
-    if (!is_dir) {
-      r << Error_reaction::continue_writing;
-    }
+  if (data.error_type == Error_type::destination_inside_source) {
+    r << Error_reaction::abort;
+  } else if (data.error_type == Error_type::file_system_error) {
+    File_system_engine::error_type fs_type = data.fs_exception.get_type();
+    r << Error_reaction::skip;
+    //todo: add possible reactions
+/*    if (fs_type == File_system_engine::) {
+      if (is_dir) {
+        r << Error_reaction::merge_dir;
+      }
+      r << Error_reaction::delete_existing
+        << Error_reaction::rename_existing
+        << Error_reaction::rename_new;
+      if (!is_dir) {
+        r << Error_reaction::continue_writing;
+      }
+    } */
+    r << Error_reaction::abort;
+    r.prepend(is_interactive? Error_reaction::retry: Error_reaction::ask);
+
   }
-  r << Error_reaction::abort;
-  r.prepend(is_interactive? Error_reaction::retry: Error_reaction::ask);
+
   return r;
 }

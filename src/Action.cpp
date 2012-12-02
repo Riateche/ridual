@@ -45,7 +45,7 @@ void Action::set_fs_engine(File_system_engine *v) {
 }
 
 Error_reaction::Enum Action::ask_question(Question_data data) {
-  qDebug() << "ask_question: " << data.message;
+  qDebug() << "ask_question: " << data.get_message();
   state.current_action = tr("Waiting for answer");
   if (state.current_progress == Action_state::UNKNOWN) {
     state.current_progress = Action_state::DISABLED;
@@ -55,7 +55,7 @@ Error_reaction::Enum Action::ask_question(Question_data data) {
   }
   emit state_changed(state);
   error_reaction = Error_reaction::undefined;
-  data.action = this;
+  //data.action = this;
   emit question(data);
   while(error_reaction == Error_reaction::undefined) {
     if (cancelled) throw Abort_exception();
@@ -203,7 +203,8 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
     QStringList destination_parts = data.destination.split("/");
     if (destination_parts.mid(0, path_parts.count()) == path_parts) {
 //    if (data.destination.startsWith(path)) {
-      ask_question(Question_data(tr("Failed to copy '%1' to '%2': can't copy folder inside itself.").arg(path).arg(new_path), Error_type::destination_inside_source, is_dir));
+      //ask_question(Question_data(tr("Failed to copy '%1' to '%2': can't copy folder inside itself.").arg(path).arg(new_path), Error_type::destination_inside_source, is_dir));
+      ask_question(Question_data(this, Error_type::destination_inside_source));
     }
 
     bool retry_asked;
@@ -289,10 +290,7 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
           current_count++;
 
         } catch (File_system_engine::Exception& e) {
-          Question_data data;
-          data.message = e.get_message();
-          ask_question(data);
-          //todo: new question_data
+          ask_question(Question_data(this, e));
         }
       } catch (Retry_exception) {
         retry_asked = true;

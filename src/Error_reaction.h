@@ -21,8 +21,7 @@ namespace Error_reaction {
 }
 Q_DECLARE_METATYPE(Error_reaction::Enum)
 
-QList<Error_reaction::Enum> get_error_reactions(Error_type::Enum error_type,
-                                     bool is_dir,
+QList<Error_reaction::Enum> get_error_reactions(Question_data data,
                                      bool is_interactive);
 
 
