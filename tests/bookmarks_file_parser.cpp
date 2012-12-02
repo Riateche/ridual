@@ -4,13 +4,13 @@
 #include <QDebug>
 #include <QApplication>
 #include <QTest>
-#include "debug_output.h"
+#include "debug_utils.h"
 
 
 
 
 TEST(Bookmarks_file_parser, gtk_bookmarks) {
-  Bookmarks_file_parser p(QDir(TEST_ENV_PATH).absoluteFilePath(".gtk-bookmarks"),
+  Bookmarks_file_parser p(env_dir("bookmarks_file_parser").absoluteFilePath(".gtk-bookmarks"),
                           Bookmarks_file_parser::format_gtk);
   File_info_list list = p.get_all();
   ASSERT_EQ(8, list.count());
@@ -36,7 +36,7 @@ TEST(Bookmarks_file_parser, gtk_bookmarks) {
 
 
 TEST(Bookmarks_file_parser, xdg_bookmarks) {
-  Bookmarks_file_parser p(QDir(TEST_ENV_PATH).absoluteFilePath("user-dirs.dirs"),
+  Bookmarks_file_parser p(env_dir("bookmarks_file_parser").absoluteFilePath("user-dirs.dirs"),
                           Bookmarks_file_parser::format_xdg);
 
   File_info_list list = p.get_all();
@@ -67,12 +67,13 @@ TEST(Bookmarks_file_parser, xdg_bookmarks) {
 
 
 TEST(Bookmarks_file_parser, auto_update) {
-  Bookmarks_file_parser p(QDir(TEST_ENV_PATH).absoluteFilePath(".gtk-bookmarks"),
+  QDir dir = env_dir("bookmarks_file_parser");
+  Bookmarks_file_parser p(dir.absoluteFilePath(".gtk-bookmarks"),
                           Bookmarks_file_parser::format_gtk);
   File_info_list list = p.get_all();
   ASSERT_EQ(8, list.count());
   QSignalSpy spy(&p, SIGNAL(changed()));
-  QFile f(QDir(TEST_ENV_PATH).absoluteFilePath(".gtk-bookmarks"));
+  QFile f(dir.absoluteFilePath(".gtk-bookmarks"));
   ASSERT_TRUE(f.open(QFile::Append));
   f.write("file:///new/uri new name\n");
   f.close();

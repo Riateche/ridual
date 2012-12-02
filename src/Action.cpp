@@ -45,6 +45,7 @@ void Action::set_fs_engine(File_system_engine *v) {
 }
 
 Error_reaction::Enum Action::ask_question(Question_data data) {
+  qDebug() << "ask_question: " << data.message;
   state.current_action = tr("Waiting for answer");
   if (state.current_progress == Action_state::UNKNOWN) {
     state.current_progress = Action_state::DISABLED;
@@ -172,7 +173,7 @@ void Action::run() {
   }
   fs_engine->moveToThread(thread()); //dangerous! need to test
   emit started();
-  state.queue_id = queue->get_id();
+  state.queue_id = queue ? queue->get_id() : -1;
   if (data.destination.endsWith("/")) {
     data.destination = data.destination.left(data.destination.length() - 1);
   }
@@ -193,12 +194,15 @@ void Action::run() {
 
 void Action::process_one(const QString& path, const QString& root_path, bool is_dir, bool dir_before) {
   try {
-    //qDebug() << "path: " << path;
     int index = root_path.lastIndexOf("/");
     QString relative_path = path.mid(index + 1);
     QString new_path = data.destination + "/" + relative_path;
-    //qDebug() << "new_path: " << new_path;
-    if (data.destination.startsWith(path)) {
+
+    // todo: move this check to somewhere else
+    QStringList path_parts = path.split("/");
+    QStringList destination_parts = data.destination.split("/");
+    if (destination_parts.mid(0, path_parts.count()) == path_parts) {
+//    if (data.destination.startsWith(path)) {
       ask_question(Question_data(tr("Failed to copy '%1' to '%2': can't copy folder inside itself.").arg(path).arg(new_path), Error_type::destination_inside_source, is_dir));
     }
 
@@ -238,53 +242,58 @@ void Action::process_one(const QString& path, const QString& root_path, bool is_
           signal_timer.restart();
         }
 
-        if (is_dir) {
-          if (data.type == Action_type::copy || data.type == Action_type::move) {
-            if (dir_before) {
-              fs_engine->make_directory(new_path);
-            } // if dir_before
-          } //copy or move
-          if (data.type == Action_type::remove || data.type == Action_type::move) {
-            if (!dir_before) {
-              fs_engine->remove(path);
-              /*QString rmdir_error;
-              if (!ridual_rmdir(path, rmdir_error)) {
-                ask_question(Question_data(tr("Failed to remove directory '%1': %2").arg(path).arg(rmdir_error), Error_type::delete_failed, true));
-              }*/
-            }
-          } //remove or move
-        } else { // above - for dirs, below - for files
-          File_system_engine::Operation* operation = 0;
-          if (data.type == Action_type::copy) {
-            operation = fs_engine->copy(path, new_path);
-          } else if (data.type == Action_type::move) {
-            operation = fs_engine->move(path, new_path);
-          } else if (data.type == Action_type::remove) {
-            fs_engine->remove(path);
-          } //remove or move
-          if (operation) {
-            while(!operation->is_finished()) {
-              if (signal_timer.elapsed() > signal_interval) {
-                process_events();
-                //todo: add real operation name here
-                state.current_action = tr("Processing '%1'").arg(path);
-                state.current_progress = operation->get_progress();
-                if (total_size > 0) {
-                  //todo: reimplement progress calculation
-                  state.total_progress = 1.0 * current_size / total_size;
-                } else {
-                  state.total_progress_text = tr("Files count: %1").arg(current_count);
-                  state.total_progress = Action_state::UNKNOWN;
-                }
-                emit state_changed(state);
-                signal_timer.restart();
+        try { // one entry processing
+
+          if (is_dir) {
+            if (data.type == Action_type::copy || data.type == Action_type::move) {
+              if (dir_before) {
+                fs_engine->make_directory(new_path);
+              } // if dir_before
+            } //copy or move
+            if (data.type == Action_type::remove || data.type == Action_type::move) {
+              if (!dir_before) {
+                fs_engine->remove(path);
               }
-              operation->run_iteration();
+            } //remove or move
+          } else { // above - for dirs, below - for files
+            File_system_engine::Operation* operation = 0;
+            if (data.type == Action_type::copy) {
+              operation = fs_engine->copy(path, new_path);
+            } else if (data.type == Action_type::move) {
+              operation = fs_engine->move(path, new_path);
+            } else if (data.type == Action_type::remove) {
+              fs_engine->remove(path);
+            } //remove or move
+            if (operation) {
+              while(!operation->is_finished()) {
+                if (signal_timer.elapsed() > signal_interval) {
+                  process_events();
+                  //todo: add real operation name here
+                  state.current_action = tr("Processing '%1'").arg(path);
+                  state.current_progress = operation->get_progress();
+                  if (total_size > 0) {
+                    //todo: reimplement progress calculation
+                    state.total_progress = 1.0 * current_size / total_size;
+                  } else {
+                    state.total_progress_text = tr("Files count: %1").arg(current_count);
+                    state.total_progress = Action_state::UNKNOWN;
+                  }
+                  emit state_changed(state);
+                  signal_timer.restart();
+                }
+                operation->run_iteration();
+              }
+              delete operation;
             }
-            delete operation;
-          }
-        } //is file
-        current_count++;
+          } //is file
+          current_count++;
+
+        } catch (File_system_engine::Exception& e) {
+          Question_data data;
+          data.message = e.get_message();
+          ask_question(data);
+          //todo: new question_data
+        }
       } catch (Retry_exception) {
         retry_asked = true;
       }

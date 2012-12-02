@@ -6,7 +6,7 @@
 #include "Main_window.h"
 #include "Core.h"
 #include <QDebug>
-#include "debug_output.h"
+#include "debug_utils.h"
 #include "File_info.h"
 #include <QProcess>
 #include <QElapsedTimer>
@@ -34,13 +34,14 @@ void test_dir_refresh(Directory* dir, File_info_list* result, bool do_refresh, b
 
 TEST(Directory, files_list) {
   Core c;
-  QString uri = QDir(TEST_ENV_PATH).absoluteFilePath("dir1");
+  QString uri = env_dir("directory").absoluteFilePath("dir1");
   Directory d(&c, uri);
   EXPECT_EQ(uri, d.get_uri());
   EXPECT_FALSE(uri.endsWith("/"));
 
   File_info_list list;
   test_dir_refresh(&d, &list, true, false);
+  qSort(list.begin(), list.end(), uri_less_than);
   ASSERT_EQ(4, list.count());
   EXPECT_EQ("file1.txt", list[0].file_name());
   EXPECT_EQ("file2.png", list[1].file_name());
@@ -88,15 +89,22 @@ TEST(Directory, files_list) {
 
   //now we will check watching
   QDir dir(TEST_ENV_PATH);
-  ASSERT_TRUE(dir.cd("dir1"));
+  ASSERT_TRUE(dir.cd("directory/dir1"));
   QFile file(dir.absoluteFilePath("new_file.txt"));
   file.open(QFile::WriteOnly);
   file.write("test");
   file.close();
 
   test_dir_refresh(&d, &list, false, false);
+  qSort(list.begin(), list.end(), uri_less_than);
   ASSERT_EQ(5, list.count());
-  EXPECT_EQ("new_file.txt", list[4].file_name());
+  bool found = false;
+  foreach(File_info fi, list) {
+    if (fi.file_name() == "new_file.txt") {
+      found = true;
+    }
+  }
+  EXPECT_TRUE(found);
 }
 
 void umount(Core* core, QString uri) {

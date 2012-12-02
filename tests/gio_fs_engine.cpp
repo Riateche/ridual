@@ -5,15 +5,13 @@
 #include "gio/Gio_file_system_engine.h"
 #include "Directory.h"
 #include "Core.h"
+#include "debug_utils.h"
 
-bool gio_uri_less_than(const File_info &v1, const File_info &v2) {
-  return v1.uri < v2.uri;
-}
 
 TEST(Gio_fs_engine, list) {
   Core core;
   Gio_file_system_engine engine(core.get_mount_manager());
-  QString uri = QDir(TEST_ENV_PATH).absoluteFilePath("dir1");
+  QString uri = env_dir("gio_fs_engine").absoluteFilePath("dir1");
   File_system_engine::Iterator* iterator = engine.list(uri);
   File_info_list list;
   while(iterator->has_next()) {
@@ -21,7 +19,7 @@ TEST(Gio_fs_engine, list) {
   }
   delete iterator;
 
-  qSort(list.begin(), list.end(), gio_uri_less_than);
+  qSort(list.begin(), list.end(), uri_less_than);
 
   ASSERT_EQ(4, list.count());
   EXPECT_EQ("file1.txt", list[0].file_name());
@@ -72,9 +70,9 @@ TEST(Gio_fs_engine, list) {
 TEST(Gio_fs_engine, unreadable_list) {
   Core core;
   Gio_file_system_engine engine(core.get_mount_manager());
-  QString uri = QDir(TEST_ENV_PATH).absoluteFilePath("unreadable_dir");
-  QDir().mkdir(uri);
-  QFile(uri).setPermissions(0);
+  QString uri = env_dir("gio_fs_engine").absoluteFilePath("unreadable_dir");
+  EXPECT_TRUE(QDir().mkdir(uri));
+  EXPECT_TRUE(QFile(uri).setPermissions(0));
   try {
     engine.list(uri);
   } catch (File_system_engine::Exception e) {
@@ -88,8 +86,7 @@ TEST(Gio_fs_engine, unreadable_list) {
 TEST(Gio_fs_engine, copy) {
   Core core;
   Gio_file_system_engine engine(core.get_mount_manager());
-  QDir dir(TEST_ENV_PATH);
-  EXPECT_TRUE(dir.cd("dir3"));
+  QDir dir = env_dir("gio_fs_engine");
   File_system_engine::Operation* o =
       engine.copy(dir.absoluteFilePath("source.txt"), dir.absoluteFilePath("dest.txt"));
   while(!o->is_finished()) {
@@ -110,8 +107,7 @@ TEST(Gio_fs_engine, copy) {
 TEST(Gio_fs_engine, move) {
   Core core;
   Gio_file_system_engine engine(core.get_mount_manager());
-  QDir dir(TEST_ENV_PATH);
-  EXPECT_TRUE(dir.cd("dir3"));
+  QDir dir = env_dir("gio_fs_engine");
   File_system_engine::Operation* o =
       engine.move(dir.absoluteFilePath("source.txt"), dir.absoluteFilePath("dest2.txt"));
   while(!o->is_finished()) {
@@ -130,8 +126,7 @@ TEST(Gio_fs_engine, move) {
 TEST(Gio_fs_engine, move_fail) {
   Core core;
   Gio_file_system_engine engine(core.get_mount_manager());
-  QDir dir(TEST_ENV_PATH);
-  EXPECT_TRUE(dir.cd("dir3"));
+  QDir dir = env_dir("gio_fs_engine");
 
   try {
     File_system_engine::Operation* o =
@@ -151,8 +146,7 @@ TEST(Gio_fs_engine, move_fail) {
 TEST(Gio_fs_engine, remove) {
   Core core;
   Gio_file_system_engine engine(core.get_mount_manager());
-  QDir dir(TEST_ENV_PATH);
-  EXPECT_TRUE(dir.cd("dir3"));
+  QDir dir = env_dir("gio_fs_engine");
   QString filename = dir.absoluteFilePath("file1.ini");
   EXPECT_TRUE(QFile(filename).exists());
   engine.remove(filename);

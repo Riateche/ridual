@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include <QDebug>
 #include "File_list_model.h"
-#include "debug_output.h"
+#include "debug_utils.h"
 #include <QListView>
 #include "Core.h"
 #include <QTableView>

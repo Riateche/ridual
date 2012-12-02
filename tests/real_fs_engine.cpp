@@ -4,14 +4,11 @@
 #include <QDebug>
 #include "Real_file_system_engine.h"
 #include "Directory.h"
-
-bool uri_less_than(const File_info &v1, const File_info &v2) {
-  return v1.uri < v2.uri;
-}
+#include "debug_utils.h"
 
 TEST(Real_fs_engine, list) {
   Real_file_system_engine engine;
-  QString uri = QDir(TEST_ENV_PATH).absoluteFilePath("dir1");
+  QString uri =  env_dir("real_fs_engine").absoluteFilePath("dir1");
   File_system_engine::Iterator* iterator = engine.list(uri);
   File_info_list list;
   while(iterator->has_next()) {
@@ -69,9 +66,9 @@ TEST(Real_fs_engine, list) {
 
 TEST(Real_fs_engine, unreadable_list) {
   Real_file_system_engine engine;
-  QString uri = QDir(TEST_ENV_PATH).absoluteFilePath("unreadable_dir");
-  QDir().mkdir(uri);
-  QFile(uri).setPermissions(0);
+  QString uri = env_dir("real_fs_engine").absoluteFilePath("unreadable_dir");
+  EXPECT_TRUE(QDir().mkdir(uri));
+  EXPECT_TRUE(QFile(uri).setPermissions(0));
   try {
     engine.list(uri);
   } catch (File_system_engine::Exception e) {
@@ -84,8 +81,7 @@ TEST(Real_fs_engine, unreadable_list) {
 
 TEST(Real_fs_engine, copy) {
   Real_file_system_engine engine;
-  QDir dir(TEST_ENV_PATH);
-  EXPECT_TRUE(dir.cd("dir3"));
+  QDir dir =  env_dir("real_fs_engine");
   File_system_engine::Operation* o =
       engine.copy(dir.absoluteFilePath("source.txt"), dir.absoluteFilePath("dest.txt"));
   while(!o->is_finished()) {
@@ -105,8 +101,7 @@ TEST(Real_fs_engine, copy) {
 
 TEST(Real_fs_engine, move) {
   Real_file_system_engine engine;
-  QDir dir(TEST_ENV_PATH);
-  EXPECT_TRUE(dir.cd("dir3"));
+  QDir dir =  env_dir("real_fs_engine");
   File_system_engine::Operation* o =
       engine.move(dir.absoluteFilePath("source.txt"), dir.absoluteFilePath("dest2.txt"));
   while(!o->is_finished()) {
@@ -124,8 +119,7 @@ TEST(Real_fs_engine, move) {
 
 TEST(Real_fs_engine, move_fail) {
   Real_file_system_engine engine;
-  QDir dir(TEST_ENV_PATH);
-  EXPECT_TRUE(dir.cd("dir3"));
+  QDir dir =  env_dir("real_fs_engine");
 
   try {
     File_system_engine::Operation* o =
@@ -144,8 +138,7 @@ TEST(Real_fs_engine, move_fail) {
 
 TEST(Real_fs_engine, remove) {
   Real_file_system_engine engine;
-  QDir dir(TEST_ENV_PATH);
-  EXPECT_TRUE(dir.cd("dir3"));
+  QDir dir =  env_dir("real_fs_engine");
   QString filename = dir.absoluteFilePath("file1.ini");
   EXPECT_TRUE(QFile(filename).exists());
   engine.remove(filename);
