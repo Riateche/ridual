@@ -291,9 +291,10 @@ void Main_window::keyPressEvent(QKeyEvent *event) {
 Action_data Main_window::get_auto_target_and_destination(Action_type::Enum action_type) {
   Action_data data;
   data.type = action_type;
-  foreach(File_info fi, active_pane->get_selected_files()) {
-    data.targets << fi.uri;
-  }
+  data.targets = active_pane->get_selected_files();
+//  foreach(File_info fi, active_pane->get_selected_files()) {
+//    data.targets << fi.uri;
+//  }
   if (data.type != Action_type::remove) {
     data.destination = get_destination_pane()->get_uri();
   }
@@ -590,9 +591,12 @@ void Main_window::on_action_paste_triggered() {
   QStringList list = QString::fromUtf8(d->data("x-special/gnome-copied-files")).split("\n");
   QString mode = list.first().trimmed();
   list.removeFirst();
-  QStringList normal_list;
+  File_info_list normal_list;
   foreach(QString s, list) {
-    normal_list << Directory::canonize(QUrl::fromPercentEncoding(s.toAscii()));
+    File_info info;
+    info.uri = Directory::canonize(QUrl::fromPercentEncoding(s.toAscii()));
+    //todo: request info from fs
+    normal_list << info;
   }
   Action_data data;
   data.targets = normal_list;

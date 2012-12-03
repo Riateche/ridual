@@ -18,7 +18,7 @@ public:
   QIcon icon;
   bool is_folder;
   bool is_executable;
-  bool is_file() { return !is_folder; }
+  bool is_file() const { return !is_folder; }
   qint64 file_size; // in bytes; -1 if folder or unknown
 
   QString file_name() const;

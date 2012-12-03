@@ -139,7 +139,25 @@ QString File_system_engine::Exception::get_message() {
 }
 
 File_info File_system_engine::Iterator::get_next() {
+  if (!has_next()) {
+    qWarning("File_system_engine::Iterator::get_next must not be called when has_next() == false");
+    return File_info();
+  }
   current = get_next_internal();
   return current;
+}
+
+File_system_engine::Simple_iterator::Simple_iterator(const File_info_list &p_list) {
+  list = p_list;
+  current = 0;
+}
+
+bool File_system_engine::Simple_iterator::has_next() {
+  return current < list.count();
+}
+
+File_info File_system_engine::Simple_iterator::get_next_internal() {
+  current++;
+  return list[current - 1];
 }
 

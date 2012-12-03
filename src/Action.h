@@ -1,6 +1,7 @@
 #ifndef FILE_ACTION_TASK_H
 #define FILE_ACTION_TASK_H
 
+#include <QStack>
 #include <QObject>
 #include <QStringList>
 #include <QVariant>
@@ -104,22 +105,9 @@ private:
   static const int sleep_interval = 100; //! Sleep time (in ms) for one iteration while waiting for user answer or resume after pause.
 
   //QString get_real_dir(QString uri); //! Convert URI to real path based on Action::mounts value.
+  //Error_reaction::Enum error_reaction;
 
-  bool paused; //! Indicates if action is currently paused. This value is setted by Action::toggle_pause slot.
 
-  /*! Indicates if action is requested to abort.
-      This value is setted by Action::abort and Action::question_answered slots.  */
-  bool cancelled;
-
-  /*! Last error reaction sent to Action::question_answered slot.
-    This field is used internally by Action::question_answered and
-    Action::ask_question, so it must not be used from any other place.
-    */
-  Error_reaction::Enum error_reaction;
-
-  /*! The object filled before sending Action::state_changed signal.
-      In other times contents of this object is outdated. */
-  Action_state state;
 
   /*! Ask a question specified by data. This function will wait for user answer
     and return it. It can also throw one of Abort_exception, Retry_exception
@@ -130,49 +118,64 @@ private:
     Precisely, Action::ask_question waits for Action::question_answered to
     be called and set Action::error_reaction value.
     */
-  Error_reaction::Enum ask_question(Question_data data);
+  void ask_question(Question_data data);
 
-  /*!
-    Process slot calls passed to Action and perform sleep or cancel (if neseccary).
-    This function should be called frequently in Action::run method and
-    methods called by it. Action slots can be called by Qt event loop
-    when this method is called.
-
-    If the action was paused using Action::toggle_pause slot, this function
-    goes to loop until action is resumed. So, when Action::run calls this function,
-    operations of Action::run are paused.
-
-    If the action is cancelled by user using Action::cancel, this function
-    throws Abort_exception.
-    */
-  void process_events();
-
-  // call prepare_one or process_one (depending on the parameter) on each target directory or file
-  // recursively.
-  void iterate_all(bool prepare);
-
-  // perform recursive fetch for one file or directory
-  void prepare_one(const QString& path, const QString& root_path, bool is_dir);
 
   // perform copying for one file or directory
-  void process_one(const QString& path, const QString& root_path, bool is_dir, bool dir_before);
+  void process_one(const File_info& file_info);
+
+  void postprocess_directory(const File_info& file_info);
+
+  void process_pending_operation();
+
+  void send_state();
+
+  // ...... new implementation ........
+
+  bool state_delivery_in_process;
+  //bool state_constructing_requested;
+
+  QStack<File_system_engine::Iterator*> fs_iterators_stack;
+  QStringList unprocessed_targets;
+  enum Phase { phase_preparing, phase_processing, phase_finished };
+  Phase phase;
+
+  bool paused; //! Indicates if action is currently paused. This value is setted by Action::toggle_pause slot.
+  bool blocked; //! Indicates if action is waiting for an answer.
+
+  File_system_engine::Operation* pending_operation;
+  File_info current_file; // for state constructing only
 
 
-  class Abort_exception { };
-  class Retry_exception { };
-  class Skip_exception { };
-  class Prepare_finished_exception {};
+  void end_preparing();
+
+  QTimer iteration_timer;
+  void update_iteration_timer();
+
+
+
 
 public slots:
   void question_answered(Error_reaction::Enum reaction);
   void set_paused(bool v);
   void abort();
 
+  //todo: connect to this slot
+  void state_delivered();
+
+
+private slots:
+  void run_iteration();
+
+
 signals:
-  //void error(QString message);
   void state_changed(Action_state state);
   void question(Question_data data);
   void started();
+  void finished();
+
+  //todo: connect to this signal
+  void error(QString string);
 
 
 

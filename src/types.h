@@ -33,7 +33,7 @@ public:
   Action_type::Enum type;
   Recursive_fetch_option recursive_fetch_option;
   Link_type link_type;
-  QStringList targets;
+  File_info_list targets;
   QString destination;
 };
 

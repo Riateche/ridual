@@ -25,6 +25,18 @@ public:
 
   };
 
+  class Simple_iterator : public Iterator {
+  public:
+    Simple_iterator(const File_info_list& list);
+    bool has_next();
+    File_info get_next_internal();
+
+
+  private:
+    File_info_list list;
+    int current;
+  };
+
   class Operation {
   public:
     virtual bool is_finished() = 0;
