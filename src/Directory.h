@@ -75,18 +75,6 @@ public:
 
   static bool is_relative(QString uri);
 
-
-
-
-  /*! Convert current Directory URI to real path. If no matching
-    GIO mount is found, result of this function is the same is URI.
-    */
-  static QString find_real_path(QString uri, const QList<Gio_mount> &mounts);
-  static QString find_real_path(QString uri, Core* core);
-
-
-
-
   void interrupt_gio_operation();
 
   
@@ -131,7 +119,6 @@ private slots:
 
 private:
   QString uri;
-  QString path; //real path
   Elapsed_timer refresh_timer;
 
   void create_task(QString uri);

@@ -20,7 +20,7 @@ Core::Core() {
   user_dirs = new Bookmarks_file_parser(QDir::home().absoluteFilePath(".config/user-dirs.dirs"),
                                         Bookmarks_file_parser::format_xdg);
   mount_manager = new Mount_manager(this);
-  watcher = new Directory_watcher(0);
+  watcher = new Directory_watcher(this);
   watcher_thread = new QThread(this);
   watcher_thread->start();
   watcher->moveToThread(watcher_thread);

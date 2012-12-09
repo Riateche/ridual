@@ -46,7 +46,7 @@ Directory::Directory(Core *c, QString p_uri) :
 
 Directory::~Directory() {
   if (watcher_created) {
-    emit unwatch(path);
+    emit unwatch(uri);
   }
   interrupt_gio_operation();
 }
@@ -113,16 +113,7 @@ QString Directory::get_parent_uri(QString target_uri) {
   return s;
 }
 
-//todo: remove this
-QString Directory::find_real_path(QString uri, const QList<Gio_mount> &mounts) {
-  if (uri.startsWith("/")) return uri;
-  foreach(Gio_mount mount, mounts) {
-    if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
-      return mount.path + "/" + uri.mid(mount.uri.length());
-    }
-  }
-  return uri;
-}
+
 
 bool Directory::is_relative(QString uri) {
   return !uri.startsWith("/") &&
@@ -132,9 +123,7 @@ bool Directory::is_relative(QString uri) {
 }
 
 
-QString Directory::find_real_path(QString uri, Core *core) {
-  return find_real_path(uri, core->get_mount_manager()->get_mounts());
-}
+
 
 void Directory::interrupt_gio_operation() {
   if (gcancellable) {
@@ -154,12 +143,12 @@ void Directory::refresh() {
     emit error(tr("Address is empty"));
     return;
   }
-  if (uri.startsWith("/")) {
+/*  if (uri.startsWith("/")) {
     // regular directory
     path = uri;
     create_task(uri);
     return;
-  }
+  } */
   Special_uri special_uri(uri);
   if (special_uri.name() == Special_uri::places) {
     //the root of our virtual directory tree
@@ -267,13 +256,17 @@ void Directory::refresh() {
     return;
   }
 
-  QString real_path = find_real_path(uri, core);
+  /*QString real_path = find_real_path(uri, core);
   if (uri != real_path) {
     path = real_path;
     create_task(path);
     return;
-  }
+  }*/
 
+  create_task(uri);
+
+  //todo: reimplement this
+/*
   //address not recognized. try to pass it to gio
   GFile* file = g_file_new_for_uri(uri.toLocal8Bit());
   qDebug() << "Trying to mount this location";
@@ -282,6 +275,7 @@ void Directory::refresh() {
   async_result_type = async_result_mount_location;
   gcancellable = g_cancellable_new();
   g_file_mount_enclosing_volume(file, GMountMountFlags(), 0, gcancellable, async_result, this);
+  */
 }
 
 void Directory::task_ready(File_info_list r) {
@@ -299,8 +293,7 @@ void Directory::refresh_timeout() {
 }
 
 void Directory::directory_changed(QString changed_path) {
-  //qDebug() << "directory_changed" << path << changed_path;
-  if (!path.isEmpty() && path == changed_path) {
+  if (changed_path == uri) {
     if (refresh_timer.elapsed() < watcher_refresh_timeout) {
       need_update = true;
     } else {
@@ -324,7 +317,7 @@ void Directory::create_task(QString uri) {
     //Directory_watch_task* task2 = new Directory_watch_task(path);
     //connect(task2, SIGNAL(changed()), this, SLOT(watcher_event()));
     //main_window->add_task(task2);
-    emit watch(path);
+    emit watch(uri);
     watcher_created = true;
   }
 }
