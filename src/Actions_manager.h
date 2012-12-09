@@ -3,16 +3,17 @@
 
 #include <QObject>
 #include <QHash>
+#include "Core_ally.h"
 
 class Action_queue;
 class Action;
 class Mount_manager;
 
 
-class Actions_manager : public QObject {
+class Actions_manager : public QObject, public Core_ally {
   Q_OBJECT
 public:
-  explicit Actions_manager(QObject *parent = 0);
+  explicit Actions_manager(Core* c);
   Action_queue* create_queue();
 
   /*! Get all currently existing queues. Note that any queue is deleted
@@ -31,11 +32,6 @@ public:
     */
   QList<Action*> get_actions() { return actions; }
 
-  /*! Set mount manager used to initialize Action objects.
-    Must be called once just after constructing this object.
-    */
-  void set_mount_manager(Mount_manager* m) { mount_manager = m; }
-
 signals:
   /*! Emitted when an action is added to any queue but not launched yet.
     */
@@ -52,7 +48,6 @@ private slots:
 private:
   QHash<int, Action_queue*> queues;
   QList<Action*> actions;
-  Mount_manager* mount_manager;
   
 };
 

@@ -225,7 +225,9 @@ void Main_window::create_action(Action_data data) {
   } else {
     q = core->get_actions_manager()->create_queue();
   }
-  q->add_action(new Action(data));
+//  Action* a = new Action(data);
+//  q->add_action(a);
+  q->create_action(data);
 }
 
 Recursive_fetch_option Main_window::get_recursive_fetch_option() {
@@ -331,6 +333,10 @@ void Main_window::switch_active_pane() {
 
 void Main_window::show_message(QString message, Icon::Enum icon) {
   ui->questions_layout->insertWidget(0, new Message_widget(message, icon));
+}
+
+void Main_window::show_error(QString message) {
+  show_message(message, Icon::error);
 }
 
 void Main_window::save_settings() {
@@ -626,4 +632,6 @@ void Main_window::action_added(Action* a) {
   connect(a, SIGNAL(question(Question_data)), this, SLOT(slot_action_question(Question_data)));
   Action_state_widget* w = new Action_state_widget(a);
   connect(w, SIGNAL(show_requested()), this, SLOT(action_started()));
+  connect(a, SIGNAL(error(QString)), this, SLOT(show_error(QString)));
+
 }

@@ -32,7 +32,7 @@ Directory::Directory(Core *c, QString p_uri) :
 
   Special_uri special_uri(uri);
   if (special_uri.name() == Special_uri::places) {
-    connect(core->get_mount_manager(), SIGNAL(mounts_changed()), this, SLOT(refresh()));
+    connect(core->get_mount_manager(), SIGNAL(mounts_changed(QList<Gio_mount>)), this, SLOT(refresh()));
     connect(core->get_bookmarks(), SIGNAL(changed()), this, SLOT(refresh()));
     connect(core->get_user_dirs(), SIGNAL(changed()), this, SLOT(refresh()));
   }

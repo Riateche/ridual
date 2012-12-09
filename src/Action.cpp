@@ -14,9 +14,10 @@
 #include <errno.h>
 #include "File_system_engine.h"
 
-Action::Action(const Action_data &p_data)
+Action::Action(Action_queue *q, const Action_data &p_data)
 : data(p_data)
-, fs_engine(0)
+, fs_engine(q->get_core()->get_new_file_system_engine())
+, queue(q)
 {
   total_size = 0;
   total_count = 0;
@@ -26,27 +27,22 @@ Action::Action(const Action_data &p_data)
 
   paused = false;
   blocked = false;
-  queue = 0;
 
-  state_delivery_in_process = false;
+  //state_delivery_in_process = false;
   pending_operation = 0;
 
   qRegisterMetaType<Action_state>("Action_state");
   qRegisterMetaType<Question_data>("Question_data");
-  connect(&iteration_timer, SIGNAL(timeout()), this, SLOT(run_iteration()));
+  /*connect(&iteration_timer, SIGNAL(timeout()), this, SLOT(run_iteration()));
   iteration_timer.setInterval(0);
+  iteration_timer.setSingleShot(true); */
+
+  fs_engine->moveToThread(queue);
+  moveToThread(queue);
 }
 
 Action::~Action() {
 
-}
-
-void Action::set_queue(Action_queue *q) {
-  queue = q;
-}
-
-void Action::set_fs_engine(File_system_engine *v) {
-  fs_engine = v;
 }
 
 void Action::ask_question(Question_data data) {
@@ -64,7 +60,7 @@ void Action::run() {
     qFatal("no fs engine for action");
     return;
   }
-  fs_engine->moveToThread(thread()); //dangerous! need to test
+  //fs_engine->moveToThread(thread()); //dangerous! need to test
   emit started();
   if (data.destination.endsWith("/")) {
     data.destination = data.destination.left(data.destination.length() - 1);
@@ -161,7 +157,6 @@ void Action::send_state() {
   state.queue_id = queue ? queue->get_id() : -1;
 
   if (phase == phase_processing && total_size > 0) {
-    //todo: reimplement progress calculation
     qint64 real_current_size = current_size;
     if (pending_operation) {
       real_current_size += current_file.file_size * pending_operation->get_progress();
@@ -208,47 +203,48 @@ void Action::send_state() {
   }
 
   emit state_changed(state);
-  state_delivery_in_process = true;
+  qDebug() << "emit state_changed(state)";
+  //state_delivery_in_process = true;
   signal_timer.restart();
 }
 
 void Action::run_iteration() {
-  if (paused || blocked || phase == phase_finished) return;
-
-  if (!state_delivery_in_process && signal_timer.elapsed() > signal_interval) {
-    send_state();
-  }
-
-  try {
-    if (pending_operation) {
-      process_pending_operation();
+  while(!(paused || blocked || phase == phase_finished)) {
+    QApplication::processEvents();
+    if (signal_timer.elapsed() > signal_interval) {
+      send_state();
     }
-    if (fs_iterators_stack.top()->has_next()) {
-      File_info fi = fs_iterators_stack.top()->get_next();
-      current_file = fi;
-      process_one(fi);
-      if (fi.is_folder) {
-        fs_iterators_stack.push(fs_engine->list(fi.uri));
-      }
-    } else {
-      fs_iterators_stack.pop();
-      if (fs_iterators_stack.isEmpty()) {
-        if (phase == phase_preparing) {
-          end_preparing();
-        } else if (phase == phase_processing) {
-          phase = phase_finished;
-          emit finished();
-          update_iteration_timer();
-        } else {
-          qWarning("unexpected value of phase");
+
+    try {
+      if (pending_operation) {
+        process_pending_operation();
+      } else if (fs_iterators_stack.top()->has_next()) {
+        File_info fi = fs_iterators_stack.top()->get_next();
+        current_file = fi;
+        process_one(fi);
+        if (fi.is_folder) {
+          fs_iterators_stack.push(fs_engine->list(fi.uri));
         }
       } else {
-        File_info fi = fs_iterators_stack.top()->get_current();
-        postprocess_directory(fi);
+        fs_iterators_stack.pop();
+        if (fs_iterators_stack.isEmpty()) {
+          if (phase == phase_preparing) {
+            end_preparing();
+          } else if (phase == phase_processing) {
+            phase = phase_finished;
+            emit finished();
+            update_iteration_timer();
+          } else {
+            qWarning("unexpected value of phase");
+          }
+        } else {
+          File_info fi = fs_iterators_stack.top()->get_current();
+          postprocess_directory(fi);
+        }
       }
+    } catch (File_system_engine::Exception& e) {
+      ask_question(Question_data(this, e));
     }
-  } catch (File_system_engine::Exception& e) {
-    ask_question(Question_data(this, e));
   }
 }
 
@@ -262,9 +258,10 @@ void Action::end_preparing() {
 
 void Action::update_iteration_timer() {
   if (paused || blocked || phase == phase_finished) {
-    iteration_timer.stop();
+    //iteration_timer.stop();
   } else {
-    iteration_timer.start();
+    run_iteration();
+    //iteration_timer.start();
   }
 }
 
@@ -286,5 +283,6 @@ void Action::abort() {
 }
 
 void Action::state_delivered() {
-  state_delivery_in_process = false;
+  qDebug() << "Action::state_delivered";
+  //state_delivery_in_process = false;
 }

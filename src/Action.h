@@ -12,6 +12,7 @@
 #include "Error_reaction.h"
 #include "types.h"
 #include "Elapsed_timer.h"
+#include "Core_ally.h"
 
 #define BUFFER_SIZE 65535
 
@@ -56,23 +57,10 @@ public:
                     \sa Action_data
 
     */
-  explicit Action(const Action_data& p_data);
+  explicit Action(Action_queue* q, const Action_data& p_data);
   ~Action();
 
-  /*! This function is called when Action is added to the queue.
-    Action uses this value to report queue id in Action::state_changed
-    signal and to call Action_queue::msleep when waiting for user
-    answer or when paused.
-    */
-  void set_queue(Action_queue* q);
 
-  void set_fs_engine(File_system_engine* v);
-
-  /*! This function executes main operations for this action.
-    When Action::run is finished, Action is deleted by Action_queue.
-    This function is executed in Action_queue thread.
-    */
-  void run();
 
 
 private:
@@ -102,22 +90,7 @@ private:
     and is considered failed (total_count and total_size becomes 0).
     */
   static const int auto_recursive_fetch_max = 1000;
-  static const int sleep_interval = 100; //! Sleep time (in ms) for one iteration while waiting for user answer or resume after pause.
 
-  //QString get_real_dir(QString uri); //! Convert URI to real path based on Action::mounts value.
-  //Error_reaction::Enum error_reaction;
-
-
-
-  /*! Ask a question specified by data. This function will wait for user answer
-    and return it. It can also throw one of Abort_exception, Retry_exception
-    or Skip_exception if user answer was 'abort', 'retry' or 'skip',
-    respectively.
-
-    Action slots can be called by Qt event loop while this method is executing.
-    Precisely, Action::ask_question waits for Action::question_answered to
-    be called and set Action::error_reaction value.
-    */
   void ask_question(Question_data data);
 
 
@@ -130,9 +103,7 @@ private:
 
   void send_state();
 
-  // ...... new implementation ........
-
-  bool state_delivery_in_process;
+  //bool state_delivery_in_process;
   //bool state_constructing_requested;
 
   QStack<File_system_engine::Iterator*> fs_iterators_stack;
@@ -149,7 +120,7 @@ private:
 
   void end_preparing();
 
-  QTimer iteration_timer;
+  //QTimer iteration_timer;
   void update_iteration_timer();
 
 
@@ -160,9 +131,9 @@ public slots:
   void set_paused(bool v);
   void abort();
 
-  //todo: connect to this slot
   void state_delivered();
 
+  void run();
 
 private slots:
   void run_iteration();
@@ -174,7 +145,6 @@ signals:
   void started();
   void finished();
 
-  //todo: connect to this signal
   void error(QString string);
 
 

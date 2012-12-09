@@ -26,7 +26,6 @@ Core::Core() {
   watcher->moveToThread(watcher_thread);
 
   actions_manager = new Actions_manager(this);
-  actions_manager->set_mount_manager(mount_manager);
 
   QSettings settings;
   sort_folders_before_files = settings.value("sort_folders_before_files").toBool();

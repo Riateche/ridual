@@ -145,6 +145,7 @@ public slots:
   void open_current();
   void switch_active_pane();
   void show_message(QString message, Icon::Enum icon);
+  void show_error(QString message);
 
 signals:
   void active_pane_changed();

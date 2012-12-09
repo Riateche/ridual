@@ -4,6 +4,8 @@
 #include <QThread>
 #include <QMutex>
 #include <QQueue>
+#include "Core_ally.h"
+#include "types.h"
 
 class Action;
 
@@ -14,22 +16,19 @@ class Action;
 
   Use Actions_manager to create new queues.
   */
-class Action_queue : public QThread {
+class Action_queue : public QThread, public Core_ally {
   Q_OBJECT
 public:
   virtual ~Action_queue();
-  void add_action(Action* a);
+  //void add_action(Action* a);
+
+  void create_action(Action_data data);
 
   /*! Get the id of queue. Id is an unique positive number.
     This function must be called only from the thread
     represented by this object.
     */
   inline int get_id() { return id; }
-  QQueue<Action*> get_actions();
-
-  // public morozov pattern
-  void msleep(unsigned long time) { QThread::msleep(time); }
-
   
 signals:
   /*! Emitted when action is added to the queue but not launched yet.
@@ -37,12 +36,14 @@ signals:
   void action_added(Action* action);
   
 private:
-  explicit Action_queue(int p_id);
+  explicit Action_queue(Core* c, int p_id);
   friend class Actions_manager;
-  QQueue<Action*> actions;
+  QList<Action*> actions;
   QMutex access_mutex;
   int id;
-  void run();
+
+private slots:
+  void action_finished();
 
 };
 

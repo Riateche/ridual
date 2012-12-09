@@ -3,18 +3,17 @@
 #include "Action.h"
 #include "Mount_manager.h"
 #include "gio/Gio_file_system_engine.h"
+#include "Core.h"
 
-
-Actions_manager::Actions_manager(QObject *parent) :
-  QObject(parent),
-  mount_manager(0)
+Actions_manager::Actions_manager(Core* c) :
+  Core_ally(c)
 {
 }
 
 Action_queue *Actions_manager::create_queue() {
   int id = 1;
   while(queues.contains(id)) id++;
-  Action_queue* q = new Action_queue(id);
+  Action_queue* q = new Action_queue(core, id);
   connect(q, SIGNAL(destroyed(QObject*)), this, SLOT(queue_destroyed(QObject*)));
   connect(q, SIGNAL(action_added(Action*)), this, SLOT(slot_action_added(Action*)));
   queues[id] = q;
@@ -32,12 +31,7 @@ void Actions_manager::action_destroyed(QObject *obj) {
 }
 
 void Actions_manager::slot_action_added(Action *a) {
-  if (mount_manager) {
-    //a->set_mounts(mount_manager->get_mounts());
 
-    //todo: better to use core->get_new_file_system_engine() here
-    a->set_fs_engine(new Gio_file_system_engine(mount_manager));
-  }
   actions << a;
   connect(a, SIGNAL(destroyed(QObject*)), this, SLOT(action_destroyed(QObject*)));
   emit action_added(a);

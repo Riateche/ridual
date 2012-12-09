@@ -16,6 +16,7 @@ Action_state_widget::Action_state_widget(Action* action) :
           this, SLOT(state_changed(Action_state)));
   connect(action, SIGNAL(destroyed()), this, SLOT(deleteLater()));
   connect(this, SIGNAL(set_paused(bool)), action, SLOT(set_paused(bool)));
+  connect(this, SIGNAL(state_received()), action, SLOT(state_delivered()));
   connect(ui->cancel, SIGNAL(clicked()), action, SLOT(abort()));
 }
 
@@ -51,6 +52,8 @@ void Action_state_widget::state_changed(Action_state state) {
     if (disabled) bar->reset();
     l->setText(disabled? "": caption + text);
   }
+  emit state_received();
+  qDebug() << "emit state_received()";
 }
 
 void Action_state_widget::on_pause_clicked() {
@@ -59,3 +62,4 @@ void Action_state_widget::on_pause_clicked() {
   ui->pause->setIcon(paused ? icon_resume : icon_pause);
   emit set_paused(paused);
 }
+

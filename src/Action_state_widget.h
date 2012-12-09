@@ -23,6 +23,7 @@ private:
 signals:
   void show_requested();
   void set_paused(bool paused);
+  void state_received();
 
 private slots:
   void state_changed(Action_state state);
