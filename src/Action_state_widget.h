@@ -8,6 +8,10 @@ namespace Ui {
   class Action_state_widget;
 }
 
+/*! This widget displays the state of one Action. Objects of this class are embedded in
+  Main_window.
+
+  */
 class Action_state_widget : public QWidget {
   Q_OBJECT
   

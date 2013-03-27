@@ -6,6 +6,10 @@
 #include <QList>
 #include <QVariant>
 
+
+/*! This class extracts information about an application from GAppInfo object
+  and provides a way to launch it.
+  */
 class App_info {
 public:
   App_info(GAppInfo* obj = 0);

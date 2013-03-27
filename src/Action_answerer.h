@@ -7,6 +7,12 @@
 
 class Main_window;
 
+/*!
+  This widget displays a question sent by Action and buttons with available options.
+  When the user clicks a button, the widget sends corresponding signal to the Action.
+
+  This widget is created by Main_window and is embedded into it.
+  */
 class Action_answerer : public Question_widget {
   Q_OBJECT
 public:

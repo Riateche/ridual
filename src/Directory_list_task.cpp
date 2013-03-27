@@ -14,12 +14,20 @@ Directory_list_task::Directory_list_task(QString p_uri, File_system_engine *e) :
 }
 
 Directory_list_task::~Directory_list_task() {
-  delete fs_engine;
-  //todo: fix segfault here
+  fs_engine->deleteLater();
+  //todo: fix segfault here; fixed?
 }
 
 void Directory_list_task::run() {
-  fs_engine->moveToThread(thread()); //dangerous! need to test
+  /*
+    moveToThead() should be called from the thread that owns fs_engine (GUI thread actually),
+    but in GUI thread we don't know yet
+    which thread should own fs_engine object. We would create
+    fs_engine right here, but Core::get_new_file_system_engine method is too
+    far from being thread-safe. Now we will hope that the next statement will
+    not crash the app. //todo: do something
+  */
+  fs_engine->moveToThread(thread());
   try {
     File_system_engine::Iterator* iterator = fs_engine->list(uri);
     File_info_list list;

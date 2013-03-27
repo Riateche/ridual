@@ -6,6 +6,9 @@
 
 class File_system_engine;
 
+/*! This class provides executing of directory listing in the thread pool.
+  It's used internally by Directory.
+  */
 class Directory_list_task : public QObject, public QRunnable {
   Q_OBJECT
 public:

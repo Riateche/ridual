@@ -3,6 +3,9 @@
 
 class Core;
 
+/*! This is a helper class that should be inherited by classes that keeps
+  a pointer to Core object.
+  */
 class Core_ally {
 public:
   Core_ally(Core* _core): core(_core) {}

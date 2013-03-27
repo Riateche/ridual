@@ -9,7 +9,11 @@ class Action_queue;
 class Action;
 class Mount_manager;
 
+/*!
+  This class manages action queues. It also provides signals for
+  actions' and queues' creating and destroying tracking.
 
+  */
 class Actions_manager : public QObject, public Core_ally {
   Q_OBJECT
 public:
@@ -42,7 +46,7 @@ signals:
     
 private slots:
   void queue_destroyed(QObject *obj);
-  void action_destroyed(QObject *obj);
+  void slot_action_destroyed(QObject *obj);
   void slot_action_added(Action* a);
 
 private:

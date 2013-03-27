@@ -44,6 +44,28 @@ class Gio_mount;
   3) special locations started with "places". They are used for displaying
   list of available locations. It's specific for our application.
 
+  Directory object provides a way to read directory contents and watch for changes.
+  To use Directory, pass the proper URI in Directory constructor,
+  connect to ready() signal and call Directory::refresh(). Directory will asyncronically
+  read directory contents and emit ready() signal with the result as an argument.
+  If the directory's content is changed, Directory will send ready() signal again.
+  But while the directory is changing too often, ready() signal is emitted not more often
+  than once in a second. If an error has occured while retrieving the directory contents,
+  error() signal will be emitted instead of ready().
+
+  The URI of Directory object cannot be changed. Create another Directory for another URI.
+
+  Directory class treats 'places' URIs specially and generates content for them itself.
+  All other requests are passed to Directory_list_task which uses filesystem engine to
+  get directory contents. Directory also is able to mount GIO volume. If the requested
+  URI is like 'places/mounts/[id]', Directory will try to mount the volume asyncronically.
+  If it's successful, Directory's URI will change to volume's mount point, then directory
+  will be refreshed again and emit ready() signal when volume root directory is
+  successfully read. Use Directory::get_uri to get actual Directory's URI.
+
+  Directory also should try to mount GIO network resources such as 'sftp://user@host/' if they
+  are not mounted. But now it's broken. //todo: fix this
+
 */
 class Directory : public QObject, Core_ally {
   Q_OBJECT
@@ -74,9 +96,6 @@ public:
   inline QString get_parent_uri() { return get_parent_uri(uri); }
 
   static bool is_relative(QString uri);
-
-  void interrupt_gio_operation();
-
   
 signals:
   /*!
@@ -120,6 +139,9 @@ private slots:
 private:
   QString uri;
   Elapsed_timer refresh_timer;
+
+  void interrupt_gio_operation();
+  //todo: ability to interrupt any operation
 
   void create_task(QString uri);
 

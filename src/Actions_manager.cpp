@@ -25,7 +25,7 @@ void Actions_manager::queue_destroyed(QObject *obj) {
   emit queue_destroyed(reinterpret_cast<Action_queue*>(obj));
 }
 
-void Actions_manager::action_destroyed(QObject *obj) {
+void Actions_manager::slot_action_destroyed(QObject *obj) {
   actions.removeOne(reinterpret_cast<Action*>(obj));
   emit action_destroyed(reinterpret_cast<Action*>(obj));
 }
@@ -33,6 +33,6 @@ void Actions_manager::action_destroyed(QObject *obj) {
 void Actions_manager::slot_action_added(Action *a) {
 
   actions << a;
-  connect(a, SIGNAL(destroyed(QObject*)), this, SLOT(action_destroyed(QObject*)));
+  connect(a, SIGNAL(destroyed(QObject*)), this, SLOT(slot_action_destroyed(QObject*)));
   emit action_added(a);
 }

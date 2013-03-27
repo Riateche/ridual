@@ -242,7 +242,8 @@ void Directory::refresh() {
   }
 
   if (uri.startsWith(Special_uri(Special_uri::mounts).uri())) { //mounting of unmounted volume was requested
-    int id = uri.mid(Special_uri(Special_uri::mounts).uri().length() + 1).toInt(); //uri is something like "places/mounts/42"
+    //uri is something like "places/mounts/42"
+    int id = uri.mid(Special_uri(Special_uri::mounts).uri().length() + 1).toInt();
     QList<Gio_volume*> volumes = core->get_mount_manager()->get_volumes();
     if (id < 0 || id >= volumes.count()) {
       emit error(tr("Invalid volume id"));

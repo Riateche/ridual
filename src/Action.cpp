@@ -42,7 +42,7 @@ Action::Action(Action_queue *q, const Action_data &p_data)
 }
 
 Action::~Action() {
-
+  delete fs_engine;
 }
 
 void Action::ask_question(Question_data data) {

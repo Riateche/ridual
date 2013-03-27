@@ -6,6 +6,9 @@
 #include <QVariant>
 
 namespace Column {
+
+  /*! This enum represents a column of files list view.
+    */
   enum Enum {
     name,
     extension,
@@ -27,6 +30,7 @@ namespace Column {
   };
 }
 
+/*! This class provides several convinient methods for operating with lists of columns.   */
 class Columns: public QList<Column::Enum> {
 public:
   static Columns get_all();

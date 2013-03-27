@@ -10,6 +10,12 @@ class Directory_watcher;
 class Actions_manager;
 class File_system_engine;
 
+/*!
+   This is the 'God object'. It creates objects of the most important core classes and
+   provides pointers to them. It also manages some application settings.
+
+
+  */
 class Core : public QObject {
   Q_OBJECT
 public:

@@ -22,7 +22,7 @@ class File_system_engine;
 
 
 
-/*! Action represents a long operation created by user, e.g. copying file or folder.
+/*! Action represents a long operation requested by user, e.g. copying file or folder.
   Any Action is runned in non-gui thread represented by Action_queue object.
   An Action object is created in gui thread, but when it's added to Action_queue,
   it's moved to the thread represented by it. So, any slot of Action is executed
@@ -32,17 +32,8 @@ class File_system_engine;
   the job considered done, so Action_queue deletes Action object and goes to the
   next one.
 
-  Interaction between Action::run method and GUI thread is performed through
-  Action::ask_question and Action::process_events methods called by Action::run.
-  These methods call QApplication::processEvents, so Qt can call Action slots
-  which can modify Action private fields. Action::ask_question and
-  Action::process_events behaviour depends on these fields values.
-
   Action fields and methods must never be accessed directly from GUI thread or
   other threads. The only way of interaction with it is through signal-slot connection.
-
-  Control flow in Action::run and nested methods is controlled using exceptions.
-  It's not ideal solution, but no other solution has been found.
 
   \sa Action_queue
 
@@ -50,7 +41,14 @@ class File_system_engine;
 class Action: public QObject {
   Q_OBJECT
 public:
+  ~Action();
+
+private:
+  friend class Action_queue;
+
   /*!
+    The constructor is available only from Action_queue.
+
     \param p_data   This parameter contains all information about
                     type of performed action, target files and
                     destination (if any), settings.
@@ -58,12 +56,9 @@ public:
 
     */
   explicit Action(Action_queue* q, const Action_data& p_data);
-  ~Action();
 
 
 
-
-private:
   Action_data data; //! Data passed to the constructor.
   File_system_engine* fs_engine;
 
@@ -117,20 +112,30 @@ private:
   File_system_engine::Operation* pending_operation;
   File_info current_file; // for state constructing only
 
-
   void end_preparing();
 
-  //QTimer iteration_timer;
   void update_iteration_timer();
 
 
 
 
 public slots:
+  /*! Connect to this slot to notify Action about answers.
+    */
   void question_answered(Error_reaction::Enum reaction);
+
+  /*! Connect to this slot to pause or resume the operation.
+    */
   void set_paused(bool v);
+
+  /*! Connect to this slot to abort the operation. Action object will be
+    deleted later by Action_queue.
+    */
   void abort();
 
+  /*! Connect to this slot to notify Action that Action's state has been displayed
+    in GUI and Action is allowed to send another state_changed signal.
+    */
   void state_delivered();
 
   void run();
@@ -140,14 +145,25 @@ private slots:
 
 
 signals:
+  /*! Notify about action's state.
+    */
   void state_changed(Action_state state);
+
+  /*! Send a quaction to GUI.
+    */
   void question(Question_data data);
+
+  /*! Notify that the action has been started.
+    */
   void started();
+
+  /*! Notify that the action has been finished. Action object will be deleted later.
+    */
   void finished();
 
+  /*! Notify about unrecoverable error.
+    */
   void error(QString string);
-
-
 
 };
 

@@ -5,6 +5,10 @@
 #include <QFileSystemWatcher>
 #include "File_info.h"
 
+/*!
+  This object is responsible for parsing of ~/.gtk-bookmarks and ~/.config/user-dirs.dirs files
+  These files contains GTK bookmarks and user directories (common places) of Gnome environment.
+  */
 class Bookmarks_file_parser : public QObject {
   Q_OBJECT
 public:

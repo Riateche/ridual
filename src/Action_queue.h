@@ -11,10 +11,13 @@ class Action;
 
 /*!
   All operations with Action_queue must be executed from GUI thread.
-  Accessing from other threads is forbidden. Use signal-slot system
-  to interact with queues.
-
   Use Actions_manager to create new queues.
+
+  Action_queue manages a queue of Action objects and executes them one by one.
+  Finished Action objects are deleted here.
+
+  Action_queue object is deleted when the last action is finished.
+
   */
 class Action_queue : public QThread, public Core_ally {
   Q_OBJECT
