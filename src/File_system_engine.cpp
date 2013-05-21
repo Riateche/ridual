@@ -6,6 +6,18 @@ File_system_engine::File_system_engine() {
 
 }
 
+void File_system_engine::remove_recursively(const QString &uri) {
+  if (is_directory(uri)) {
+    Iterator* iterator = list(uri);
+    while(iterator->has_next()) {
+      remove_recursively(iterator->get_next().uri);
+    }
+    delete iterator;
+  } else {
+    remove(uri);
+  }
+}
+
 File_system_engine::error_cause File_system_engine::get_cause_from_errno() {
   switch(errno) {
     case EACCES:
@@ -13,7 +25,7 @@ File_system_engine::error_cause File_system_engine::get_cause_from_errno() {
       return permission_denied;
       break;
     case EEXIST:
-      return already_exists;
+      return file_already_exists;
       break;
     case EMLINK:
       return too_many_entries;
@@ -50,6 +62,10 @@ File_system_engine::error_cause File_system_engine::get_cause_from_errno() {
     default:
       return unknown_cause;
   }
+}
+
+File_system_engine::Exception::Exception() {
+
 }
 
 File_system_engine::Exception::Exception(File_system_engine::error_type p_type,
@@ -106,8 +122,10 @@ QString File_system_engine::Exception::get_message() {
     cause_string = QObject::tr("not found"); break;
   case File_system_engine::permission_denied:
     cause_string = QObject::tr("permission denied"); break;
-  case File_system_engine::already_exists:
-    cause_string = QObject::tr("already exists"); break;
+  case File_system_engine::file_already_exists:
+    cause_string = QObject::tr("file already exists"); break;
+  case File_system_engine::directory_already_exists:
+    cause_string = QObject::tr("directory already exists"); break;
   case File_system_engine::too_many_entries:
     cause_string = QObject::tr("too many entries"); break;
   case File_system_engine::filesystem_full:
@@ -139,6 +157,7 @@ QString File_system_engine::Exception::get_message() {
 }
 
 File_info File_system_engine::Iterator::get_next() {
+  qDebug() << "Iterator::get_next";
   if (!has_next()) {
     qWarning("File_system_engine::Iterator::get_next must not be called when has_next() == false");
     return File_info();

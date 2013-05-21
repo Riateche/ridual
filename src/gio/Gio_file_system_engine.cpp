@@ -22,7 +22,7 @@ File_system_engine::Iterator *Gio_file_system_engine::list(const QString &uri) {
   return i;
 }
 
-File_system_engine::Operation *Gio_file_system_engine::copy(const QString &source, const QString &destination) {
+File_system_engine::Operation *Gio_file_system_engine::copy(const QString &source, const QString &destination, bool append_mode) {
   QString r_uri1 = get_real_file_name(source);
   if (r_uri1.isEmpty()) {
     throw Exception(copy_failed, not_found, r_uri1);
@@ -31,7 +31,7 @@ File_system_engine::Operation *Gio_file_system_engine::copy(const QString &sourc
   if (r_uri2.isEmpty()) {
     throw Exception(copy_failed, not_found, r_uri2);
   }
-  return real_engine.copy(r_uri1, r_uri2);
+  return real_engine.copy(r_uri1, r_uri2, append_mode);
 }
 
 File_system_engine::Operation *Gio_file_system_engine::move(const QString &source, const QString &destination) {
@@ -88,6 +88,22 @@ bool Gio_file_system_engine::is_responsible_for(const QString &uri) {
   if (uri.startsWith("/")) return false;
   if (get_real_file_name(uri).isEmpty()) return false;
   return true;
+}
+
+bool Gio_file_system_engine::is_file(const QString &uri) {
+  QString r_uri = get_real_file_name(uri);
+  if (r_uri.isEmpty()) {
+    throw Exception(directory_list_failed, not_found, uri);
+  }
+  return real_engine.is_file(r_uri);
+}
+
+bool Gio_file_system_engine::is_directory(const QString &uri) {
+  QString r_uri = get_real_file_name(uri);
+  if (r_uri.isEmpty()) {
+    throw Exception(directory_list_failed, not_found, uri);
+  }
+  return real_engine.is_directory(r_uri);
 }
 
 bool Gio_file_system_engine::Gio_fs_iterator::has_next() {

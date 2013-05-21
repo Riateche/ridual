@@ -14,13 +14,14 @@ class Gio_file_system_engine : public File_system_engine {
 public:
   Gio_file_system_engine(Mount_manager* m);
   Iterator* list(const QString& uri);
-  Operation* copy(const QString& source, const QString& destination);
+  Operation* copy(const QString& source, const QString& destination, bool append_mode);
   Operation* move(const QString& source, const QString& destination);
   void remove(const QString& uri);
   void make_directory(const QString& uri);
   QString get_real_file_name(const QString& uri);
   bool is_responsible_for(const QString& uri);
-
+  bool is_file(const QString& uri);
+  bool is_directory(const QString& uri);
 
 private:
   Real_file_system_engine real_engine;

@@ -10,8 +10,10 @@ class Real_file_system_engine: public File_system_engine {
 public:
   Real_file_system_engine();
   Iterator* list(const QString& uri);
-  Operation* copy(const QString& source, const QString& destination);
+  Operation* copy(const QString& source, const QString& destination, bool append_mode);
   Operation* move(const QString& source, const QString& destination);
+  bool is_file(const QString& uri);
+  bool is_directory(const QString& uri);
 
   enum Move_mode {
     move_mode_auto,

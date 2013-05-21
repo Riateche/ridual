@@ -8,12 +8,12 @@ Action_answerer::Action_answerer(Main_window *mw, Question_data data) :
   connect(this, SIGNAL(question_answered(Error_reaction::Enum)), data.action, SLOT(question_answered(Error_reaction::Enum)));
 
   QList<Button_settings> buttons;
-  //todo: request real options
-  buttons << Button_settings(1, tr("Skip"),  static_cast<int>(Error_reaction::skip));
-  if (data.error_type != Error_type::destination_inside_source) {
-    buttons << Button_settings(2, tr("Retry"), static_cast<int>(Error_reaction::retry));
+
+  foreach(Error_reaction::Enum reaction, get_error_reactions(data, true)) {
+    buttons << Button_settings(1, error_reaction_to_string(reaction),
+                               static_cast<int>(reaction));
   }
-  buttons << Button_settings(3, tr("Abort"), static_cast<int>(Error_reaction::abort));
+
   set_message(data.get_message());
   set_buttons(buttons);
 }

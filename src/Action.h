@@ -90,7 +90,7 @@ private:
 
 
   // perform copying for one file or directory
-  void process_one(const File_info& file_info);
+  void process_current(Error_reaction::Enum error_reaction = Error_reaction::undefined);
 
   void postprocess_directory(const File_info& file_info);
 
@@ -108,6 +108,7 @@ private:
 
   bool paused; //! Indicates if action is currently paused. This value is setted by Action::toggle_pause slot.
   bool blocked; //! Indicates if action is waiting for an answer.
+  bool postprocess_running;
 
   File_system_engine::Operation* pending_operation;
   File_info current_file; // for state constructing only
@@ -115,6 +116,9 @@ private:
   void end_preparing();
 
   void update_iteration_timer();
+
+
+  QString find_autorename_path(const QString& path);
 
 
 

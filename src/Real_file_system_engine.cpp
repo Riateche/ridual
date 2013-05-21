@@ -19,7 +19,7 @@ File_system_engine::Iterator *Real_file_system_engine::list(const QString &uri) 
   return new Real_fs_iterator(new QDirIterator(uri, QDir::AllEntries | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags));
 }
 
-File_system_engine::Operation *Real_file_system_engine::copy(const QString &source, const QString &destination) {
+File_system_engine::Operation *Real_file_system_engine::copy(const QString &source, const QString &destination, bool append_mode) {
   if (!source.startsWith("/")) {
     qWarning("Real_file_system_engine supports only absolute paths");
     throw Exception(copy_failed, invalid_path, source);
@@ -31,6 +31,15 @@ File_system_engine::Operation *Real_file_system_engine::copy(const QString &sour
   if (!QFile(source).exists()) {
     throw Exception(copy_failed, not_found, source);
   }
+  if (!append_mode) {
+    if (QDir(destination).exists()) {
+      throw Exception(copy_failed, directory_already_exists, source);
+    }
+    if (QFile(destination).exists()) {
+      throw Exception(copy_failed, file_already_exists, source);
+    }
+  }
+
   Copy_operation* o = new Copy_operation();
   o->file1.exceptions(std::ifstream::failbit | std::ifstream::badbit);
   o->file2.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
@@ -44,11 +53,23 @@ File_system_engine::Operation *Real_file_system_engine::copy(const QString &sour
   }
 
   if (QFile(destination).exists()) {
-    throw Exception(copy_failed, already_exists, destination);
+    throw Exception(copy_failed, file_already_exists, destination);
   }
 
+  qint64 append_current_size = 0;
+  std::ios_base::openmode mode = std::ifstream::out | std::ifstream::binary;
+  if (append_mode) {
+    std::ifstream f;
+    f.open(destination.toLocal8Bit(), std::ios::binary | std::ios::ate);
+    append_current_size = f.tellg();
+    f.close();
+
+    mode |= std::ifstream::app; //append
+  } else {
+    mode |= std::ifstream::trunc; //truncate
+  }
   try {
-    o->file2.open(destination.toLocal8Bit(), std::ifstream::out | std::ifstream::trunc | std::ifstream::binary);
+    o->file2.open(destination.toLocal8Bit(), mode);
   } catch (std::ios_base::failure e) {
     delete o;
     throw Exception(cant_open_file_for_write, get_cause_from_errno(), destination);
@@ -58,7 +79,7 @@ File_system_engine::Operation *Real_file_system_engine::copy(const QString &sour
   try {
     o->file1.seekg(0, std::ios::end);
     o->file_size = o->file1.tellg();
-    o->file1.seekg(0);
+    o->file1.seekg(append_current_size);
   } catch (std::ios_base::failure e) {
     delete o;
     throw Exception(file_not_seekable, get_cause_from_errno(), source);
@@ -74,6 +95,22 @@ File_system_engine::Operation *Real_file_system_engine::move(const QString &sour
   return move(source, destination, move_mode_auto);
 }
 
+bool Real_file_system_engine::is_file(const QString &uri) {
+  if (!uri.startsWith("/")) {
+    qWarning("Real_file_system_engine supports only absolute paths");
+    throw Exception(stat_failed, invalid_path, uri);
+  }
+  return QFile(uri).exists() && !(QDir(uri).exists());
+}
+
+bool Real_file_system_engine::is_directory(const QString &uri) {
+  if (!uri.startsWith("/")) {
+    qWarning("Real_file_system_engine supports only absolute paths");
+    throw Exception(stat_failed, invalid_path, uri);
+  }
+  return QDir(uri).exists();
+}
+
 File_system_engine::Operation *Real_file_system_engine::move(const QString &source, const QString &destination, Move_mode move_mode) {
   if (!source.startsWith("/")) {
     qWarning("Real_file_system_engine supports only absolute paths");
@@ -85,6 +122,12 @@ File_system_engine::Operation *Real_file_system_engine::move(const QString &sour
   }
   if (!QFile(source).exists()) {
     throw Exception(move_failed, not_found, source);
+  }
+  if (QDir(destination).exists()) {
+    throw Exception(copy_failed, directory_already_exists, source);
+  }
+  if (QFile(destination).exists()) {
+    throw Exception(copy_failed, file_already_exists, source);
   }
   if (move_mode == move_mode_auto) {
     struct stat r;
@@ -111,7 +154,7 @@ File_system_engine::Operation *Real_file_system_engine::move(const QString &sour
     }
     return new Done_operation();
   } else if (move_mode == move_mode_copy) {
-    Copy_operation* o = dynamic_cast<Copy_operation*>(copy(source, destination));
+    Copy_operation* o = dynamic_cast<Copy_operation*>(copy(source, destination, false));
     if (!o) {
       qWarning("unexpected dynamic cast fail");
       throw Exception(move_failed, unknown_cause, source, destination);
@@ -136,7 +179,7 @@ void Real_file_system_engine::remove(const QString &uri) {
     bool r = rmdir(uri.toLocal8Bit()) == 0;
     if (!r) {
       error_cause c = get_cause_from_errno();
-      if (c == already_exists) {
+      if (c == file_already_exists) {
         c = directory_not_empty;
       }
       throw Exception(rmdir_failed, c, uri);
@@ -201,7 +244,6 @@ File_info Real_file_system_engine::Real_fs_iterator::get_next_internal() {
   item.uri = item.path;
   return item;
 }
-
 
 double Real_file_system_engine::Copy_operation::get_progress() {
   return 1.0 * file1.tellg() / file_size;

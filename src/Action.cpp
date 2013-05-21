@@ -27,6 +27,7 @@ Action::Action(Action_queue *q, const Action_data &p_data)
 
   paused = false;
   blocked = false;
+  postprocess_running = false;
 
   //state_delivery_in_process = false;
   pending_operation = 0;
@@ -92,7 +93,11 @@ void Action::run() {
   update_iteration_timer();
 }
 
-void Action::process_one(const File_info &file_info) {
+void Action::process_current(Error_reaction::Enum error_reaction) {
+  if (postprocess_running) {
+    postprocess_directory(current_file);
+    return;
+  }
   if (phase == phase_preparing) {
     if (data.recursive_fetch_option == recursive_fetch_auto && total_count > auto_recursive_fetch_max) {
       total_size = 0;
@@ -101,29 +106,43 @@ void Action::process_one(const File_info &file_info) {
     }
     total_count++;
     if (data.type != Action_type::remove) {
-      if (file_info.is_file()) total_size += file_info.file_size;
+      if (current_file.is_file()) { total_size += current_file.file_size; }
     }
   } else {
     QStringList new_path_parts;
     new_path_parts << data.destination;
     foreach(File_system_engine::Iterator* i, fs_iterators_stack) {
       new_path_parts << i->get_current().file_name();
+      qDebug() << "uri in stack: " << i->get_current().uri;
     }
+    qDebug() << "new_path_parts: " << new_path_parts;
     QString new_path = new_path_parts.join("/");
-    if (file_info.is_folder) {
+    if (error_reaction == Error_reaction::delete_existing) {
+      fs_engine->remove_recursively(new_path);
+    } else if (error_reaction == Error_reaction::rename_new) {
+      new_path = find_autorename_path(new_path);
+    } else if (error_reaction == Error_reaction::rename_existing) {
+      QString path_for_existing = find_autorename_path(new_path);
+      fs_engine->move(new_path, path_for_existing);
+    }
+
+    if (current_file.is_folder) {
       if (data.type == Action_type::copy || data.type == Action_type::move) {
-        fs_engine->make_directory(new_path);
+        if (error_reaction != Error_reaction::merge_dir) {
+          fs_engine->make_directory(new_path);
+        }
       }
     } else {
       if (pending_operation != 0) {
         qWarning("pending_operation must be NULL in Action::process_one");
       }
       if (data.type == Action_type::copy) {
-        pending_operation = fs_engine->copy(file_info.uri, new_path);
+        bool append = error_reaction == Error_reaction::continue_writing;
+        pending_operation = fs_engine->copy(current_file.uri, new_path, append);
       } else if (data.type == Action_type::move) {
-        pending_operation = fs_engine->move(file_info.uri, new_path);
+        pending_operation = fs_engine->move(current_file.uri, new_path);
       } else if (data.type == Action_type::remove) {
-        fs_engine->remove(file_info.uri);
+        fs_engine->remove(current_file.uri);
       }
     }
     current_count++;
@@ -216,30 +235,48 @@ void Action::run_iteration() {
     }
 
     try {
-      if (pending_operation) {
-        process_pending_operation();
-      } else if (fs_iterators_stack.top()->has_next()) {
-        File_info fi = fs_iterators_stack.top()->get_next();
-        current_file = fi;
-        process_one(fi);
-        if (fi.is_folder) {
-          fs_iterators_stack.push(fs_engine->list(fi.uri));
-        }
+
+      //3a. Finalize processing after previous item is successfully processed or skipped
+      if (postprocess_running) {
+        postprocess_running = false;
       } else {
-        fs_iterators_stack.pop();
-        if (fs_iterators_stack.isEmpty()) {
-          if (phase == phase_preparing) {
-            end_preparing();
-          } else if (phase == phase_processing) {
-            phase = phase_finished;
-            emit finished();
-            update_iteration_timer();
-          } else {
-            qWarning("unexpected value of phase");
-          }
+        if (current_file.is_folder) {
+          fs_iterators_stack.push(fs_engine->list(current_file.uri));
+        }
+      }
+
+
+      if (pending_operation) {
+        //3b. process already started operation
+        process_pending_operation();
+      } else {
+        // 1. Find the next item and set `current_file` and `postprocess_running`
+        if (fs_iterators_stack.top()->has_next()) {
+          current_file = fs_iterators_stack.top()->get_next();
+          //current_file = fi;
         } else {
-          File_info fi = fs_iterators_stack.top()->get_current();
-          postprocess_directory(fi);
+          delete fs_iterators_stack.top();
+          fs_iterators_stack.pop();
+          if (fs_iterators_stack.isEmpty()) {
+            if (phase == phase_preparing) {
+              end_preparing();
+            } else if (phase == phase_processing) {
+              phase = phase_finished;
+              emit finished();
+              update_iteration_timer();
+            } else {
+              qWarning("unexpected value of phase");
+            }
+            current_file = File_info(); // no processing required
+          } else {
+            current_file = fs_iterators_stack.top()->get_current();
+            postprocess_running = true;
+          }
+        }
+
+        //2. Actual processing
+        if (!current_file.uri.isEmpty()) {
+          process_current();
         }
       }
     } catch (File_system_engine::Exception& e) {
@@ -265,9 +302,68 @@ void Action::update_iteration_timer() {
   }
 }
 
+QString Action::find_autorename_path(const QString &path) {
+  QStringList parts = path.split("/");
+  QFileInfo filename(parts.last());
+  QString suffix = filename.completeSuffix();
+  for(int i = 1; i < 10000; i++) {
+    QString new_filename;
+    if (suffix.isEmpty()) {
+      new_filename = QString("%1 (%2)").arg(filename.baseName()).arg(i);
+    } else {
+      new_filename = QString("%1 (%2).%3").arg(filename.baseName()).arg(i).arg(suffix);
+    }
+    parts.removeLast();
+    parts.append(new_filename);
+    QString new_path = parts.join("/");
+    if (!fs_engine->is_file(new_path) && !fs_engine->is_directory(new_path)) {
+      return new_path;
+    }
+  }
+  qFatal("Action::find_autorename_path: no filenames available");
+  return QString();
+}
+
 
 void Action::question_answered(Error_reaction::Enum reaction) {
-  //.....
+  try {
+    if (reaction == Error_reaction::retry) {
+      if (pending_operation) {
+        process_pending_operation();
+      } else {
+        process_current();
+      }
+    } else if (reaction == Error_reaction::skip) {
+      if (pending_operation) {
+        delete pending_operation;
+        pending_operation = 0;
+        current_size += current_file.file_size;
+      } else {
+        run_iteration();
+      }
+    } else if (reaction == Error_reaction::abort) {
+      abort();
+      return;
+    } else if (reaction == Error_reaction::continue_writing ||
+               reaction == Error_reaction::delete_existing ||
+               reaction == Error_reaction::rename_existing ||
+               reaction == Error_reaction::rename_new ||
+               reaction == Error_reaction::merge_dir) {
+      process_current(reaction);
+    } else if (reaction == Error_reaction::ask) {
+      qFatal("Action::question_answered: 'ask' must not be here");
+    } else if (reaction == Error_reaction::undefined) {
+      qFatal("Action::question_answered: 'undefined' must not be here");
+    } else {
+      qFatal("Action::question_answered: unhandled answer");
+    }
+
+    blocked = false;
+    update_iteration_timer();
+    send_state();
+  } catch (File_system_engine::Exception& e) {
+    ask_question(Question_data(this, e));
+  }
 }
 
 void Action::set_paused(bool v) {
@@ -276,6 +372,10 @@ void Action::set_paused(bool v) {
 }
 
 void Action::abort() {
+  if (pending_operation) {
+    delete pending_operation;
+    pending_operation = 0;
+  }
   phase = phase_finished;
   //todo: display warning if answer was automatic
   emit finished();
