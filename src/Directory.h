@@ -114,6 +114,9 @@ signals:
   void watch(QString path);
   void unwatch(QString path);
 
+
+
+
   
 public slots:
   /*!
@@ -135,6 +138,9 @@ private slots:
   void refresh_timeout();
 
   void directory_changed(QString path);
+
+  void location_not_found();
+  void gio_mounter_finished(bool success);
 
 private:
   QString uri;

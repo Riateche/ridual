@@ -40,7 +40,7 @@ Pane::Pane(QWidget *parent) :
   connect(ui->address, SIGNAL(returnPressed()), this, SLOT(on_go_clicked()));
 
   ui->loading_indicator->hide();
-  QMovie* loading_movie = new QMovie(":/loading.gif", QByteArray(), ui->loading_indicator);
+  QMovie* loading_movie = new QMovie("://resources/images/loading.gif", QByteArray(), ui->loading_indicator);
   ui->loading_indicator->setMovie(loading_movie);
   loading_movie->start();
 
@@ -91,13 +91,14 @@ void Pane::set_uri(QString new_directory) {
           this, SLOT(directory_ready(File_info_list)));
   connect(pending_directory, SIGNAL(error(QString)),
           this, SLOT(directory_error(QString)));
+  ui->loaded_indicator->hide();
+  ui->loading_indicator->show();
   pending_directory->refresh();
   //ui->address->setText(directory);
 
   ready = false;  
-  QTimer* timer = new QTimer();
-  timer->singleShot(300, this, SLOT(show_loading_indicator()));
-
+  //QTimer* timer = new QTimer();
+  //timer->singleShot(300, this, SLOT(show_loading_indicator()));
 }
 
 bool Pane::eventFilter(QObject *object, QEvent *event) {
@@ -279,6 +280,7 @@ void Pane::directory_ready(File_info_list files) {
     emit uri_changed();
     pending_directory = 0;
     ui->loading_indicator->hide();
+    ui->loaded_indicator->show();
     ui->address->setText(directory->get_uri());
     refresh_path_toolbar();
   } else if (sender() == directory) {
@@ -300,6 +302,7 @@ void Pane::directory_ready(File_info_list files) {
   }
   ui->list->clearSelection();
   ui->loading_indicator->hide();
+  ui->loaded_indicator->show();
 
   /*ui->list->setSortingEnabled(!files.disable_sort);
   if (files.disable_sort) {
@@ -339,6 +342,7 @@ void Pane::directory_error(QString message) {
     pending_directory->deleteLater();
     pending_directory = 0;
     ui->loading_indicator->hide();
+    ui->loaded_indicator->show();
 
   } else if (sender() == directory) {
 

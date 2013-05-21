@@ -37,7 +37,10 @@ void Directory_list_task::run() {
     }
     emit ready(list);
   } catch (File_system_engine::Exception e) {
-    emit error(e.get_message());
+    if (e.get_cause() == File_system_engine::not_found && !uri.startsWith("/")) {
+      emit location_not_found();
+    } else {
+      emit error(e.get_message());
+    }
   }
-
 }

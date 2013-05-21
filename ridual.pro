@@ -62,7 +62,8 @@ SOURCES += src/Main_window.cpp \
     src/Actions_manager.cpp \
     src/File_system_engine.cpp \
     src/Real_file_system_engine.cpp \
-    src/gio/Gio_file_system_engine.cpp
+    src/gio/Gio_file_system_engine.cpp \
+    src/gio/Gio_mounter.cpp
 
 HEADERS  += src/Main_window.h \
     src/Pane.h \
@@ -107,7 +108,8 @@ HEADERS  += src/Main_window.h \
     src/Actions_manager.h \
     src/File_system_engine.h \
     src/Real_file_system_engine.h \
-    src/gio/Gio_file_system_engine.h
+    src/gio/Gio_file_system_engine.h \
+    src/gio/Gio_mounter.h
 
 FORMS    += src/Main_window.ui \
     src/Pane.ui \

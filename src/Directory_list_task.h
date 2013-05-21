@@ -29,6 +29,9 @@ signals:
   */
   void error(QString message);
 
+
+  void location_not_found();
+
   
 public slots:
 

@@ -12,6 +12,8 @@
 #include "utils.h"
 #include <stdexcept>
 #include <QApplication>
+#include "gio/Gio_mounter.h"
+
 
 Directory::Directory(Core *c, QString p_uri) :
   Core_ally(c),
@@ -303,11 +305,25 @@ void Directory::directory_changed(QString changed_path) {
   }
 }
 
+void Directory::location_not_found() {
+  Gio_mounter* m = new Gio_mounter();
+  connect(m, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
+  connect(m, SIGNAL(finished(bool)), this, SLOT(gio_mounter_finished(bool)));
+  m->start(uri);
+}
+
+void Directory::gio_mounter_finished(bool success) {
+  if (success) {
+    refresh();
+  }
+}
+
 void Directory::create_task(QString uri) {
   Directory_list_task* task = new Directory_list_task(uri, core->get_new_file_system_engine());
   task->setAutoDelete(true);
   connect(task, SIGNAL(ready(File_info_list)), this, SLOT(task_ready(File_info_list)));
   connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
+  connect(task, SIGNAL(location_not_found()), this, SLOT(location_not_found()));
   //connect(task, SIGNAL(error(QString)), this, SLOT(test(QString)));
   //main_window->add_task(task);
 
@@ -331,7 +347,7 @@ void Directory::async_result(GObject *source_object, GAsyncResult *res, gpointer
   Async_result_type t = _this->async_result_type;
   _this->async_result_type = async_result_unexpected;
   GError* e = 0;
-  if (t == _this->async_result_mount_location) {
+  /*if (t == _this->async_result_mount_location) {
     g_file_mount_enclosing_volume_finish(reinterpret_cast<GFile*>(source_object), res, &e);
     if (e) {
       if (e->code == G_IO_ERROR_CANCELLED) {
@@ -350,7 +366,7 @@ void Directory::async_result(GObject *source_object, GAsyncResult *res, gpointer
     // location is mounted now, retry
     _this->refresh();
 
-  } else if (t == _this->async_result_mount_volume) {
+  } else*/ if (t == _this->async_result_mount_volume) {
     GVolume* volume = reinterpret_cast<GVolume*>(source_object);
     g_volume_mount_finish(volume, res, &e);
     if (e) {

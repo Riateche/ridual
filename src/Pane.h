@@ -74,7 +74,6 @@ private slots:
   void on_list_customContextMenuRequested(const QPoint &pos);
   void action_launch_triggered();
   void on_address_textEdited(const QString &);
-  //
 
 private:
   Ui::Pane *ui;
