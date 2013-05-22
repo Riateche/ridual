@@ -459,8 +459,7 @@ void Main_window::on_action_execute_triggered() {
     QProcess* p = new QProcess(this);
     p->setWorkingDirectory(Directory::get_parent_uri(f.path));
     p->start(f.path);
-    //todo: catch errors
-    //todo: run in tasks thread
+    //todo: catch errors; run in tasks thread
   }
 }
 
@@ -601,7 +600,7 @@ void Main_window::on_action_paste_triggered() {
   foreach(QString s, list) {
     File_info info;
     info.uri = Directory::canonize(QUrl::fromPercentEncoding(s.toAscii()));
-    //todo: request info from fs
+    //todo: request info from fs and fill `info` variable properly
     normal_list << info;
   }
   Action_data data;

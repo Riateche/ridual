@@ -63,8 +63,9 @@ class Gio_mount;
   will be refreshed again and emit ready() signal when volume root directory is
   successfully read. Use Directory::get_uri to get actual Directory's URI.
 
-  Directory also should try to mount GIO network resources such as 'sftp://user@host/' if they
-  are not mounted. But now it's broken. //todo: fix this
+  If GUI network resource (such as 'sftp://user@host/') is requested and there is no appropriate
+  mounted FS for it, Directory will try to mount it. If mounting is successful, Directory will
+  read files list and return it as usual.
 
 */
 class Directory : public QObject, Core_ally {

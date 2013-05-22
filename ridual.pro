@@ -50,7 +50,6 @@ SOURCES += src/Main_window.cpp \
     src/Action_queue.cpp \
     src/Action.cpp \
     src/Action_answerer.cpp \
-    src/mkdir.cpp \
     src/Question_widget.cpp \
     src/Current_queue_question.cpp \
     src/Core.cpp \
@@ -96,7 +95,6 @@ HEADERS  += src/Main_window.h \
     src/Action_queue.h \
     src/Action_answerer.h \
     src/types.h \
-    src/mkdir.h \
     src/Question_widget.h \
     src/Current_queue_question.h \
     src/Core.h \

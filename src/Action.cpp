@@ -8,7 +8,6 @@
 #include <QStack>
 #include <QDirIterator>
 #include <QFSFileEngine>
-#include "mkdir.h"
 #include "Core.h"
 #include <fstream>
 #include <errno.h>
