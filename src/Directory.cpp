@@ -259,26 +259,7 @@ void Directory::refresh() {
     return;
   }
 
-  /*QString real_path = find_real_path(uri, core);
-  if (uri != real_path) {
-    path = real_path;
-    create_task(path);
-    return;
-  }*/
-
   create_task(uri);
-
-  //todo: reimplement this
-/*
-  //address not recognized. try to pass it to gio
-  GFile* file = g_file_new_for_uri(uri.toLocal8Bit());
-  qDebug() << "Trying to mount this location";
-
-  interrupt_gio_operation();
-  async_result_type = async_result_mount_location;
-  gcancellable = g_cancellable_new();
-  g_file_mount_enclosing_volume(file, GMountMountFlags(), 0, gcancellable, async_result, this);
-  */
 }
 
 void Directory::task_ready(File_info_list r) {
@@ -347,26 +328,7 @@ void Directory::async_result(GObject *source_object, GAsyncResult *res, gpointer
   Async_result_type t = _this->async_result_type;
   _this->async_result_type = async_result_unexpected;
   GError* e = 0;
-  /*if (t == _this->async_result_mount_location) {
-    g_file_mount_enclosing_volume_finish(reinterpret_cast<GFile*>(source_object), res, &e);
-    if (e) {
-      if (e->code == G_IO_ERROR_CANCELLED) {
-        qDebug() << "Operation was cancelled";
-      } else if (e->code == G_IO_ERROR_NOT_SUPPORTED) {
-        //error "volume doesn't implement mount"  occurs on invalid address
-        emit _this->error(tr("Address not recognized"));
-      } else {
-        emit _this->error( tr("Error %1: %2").arg(e->message)
-                           .arg(QString::fromLocal8Bit(e->message)) );
-      }
-      g_error_free(e);
-      return;
-    }
-    g_object_unref(source_object); // source_object is GFile created by us
-    // location is mounted now, retry
-    _this->refresh();
-
-  } else*/ if (t == _this->async_result_mount_volume) {
+  if (t == _this->async_result_mount_volume) {
     GVolume* volume = reinterpret_cast<GVolume*>(source_object);
     g_volume_mount_finish(volume, res, &e);
     if (e) {

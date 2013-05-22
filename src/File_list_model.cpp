@@ -111,9 +111,9 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
       case Column::octal_permissions: {
         return format_octal_permissions(file_info.permissions);
       }
-    case Column::permissions: {
-      return format_string_permissions(file_info.permissions);
-    }
+      case Column::permissions: {
+        return format_string_permissions(file_info.permissions);
+      }
       case Column::date_modified: {
         if (role == sort_role) {
           return file_info.date_modified;
