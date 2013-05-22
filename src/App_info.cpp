@@ -1,8 +1,11 @@
 #include "App_info.h"
 #include <QDebug>
 #include <QStringList>
+#include "Main_window.h"
 
-App_info::App_info(GAppInfo* obj): object(obj) {
+
+
+App_info::App_info(Main_window* mw, GAppInfo* obj): main_window(mw), object(obj) {
 
 }
 
@@ -43,9 +46,8 @@ void App_info::launch_uris(QStringList filenames) {
   g_app_info_launch_uris(object, list, 0, &error);
   g_list_free(list);
   if (error) {
-    qDebug() << "error: " << error->message;
     g_error_free(error);
-    //todo: display message to user
+    main_window->show_error(QObject::tr("Failed to launch an application: %1").arg(error->message));
   }
 }
 
@@ -64,6 +66,6 @@ void App_info::launch(QStringList filenames) {
   if (error) {
     qDebug() << "error: " << error->message;
     g_error_free(error);
-    //todo: display message to user
+    main_window->show_error(QObject::tr("Failed to launch an application: %1").arg(error->message));
   }
 }

@@ -6,13 +6,14 @@
 #include <QList>
 #include <QVariant>
 
+class Main_window;
 
 /*! This class extracts information about an application from GAppInfo object
   and provides a way to launch it.
   */
 class App_info {
 public:
-  App_info(GAppInfo* obj = 0);
+  App_info(Main_window* mw = 0, GAppInfo* obj = 0);
   QString name();
   QString command() const;
   bool operator==(const App_info& other);
@@ -23,6 +24,7 @@ public:
   void launch_uris(QStringList filenames); //not recommended
 
 private:
+  Main_window* main_window;
   GAppInfo* object;
 };
 

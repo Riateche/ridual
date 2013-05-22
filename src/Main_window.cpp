@@ -156,7 +156,7 @@ App_info_list Main_window::get_apps(const QString &mime_type) {
   GList* list = g_app_info_get_all_for_type(mime_type.toLocal8Bit());
   if (!list) return r;
   for(; list; list = list->next) {
-    r << App_info(static_cast<GAppInfo*>(list->data));
+    r << App_info(this, static_cast<GAppInfo*>(list->data));
     //qDebug() << "found app:" << list->data;
   }
 
@@ -173,13 +173,13 @@ App_info_list Main_window::get_apps(const QString &mime_type) {
   }
 
   GAppInfo* default_app = g_app_info_get_default_for_type(mime_type.toLocal8Bit(), 0);
-  r.default_app = App_info(default_app);
+  r.default_app = App_info(this, default_app);
   return r;
 }
 
 App_info Main_window::get_default_app(const QString &mime_type) {
   GAppInfo* default_app = g_app_info_get_default_for_type(mime_type.toLocal8Bit(), 0);
-  return App_info(default_app);
+  return App_info(this, default_app);
 }
 
 Pane *Main_window::get_destination_pane() {

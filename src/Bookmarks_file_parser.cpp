@@ -82,7 +82,7 @@ void Bookmarks_file_parser::read() {
         QString prefix = QString("XDG_%1_DIR=\"").arg(key);
         if (line.startsWith(prefix)) {
           QString value = line.mid(prefix.length(), line.length() - prefix.length() - 1);
-          //todo: shell unescape
+          //here should be shell unescaping
           if (value.startsWith("$HOME/")) {
             value = QDir::home().absoluteFilePath(value.mid(6));
           }
