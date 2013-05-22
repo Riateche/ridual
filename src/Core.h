@@ -33,7 +33,7 @@ public:
   inline bool get_sort_folders_before_files() { return sort_folders_before_files; }
   void set_sort_folders_before_files(bool v);
 
-  File_system_engine* get_new_file_system_engine();
+  File_system_engine* get_file_system_engine();
 
 signals:
   void sort_folders_before_files_changed();
@@ -48,6 +48,7 @@ private:
   Directory_watcher* watcher;
   QThread* watcher_thread;
   Actions_manager* actions_manager;
+  File_system_engine* fs_engine;
 
   bool sort_folders_before_files;
 

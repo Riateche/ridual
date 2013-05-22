@@ -5,6 +5,12 @@
 #include <QDirIterator>
 #include <fstream>
 
+/*!
+ * The Real_file_system_engine class provides access to basic filesystem functions
+ * with exception-based error reporting. Now this class supports only Linux, but
+ * other OS support may be added here.
+ */
+
 class Real_file_system_engine: public File_system_engine {
   Q_OBJECT
 public:

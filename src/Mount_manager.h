@@ -19,8 +19,8 @@ public:
   explicit Mount_manager(QObject *parent = 0);
   ~Mount_manager();
 
-  inline QList<Gio_mount> get_mounts() { return mounts; }
-  inline QList<Gio_volume*> get_volumes() { return volumes; }
+  inline QList<Gio_mount> get_mounts() const { QMutexLocker locker(&mounts_mutex); return mounts; }
+  inline QList<Gio_volume*> get_volumes() const { return volumes; }
 
   
 signals:
@@ -29,7 +29,7 @@ signals:
 private:
   QList<Gio_volume*> volumes;
   QList<Gio_mount> mounts;
-//  QMutex mounts_mutex;
+  mutable QMutex mounts_mutex;
   GVolumeMonitor* volume_monitor;
   QList<gulong> connects;
 

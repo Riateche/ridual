@@ -26,7 +26,7 @@ public:
 private:
   Real_file_system_engine real_engine;
   Mount_manager* mount_manager;
-  QList<Gio_mount> mounts;
+  //QList<Gio_mount> mounts;
 
   class Gio_fs_iterator: public Iterator {
   public:
@@ -39,8 +39,8 @@ private:
 
   };
 
-private slots:
-  void mounts_changed(QList<Gio_mount> new_mounts);
+//private slots:
+//  void mounts_changed(QList<Gio_mount> new_mounts);
 
 };
 

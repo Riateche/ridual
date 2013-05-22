@@ -10,7 +10,7 @@ Directory_watcher::Directory_watcher(Core *c) :
 , Core_ally(c)
 {
   connect(&watcher, SIGNAL(directoryChanged(QString)), this, SIGNAL(directory_changed(QString)));
-  fs = core->get_new_file_system_engine();
+  fs = core->get_file_system_engine();
 }
 
 void Directory_watcher::add(QString path) {

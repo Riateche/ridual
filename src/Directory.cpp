@@ -300,7 +300,7 @@ void Directory::gio_mounter_finished(bool success) {
 }
 
 void Directory::create_task(QString uri) {
-  Directory_list_task* task = new Directory_list_task(uri, core->get_new_file_system_engine());
+  Directory_list_task* task = new Directory_list_task(uri, core->get_file_system_engine());
   task->setAutoDelete(true);
   connect(task, SIGNAL(ready(File_info_list)), this, SLOT(task_ready(File_info_list)));
   connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));

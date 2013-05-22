@@ -37,7 +37,7 @@ void Mount_manager::init_connects() {
 }
 
 void Mount_manager::fetch() {
-  //QMutexLocker locker(&mounts_mutex);
+  QMutexLocker locker(&mounts_mutex);
   //foreach (gio::Mount* m, mounts) delete m;
   foreach (Gio_volume* m, volumes) delete m;
   volumes.clear();

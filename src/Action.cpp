@@ -15,7 +15,7 @@
 
 Action::Action(Action_queue *q, const Action_data &p_data)
 : data(p_data)
-, fs_engine(q->get_core()->get_new_file_system_engine())
+, fs_engine(q->get_core()->get_file_system_engine())
 , queue(q)
 {
   total_size = 0;
@@ -37,12 +37,12 @@ Action::Action(Action_queue *q, const Action_data &p_data)
   iteration_timer.setInterval(0);
   iteration_timer.setSingleShot(true); */
 
-  fs_engine->moveToThread(queue);
+  //fs_engine->moveToThread(queue);
   moveToThread(queue);
 }
 
 Action::~Action() {
-  delete fs_engine;
+  //delete fs_engine;
 }
 
 void Action::ask_question(Question_data data) {
@@ -56,10 +56,10 @@ void Action::ask_question(Question_data data) {
 }
 
 void Action::run() {
-  if (!fs_engine) {
-    qFatal("no fs engine for action");
-    return;
-  }
+  //if (!fs_engine) {
+  //  qFatal("no fs engine for action");
+  //  return;
+  //}
   //fs_engine->moveToThread(thread()); //dangerous! need to test
   emit started();
   if (data.destination.endsWith("/")) {

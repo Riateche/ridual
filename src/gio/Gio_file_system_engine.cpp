@@ -4,8 +4,8 @@
 Gio_file_system_engine::Gio_file_system_engine(Mount_manager *m)
   : mount_manager(m)
 {
-  connect(m, SIGNAL(mounts_changed(QList<Gio_mount>)), this, SLOT(mounts_changed(QList<Gio_mount>)));
-  mounts = mount_manager->get_mounts();
+  //connect(m, SIGNAL(mounts_changed(QList<Gio_mount>)), this, SLOT(mounts_changed(QList<Gio_mount>)));
+  //mounts = mount_manager->get_mounts();
 }
 
 File_system_engine::Iterator *Gio_file_system_engine::list(const QString &uri) {
@@ -35,7 +35,7 @@ File_system_engine::Operation *Gio_file_system_engine::copy(const QString &sourc
 }
 
 File_system_engine::Operation *Gio_file_system_engine::move(const QString &source, const QString &destination) {
-  foreach(Gio_mount mount, mounts) {
+  foreach(Gio_mount mount, mount_manager->get_mounts()) {
     if (!mount.uri.isEmpty() && source.startsWith(mount.uri) && destination.startsWith(mount.uri)) {
       //both files in the same mount
       QString r_uri1 = mount.path + "/" + source.mid(mount.uri.length());
@@ -70,13 +70,13 @@ void Gio_file_system_engine::make_directory(const QString &uri) {
   real_engine.make_directory(r_uri);
 }
 
-void Gio_file_system_engine::mounts_changed(QList<Gio_mount> new_mounts) {
-  mounts = new_mounts;
-}
+//void Gio_file_system_engine::mounts_changed(QList<Gio_mount> new_mounts) {
+//  mounts = new_mounts;
+//}
 
 QString Gio_file_system_engine::get_real_file_name(const QString &uri) {
   if (uri.startsWith("/")) return uri;
-  foreach(Gio_mount mount, mounts) {
+  foreach(Gio_mount mount, mount_manager->get_mounts()) {
     if (!mount.uri.isEmpty() && uri.startsWith(mount.uri)) {
       return mount.path + "/" + uri.mid(mount.uri.length());
     }

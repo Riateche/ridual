@@ -255,7 +255,7 @@ void Main_window::switch_focus_question(Question_widget *target, int direction) 
 
 void Main_window::view_or_edit_selected(bool edit) {
   File_info_list list = active_pane->get_selected_files();
-  File_system_engine* fs_engine = core->get_new_file_system_engine();
+  //File_system_engine* fs_engine = core->get_file_system_engine();
   foreach(File_info f, list) {
     QProcess* p = new QProcess(this);
     p->setWorkingDirectory(Directory::get_parent_uri(f.path));
@@ -267,7 +267,7 @@ void Main_window::view_or_edit_selected(bool edit) {
     //todo: catch errors
     //todo: run in tasks thread
   }
-  delete fs_engine;
+  //delete fs_engine;
 
 }
 
