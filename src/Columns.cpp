@@ -17,7 +17,7 @@ Columns Columns::get_all() {
   r    << Column::date_created;
   r    << Column::owner;
   r    << Column::group;
-  //r    << Column::permissions; //todo: implement
+  r    << Column::permissions;
   r    << Column::octal_permissions;
   return r;
 }

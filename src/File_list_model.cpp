@@ -111,6 +111,9 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
       case Column::octal_permissions: {
         return format_octal_permissions(file_info.permissions);
       }
+    case Column::permissions: {
+      return format_string_permissions(file_info.permissions);
+    }
       case Column::date_modified: {
         if (role == sort_role) {
           return file_info.date_modified;
@@ -291,6 +294,21 @@ QString File_list_model::format_octal_permissions(QFile::Permissions permissions
   if (permissions & QFile::WriteOther)  r += 0002;
   if (permissions & QFile::ExeOther)    r += 0001;
   return QString("%1").arg(r, 3, 8, QLatin1Char('0'));
+}
+
+QString File_list_model::format_string_permissions(QFile::Permissions permissions) {
+  if (permissions == -1) return QString();
+  QString s = "---------";
+  if (permissions & QFile::ReadOwner)   s[0] = 'r';
+  if (permissions & QFile::WriteOwner)  s[1] = 'w';
+  if (permissions & QFile::ExeOwner)    s[2] = 'x';
+  if (permissions & QFile::ReadGroup)   s[3] = 'r';
+  if (permissions & QFile::WriteGroup)  s[4] = 'w';
+  if (permissions & QFile::ExeGroup)    s[5] = 'x';
+  if (permissions & QFile::ReadOther)   s[6] = 'r';
+  if (permissions & QFile::WriteOther)  s[7] = 'w';
+  if (permissions & QFile::ExeOther)    s[8] = 'x';
+  return s;
 }
 
 QHash<QString, QString> File_list_model::mime_descriptions;

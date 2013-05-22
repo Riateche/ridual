@@ -28,6 +28,7 @@ public:
 
   static QString get_mime_description(QString mime_type);
   static QString format_octal_permissions(QFile::Permissions permissions);
+  static QString format_string_permissions(QFile::Permissions permissions);
 
   void set_current_index(const QModelIndex& index);
 
