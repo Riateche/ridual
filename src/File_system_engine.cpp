@@ -157,7 +157,7 @@ QString File_system_engine::Exception::get_message() {
 }
 
 File_info File_system_engine::Iterator::get_next() {
-  qDebug() << "Iterator::get_next";
+  //qDebug() << "Iterator::get_next";
   if (!has_next()) {
     qWarning("File_system_engine::Iterator::get_next must not be called when has_next() == false");
     return File_info();

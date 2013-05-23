@@ -221,14 +221,13 @@ void Action::send_state() {
   }
 
   emit state_changed(state);
-  qDebug() << "emit state_changed(state)";
+  //qDebug() << "emit state_changed(state)";
   //state_delivery_in_process = true;
   signal_timer.restart();
 }
 
 void Action::run_iteration() {
   while(!(paused || blocked || phase == phase_finished)) {
-    QApplication::processEvents();
     if (signal_timer.elapsed() > signal_interval) {
       send_state();
     }
@@ -281,6 +280,7 @@ void Action::run_iteration() {
     } catch (File_system_engine::Exception& e) {
       ask_question(Question_data(this, e));
     }
+    QApplication::processEvents();
   }
 }
 
@@ -382,6 +382,6 @@ void Action::abort() {
 }
 
 void Action::state_delivered() {
-  qDebug() << "Action::state_delivered";
+  //qDebug() << "Action::state_delivered";
   //state_delivery_in_process = false;
 }

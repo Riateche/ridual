@@ -22,7 +22,7 @@ class Tasks_thread;
 class Action_queue;
 class Action;
 class Question_widget;
-
+class Action_state_widget;
 
 
 
@@ -90,12 +90,15 @@ private:
   QList<Question_widget*> question_widgets;
   Columns columns;
 
-  Action_queue* create_queue();
+  QList<Action_state_widget*> get_action_state_widgets();
+
+  //Action_queue* create_queue();
   void view_or_edit_selected(bool edit);
   void send_answer(int index);
   bool eventFilter(QObject *object, QEvent *event);
 
   void keyPressEvent(QKeyEvent* event);
+  void closeEvent(QCloseEvent* event);
 
   Action_data get_auto_target_and_destination(Action_type::Enum action_type);
   void copy_or_cut_files_to_clipboard(bool cut);

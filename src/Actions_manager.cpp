@@ -14,13 +14,13 @@ Action_queue *Actions_manager::create_queue() {
   int id = 1;
   while(queues.contains(id)) id++;
   Action_queue* q = new Action_queue(core, id);
-  connect(q, SIGNAL(destroyed(QObject*)), this, SLOT(queue_destroyed(QObject*)));
+  connect(q, SIGNAL(destroyed(QObject*)), this, SLOT(slot_queue_destroyed(QObject*)));
   connect(q, SIGNAL(action_added(Action*)), this, SLOT(slot_action_added(Action*)));
   queues[id] = q;
   return q;
 }
 
-void Actions_manager::queue_destroyed(QObject *obj) {
+void Actions_manager::slot_queue_destroyed(QObject *obj) {
   queues.remove(queues.key(reinterpret_cast<Action_queue*>(obj)));
   emit queue_destroyed(reinterpret_cast<Action_queue*>(obj));
 }

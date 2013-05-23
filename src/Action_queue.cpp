@@ -37,12 +37,16 @@ Action_queue::~Action_queue() {
 void Action_queue::create_action(Action_data data) {
   Action* a = new Action(this, data);
   connect(a, SIGNAL(finished()), this, SLOT(action_finished()));
-  QMutexLocker locker(&access_mutex);
+  //QMutexLocker locker(&access_mutex);
   actions << a;
   emit action_added(a);
   if (!isRunning()) {
     QTimer::singleShot(0, a, SLOT(run()));
     start();
   }
+}
+
+void Action_queue::cancel_pending_actions() {
+  actions = actions.mid(0, 1);
 }
 

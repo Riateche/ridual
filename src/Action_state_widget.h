@@ -18,6 +18,7 @@ class Action_state_widget : public QWidget {
 public:
   explicit Action_state_widget(Action* action);
   ~Action_state_widget();
+  void abort();
   
 private:
   Ui::Action_state_widget *ui;
@@ -28,6 +29,7 @@ signals:
   void show_requested();
   void set_paused(bool paused);
   void state_received();
+  void signal_abort();
 
 private slots:
   void state_changed(Action_state state);

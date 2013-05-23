@@ -13,7 +13,7 @@ public:
   public:
     virtual bool has_next() = 0;
     File_info get_next();
-    File_info get_current() { qDebug() << "Iterator::get_current"; return current; }
+    File_info get_current() { return current; }
     virtual ~Iterator() {}
 
   protected:

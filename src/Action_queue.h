@@ -32,6 +32,8 @@ public:
     represented by this object.
     */
   inline int get_id() { return id; }
+
+  void cancel_pending_actions();
   
 signals:
   /*! Emitted when action is added to the queue but not launched yet.

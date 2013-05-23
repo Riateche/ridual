@@ -1,10 +1,9 @@
 
 - bugs:
-  - "execute" should not be accessible for "Places", "FS root" etc
   - fail with filenames in wrong encoding
+  - can't see smb root (shares list)
   - cdup in smb mount folder fails (smb root isn't mapped to real fs)
   - deny closing main window when tasks are executing
-  - can't see smb root (shares list)
 
 
 

@@ -48,8 +48,19 @@ Main_window::Main_window(Core* c) :
 Main_window::~Main_window() {
 
   save_settings();
-  //tasks_thread->interrupt();
-  //delete tasks_thread;
+
+  foreach(Action_queue* q, core->get_actions_manager()->get_queues()) {
+    q->cancel_pending_actions();
+  }
+
+  foreach(Action_state_widget* w, get_action_state_widgets()) {
+    w->abort();
+  }
+
+  while(!core->get_actions_manager()->get_queues().isEmpty()) {
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+  }
+
   delete ui;
 }
 
@@ -228,6 +239,9 @@ void Main_window::create_action(Action_data data) {
 //  Action* a = new Action(data);
 //  q->add_action(a);
   q->create_action(data);
+  if (current_queue) {
+    show_message(tr("Task added to the queue."), Icon::info);
+  }
 }
 
 Recursive_fetch_option Main_window::get_recursive_fetch_option() {
@@ -249,6 +263,17 @@ void Main_window::switch_focus_question(Question_widget *target, int direction) 
   if (i >= 0 && i < question_widgets.count()) {
     question_widgets[i]->start_editor();
   }
+}
+
+QList<Action_state_widget *> Main_window::get_action_state_widgets() {
+  QList<Action_state_widget *> r;
+  for(int i = 0; i < ui->questions_layout->count(); i++) {
+    QLayoutItem* item = ui->questions_layout->itemAt(i);
+    if (item->widget() && dynamic_cast<Action_state_widget*>(item->widget())) {
+      r << dynamic_cast<Action_state_widget*>(item->widget());
+    }
+  }
+  return r;
 }
 
 
@@ -286,6 +311,14 @@ void Main_window::keyPressEvent(QKeyEvent *event) {
         delete w;
         i--;
       }
+    }
+  }
+}
+
+void Main_window::closeEvent(QCloseEvent *event) {
+  if (!get_action_state_widgets().isEmpty()) {
+    if (QMessageBox::question(0, "", tr("Some tasks are still running. Do you want to interrupt them and quit?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) {
+      event->ignore();
     }
   }
 }
@@ -488,7 +521,8 @@ void Main_window::queue_destroyed(Action_queue* object) {
 }
 
 void Main_window::slot_action_question(Question_data data) {
-  new Action_answerer(this, data);
+  Action_answerer* aa = new Action_answerer(this, data);
+  aa->start_editor();
 }
 
 void Main_window::slot_focus_question() {

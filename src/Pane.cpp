@@ -400,14 +400,13 @@ void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
   App_info_list apps = core->get_main_window()->get_apps(file.mime_type);
   QMenu* menu = new QMenu(this);
   if (file.is_folder) {
-    menu->addAction(tr("Browse"))->setEnabled(false);
-  }
-  if (file.is_file()) {
+    menu->addAction(tr("Browse"), core->get_main_window(), SLOT(open_current()));
+  } else {
     menu->addAction(core->get_main_window()->get_ui()->action_view);
     menu->addAction(core->get_main_window()->get_ui()->action_edit);
-  }
-  if (file.is_executable) {
-    menu->addAction(core->get_main_window()->get_ui()->action_execute);
+    if (file.is_executable) {
+      menu->addAction(core->get_main_window()->get_ui()->action_execute);
+    }
   }
   if (menu->actions().count() > 0) menu->addSeparator();
 

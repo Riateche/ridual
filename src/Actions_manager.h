@@ -45,7 +45,7 @@ signals:
   void queue_destroyed(Action_queue* queue);
     
 private slots:
-  void queue_destroyed(QObject *obj);
+  void slot_queue_destroyed(QObject *obj);
   void slot_action_destroyed(QObject *obj);
   void slot_action_added(Action* a);
 

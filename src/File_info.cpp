@@ -3,6 +3,8 @@
 
 File_info::File_info():
   is_folder(false),
+  is_executable(false),
+  file_size(-1),
   permissions(-1)
 {
 }
