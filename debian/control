@@ -10,7 +10,7 @@ Homepage: https://github.com/Riateche/ridual
 
 Package: ridual
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, gnome-icon-theme-full
 Description: Dual-pane file manager
  Ridual is dual-pane file manager for Ubuntu. Details can be found on
  https://github.com/Riateche/ridual

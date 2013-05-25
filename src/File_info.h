@@ -14,7 +14,7 @@ public:
 
   QString name; //! Displayed name (for special locations only)
   QString uri; //! item uri (required)
-  QString path; //! Real path in file system
+  //QString path; //! Real path in file system
   QIcon icon;
   bool is_folder;
   bool is_executable;

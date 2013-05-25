@@ -123,16 +123,6 @@ void Question_widget::resizeEvent(QResizeEvent* e) {
   }
 }
 
-void Question_widget::focusInEvent(QFocusEvent *event) {
-  //ui->frame->setFrameShape(QFrame::Panel);
- // ui->frame->setLineWidth(2);
-}
-
-void Question_widget::focusOutEvent(QFocusEvent *event) {
-  //ui->frame->setFrameShape(QFrame::Panel);
-  //ui->frame->setLineWidth(1);
-//  ui->answer_frame->hide();
-}
 
 void Question_widget::on_answer_editor_textEdited(const QString &text) {
   if (text.isEmpty()) return;

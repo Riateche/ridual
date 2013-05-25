@@ -83,7 +83,7 @@ TEST(Real_fs_engine, copy) {
   Real_file_system_engine engine;
   QDir dir =  env_dir("real_fs_engine");
   File_system_engine::Operation* o =
-      engine.copy(dir.absoluteFilePath("source.txt"), dir.absoluteFilePath("dest.txt"));
+      engine.copy(dir.absoluteFilePath("source.txt"), dir.absoluteFilePath("dest.txt"), false);
   while(!o->is_finished()) {
     o->run_iteration();
   }

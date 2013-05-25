@@ -40,8 +40,6 @@ private:
   void update_buttons();
   virtual bool eventFilter(QObject *object, QEvent *event);
   virtual void resizeEvent(QResizeEvent *);
-  void focusInEvent(QFocusEvent* event);
-  void focusOutEvent(QFocusEvent* event);
 
 protected:
   Main_window* main_window;

@@ -15,4 +15,6 @@ bool uri_less_than(const File_info &v1, const File_info &v2);
 
 QDir env_dir(const QString& test_name);
 
+void check_file_contents(QString path, QString contents);
+
 #endif // DEBUG_OUTPUT_H

@@ -34,3 +34,10 @@ QDir env_dir(const QString& test_name) {
   EXPECT_TRUE(dir.cd(test_name));
   return dir;
 }
+
+
+void check_file_contents(QString path, QString contents) {
+  QFile file(path);
+  EXPECT_TRUE(file.open(QFile::ReadOnly));
+  EXPECT_EQ(contents, QString::fromLatin1(file.readAll()).trimmed());
+}

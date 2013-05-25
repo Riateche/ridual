@@ -14,7 +14,7 @@ namespace Error_reaction {
     abort,
     merge_dir,
     continue_writing,
-    delete_existing,
+    overwrite,
     rename_existing,
     rename_new
   };

@@ -5,7 +5,7 @@
 #include "Directory.h"
 #include "qt_gtk.h"
 #include "Core.h"
-
+#include "File_system_engine.h"
 
 File_list_model::File_list_model(Core *c) : Core_ally(c) {
   connect(core, SIGNAL(sort_folders_before_files_changed()),
@@ -97,7 +97,7 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
         return Directory::get_parent_uri(file_info.uri);
       }
       case Column::full_path: {
-        return file_info.path;
+        return core->get_file_system_engine()->get_real_file_name(file_info.uri);
       }
       case Column::uri: {
         return file_info.uri;

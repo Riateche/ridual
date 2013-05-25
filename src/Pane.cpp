@@ -434,7 +434,7 @@ void Pane::action_launch_triggered() {
   }
   App_info app = data[0].value<App_info>();
   File_info file = data[1].value<File_info>();
-  app.launch(file.path);
+  app.launch(core->get_file_system_engine()->get_real_file_name(file.uri));
 }
 
 void Pane::update_model_current_index() {

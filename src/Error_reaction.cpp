@@ -8,7 +8,7 @@ QString error_reaction_to_string(Error_reaction::Enum reaction) {
   case Error_reaction::skip: return QObject::tr("Skip");
   case Error_reaction::abort: return QObject::tr("Abort");
   case Error_reaction::merge_dir: return QObject::tr("Merge");
-  case Error_reaction::delete_existing: return QObject::tr("Delete existing");
+  case Error_reaction::overwrite: return QObject::tr("Overwrite");
   case Error_reaction::rename_existing: return QObject::tr("Rename existing");
   case Error_reaction::continue_writing: return QObject::tr("Continue writing");
   case Error_reaction::rename_new: return QObject::tr("Rename new");
@@ -34,13 +34,13 @@ QList<Error_reaction::Enum> get_error_reactions(Question_data data, bool is_inte
       if (type == File_system_engine::copy_failed) {
         r << Error_reaction::continue_writing;
       }
-      r << Error_reaction::delete_existing;
+      r << Error_reaction::overwrite;
       r << Error_reaction::rename_existing;
       r << Error_reaction::rename_new;
     }
     if (cause == File_system_engine::directory_already_exists) {
       r << Error_reaction::merge_dir;
-      r << Error_reaction::delete_existing;
+      r << Error_reaction::overwrite;
       r << Error_reaction::rename_existing;
       r << Error_reaction::rename_new;
     }

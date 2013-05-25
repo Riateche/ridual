@@ -283,10 +283,10 @@ void Main_window::view_or_edit_selected(bool edit) {
   //File_system_engine* fs_engine = core->get_file_system_engine();
   foreach(File_info f, list) {
     QProcess* p = new QProcess(this);
-    p->setWorkingDirectory(Directory::get_parent_uri(f.path));
+    p->setWorkingDirectory(Directory::get_parent_uri(core->get_file_system_engine()->get_real_file_name(f.uri)));
     QString command = QSettings().value(edit? "edit_command": "view_command", "gedit %U").toString();
     command = command.replace("%U", QString("\"%1\"").arg(f.uri));
-    command = command.replace("%F", QString("\"%1\"").arg(f.path));
+    command = command.replace("%F", QString("\"%1\"").arg(core->get_file_system_engine()->get_real_file_name(f.uri)));
     //todo: correct shell escaping
     p->start(command);
     //todo: catch errors
@@ -412,7 +412,7 @@ void Main_window::open_current() {
   foreach (File_info i, files) {
     if (i.is_file() && !i.uri.isEmpty() && !i.mime_type.isEmpty()) {
 //      types[i.mime_type] << i.uri;
-      types[i.mime_type] << i.path;
+      types[i.mime_type] << core->get_file_system_engine()->get_real_file_name(i.uri);
     }
   }
   foreach (QString mime_type, types.keys()) {
@@ -490,8 +490,8 @@ void Main_window::on_action_execute_triggered() {
   File_info_list list = active_pane->get_selected_files();
   foreach(File_info f, list) {
     QProcess* p = new QProcess(this);
-    p->setWorkingDirectory(Directory::get_parent_uri(f.path));
-    p->start(f.path);
+    p->setWorkingDirectory(Directory::get_parent_uri(core->get_file_system_engine()->get_real_file_name(f.uri)));
+    p->start(core->get_file_system_engine()->get_real_file_name(f.uri));
     //todo: catch errors; run in tasks thread
   }
 }

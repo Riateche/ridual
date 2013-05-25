@@ -125,22 +125,22 @@ void umount(Core* core, QString uri) {
 
 TEST(Directory, ftp_list) {  
   Core c;
-  QString uri = "ftp://anonymous@ftp.mozilla.org/";
+  QString uri = "ftp://anonymous@ftp.ubuntu.com/";
   umount(&c, uri);
   Directory dir1(&c, uri);
   File_info_list list;
   test_dir_refresh(&dir1, &list, true, false, 10000);
-  ASSERT_EQ(3, list.count());
+  ASSERT_EQ(1, list.count());
 
   bool found = false;
   foreach(Gio_mount m, c.get_mount_manager()->get_mounts()) {
-    if (m.uri == uri) found = true;
+    if (m.uri == uri) { found = true; }
   }
   EXPECT_TRUE(found) << "Testing location must be mounted here.";
 
   Directory dir2(&c, uri);
   test_dir_refresh(&dir2, &list, true, false, 10000);
-  ASSERT_EQ(3, list.count()) << "Fetching dir from already mounted location failed.";
+  ASSERT_EQ(1, list.count()) << "Fetching dir from already mounted location failed.";
 
 }
 

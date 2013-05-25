@@ -88,7 +88,7 @@ TEST(Gio_fs_engine, copy) {
   Gio_file_system_engine engine(core.get_mount_manager());
   QDir dir = env_dir("gio_fs_engine");
   File_system_engine::Operation* o =
-      engine.copy(dir.absoluteFilePath("source.txt"), dir.absoluteFilePath("dest.txt"));
+      engine.copy(dir.absoluteFilePath("source.txt"), dir.absoluteFilePath("dest.txt"), false);
   while(!o->is_finished()) {
     o->run_iteration();
   }

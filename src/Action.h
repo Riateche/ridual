@@ -41,13 +41,8 @@ class File_system_engine;
 class Action: public QObject {
   Q_OBJECT
 public:
-  ~Action();
-
-private:
-  friend class Action_queue;
-
   /*!
-    The constructor is available only from Action_queue.
+    The constructor should be only used in Action_queue.
 
     \param p_data   This parameter contains all information about
                     type of performed action, target files and
@@ -55,7 +50,11 @@ private:
                     \sa Action_data
 
     */
-  explicit Action(Action_queue* q, const Action_data& p_data);
+  explicit Action(Action_queue* q, File_system_engine* fs, const Action_data& p_data);
+
+  ~Action();
+
+private:
 
 
 
@@ -115,7 +114,7 @@ private:
 
   void end_preparing();
 
-  void update_iteration_timer();
+  //void update_iteration_timer();
 
 
   QString find_autorename_path(const QString& path);
@@ -145,7 +144,7 @@ public slots:
   void run();
 
 private slots:
-  void run_iteration();
+  void run_iterations();
 
 
 signals:

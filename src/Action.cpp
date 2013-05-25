@@ -13,9 +13,9 @@
 #include <errno.h>
 #include "File_system_engine.h"
 
-Action::Action(Action_queue *q, const Action_data &p_data)
+Action::Action(Action_queue *q, File_system_engine *fs, const Action_data &p_data)
 : data(p_data)
-, fs_engine(q->get_core()->get_file_system_engine())
+, fs_engine(fs)
 , queue(q)
 {
   total_size = 0;
@@ -38,7 +38,9 @@ Action::Action(Action_queue *q, const Action_data &p_data)
   iteration_timer.setSingleShot(true); */
 
   //fs_engine->moveToThread(queue);
-  moveToThread(queue);
+  if (queue) {
+    moveToThread(queue);
+  }
 }
 
 Action::~Action() {
@@ -51,7 +53,7 @@ void Action::ask_question(Question_data data) {
   //data.action = this;
   emit question(data);
   blocked = true;
-  update_iteration_timer();
+  //update_iteration_timer();
   send_state();
 }
 
@@ -89,7 +91,8 @@ void Action::run() {
   }
 
   send_state();
-  update_iteration_timer();
+  run_iterations();
+  //update_iteration_timer();
 }
 
 void Action::process_current(Error_reaction::Enum error_reaction) {
@@ -112,11 +115,11 @@ void Action::process_current(Error_reaction::Enum error_reaction) {
     new_path_parts << data.destination;
     foreach(File_system_engine::Iterator* i, fs_iterators_stack) {
       new_path_parts << i->get_current().file_name();
-      qDebug() << "uri in stack: " << i->get_current().uri;
+      //qDebug() << "uri in stack: " << i->get_current().uri;
     }
-    qDebug() << "new_path_parts: " << new_path_parts;
+    //qDebug() << "new_path_parts: " << new_path_parts;
     QString new_path = new_path_parts.join("/");
-    if (error_reaction == Error_reaction::delete_existing) {
+    if (error_reaction == Error_reaction::overwrite) {
       fs_engine->remove_recursively(new_path);
     } else if (error_reaction == Error_reaction::rename_new) {
       new_path = find_autorename_path(new_path);
@@ -226,7 +229,7 @@ void Action::send_state() {
   signal_timer.restart();
 }
 
-void Action::run_iteration() {
+void Action::run_iterations() {
   while(!(paused || blocked || phase == phase_finished)) {
     if (signal_timer.elapsed() > signal_interval) {
       send_state();
@@ -261,7 +264,7 @@ void Action::run_iteration() {
             } else if (phase == phase_processing) {
               phase = phase_finished;
               emit finished();
-              update_iteration_timer();
+              //update_iteration_timer();
             } else {
               qWarning("unexpected value of phase");
             }
@@ -292,14 +295,14 @@ void Action::end_preparing() {
   phase = phase_processing;
 }
 
-void Action::update_iteration_timer() {
+/*void Action::update_iteration_timer() {
   if (paused || blocked || phase == phase_finished) {
     //iteration_timer.stop();
   } else {
     run_iteration();
     //iteration_timer.start();
   }
-}
+}*/
 
 QString Action::find_autorename_path(const QString &path) {
   QStringList parts = path.split("/");
@@ -338,13 +341,13 @@ void Action::question_answered(Error_reaction::Enum reaction) {
         pending_operation = 0;
         current_size += current_file.file_size;
       } else {
-        run_iteration();
+        run_iterations();
       }
     } else if (reaction == Error_reaction::abort) {
       abort();
       return;
     } else if (reaction == Error_reaction::continue_writing ||
-               reaction == Error_reaction::delete_existing ||
+               reaction == Error_reaction::overwrite ||
                reaction == Error_reaction::rename_existing ||
                reaction == Error_reaction::rename_new ||
                reaction == Error_reaction::merge_dir) {
@@ -358,16 +361,19 @@ void Action::question_answered(Error_reaction::Enum reaction) {
     }
 
     blocked = false;
-    update_iteration_timer();
+    //update_iteration_timer();
     send_state();
   } catch (File_system_engine::Exception& e) {
     ask_question(Question_data(this, e));
+    return;
   }
+  run_iterations();
 }
 
 void Action::set_paused(bool v) {
   paused = v;
-  update_iteration_timer();
+  run_iterations();
+  //update_iteration_timer();
 }
 
 void Action::abort() {
@@ -378,7 +384,7 @@ void Action::abort() {
   phase = phase_finished;
   //todo: display warning if answer was automatic
   emit finished();
-  update_iteration_timer();
+  //update_iteration_timer();
 }
 
 void Action::state_delivered() {

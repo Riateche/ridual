@@ -112,7 +112,7 @@ bool Gio_file_system_engine::Gio_fs_iterator::has_next() {
 
 File_info Gio_file_system_engine::Gio_fs_iterator::get_next_internal() {
   File_info i = iterator->get_next();
-  i.uri = uri_prefix + QFileInfo(i.path).fileName();
+  i.uri = uri_prefix + QFileInfo(i.uri).fileName();
   return i;
 }
 

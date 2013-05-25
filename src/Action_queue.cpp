@@ -2,6 +2,8 @@
 #include "Action.h"
 #include <QTimer>
 #include <QDebug>
+#include "Core.h"
+
 
 Action_queue::Action_queue(Core* c, int p_id): Core_ally(c), id(p_id) {
 }
@@ -35,7 +37,7 @@ Action_queue::~Action_queue() {
 }
 
 void Action_queue::create_action(Action_data data) {
-  Action* a = new Action(this, data);
+  Action* a = new Action(this, core->get_file_system_engine(), data);
   connect(a, SIGNAL(finished()), this, SLOT(action_finished()));
   //QMutexLocker locker(&access_mutex);
   actions << a;

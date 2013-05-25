@@ -204,7 +204,9 @@ void Real_file_system_engine::make_directory(const QString &uri) {
 }
 
 QString Real_file_system_engine::get_real_file_name(const QString &uri) {
-  if (uri.startsWith("/") && QFile::exists(uri)) return uri;
+  if (uri.startsWith("/")) {
+    return uri;
+  }
   return QString();
 }
 
@@ -224,8 +226,8 @@ bool Real_file_system_engine::Real_fs_iterator::has_next() {
 File_info Real_file_system_engine::Real_fs_iterator::get_next_internal() {
   iterator->next();
   File_info item;
-  item.path = iterator->filePath();
-  QFileInfo info(item.path);
+  //item.path = iterator->filePath();
+  QFileInfo info(iterator->filePath());
   item.is_folder = info.isDir();
   if (item.is_file()) {
     item.file_size = info.size();
@@ -240,8 +242,8 @@ File_info Real_file_system_engine::Real_fs_iterator::get_next_internal() {
   item.date_modified = info.lastModified();
   item.date_created = info.created();
   item.is_executable = item.is_file() && info.isExecutable();
-  item.mime_type = get_mime_type(item.path);
-  item.uri = item.path;
+  item.mime_type = get_mime_type(iterator->filePath());
+  item.uri = iterator->filePath();
   return item;
 }
 
