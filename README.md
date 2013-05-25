@@ -9,11 +9,6 @@ Ridual
 Ridual is dual-pane file manager for Gnome environment. 
 **It's in development stage now, so using Ridual is not recommended.**
 
-Sheduled releases:
-
-- Half-functional release: 2012/11/01
-- Fully-functional release: 2013/02/01
-
 Main advantages of Ridual:
 
 - High integration with Gnome environment: Ridual supports GVFS mounts, bookmarks and user dirs, 
