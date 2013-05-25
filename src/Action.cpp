@@ -18,6 +18,7 @@ Action::Action(Action_queue *q, File_system_engine *fs, const Action_data &p_dat
 , fs_engine(fs)
 , queue(q)
 {
+  phase = phase_queued;
   total_size = 0;
   total_count = 0;
 
@@ -377,14 +378,15 @@ void Action::set_paused(bool v) {
 }
 
 void Action::abort() {
-  if (pending_operation) {
-    delete pending_operation;
-    pending_operation = 0;
+  if (phase != phase_queued) {
+    if (pending_operation) {
+      delete pending_operation;
+      pending_operation = 0;
+    }
+    phase = phase_finished;
+    //todo: display warning if answer was automatic
+    emit finished();
   }
-  phase = phase_finished;
-  //todo: display warning if answer was automatic
-  emit finished();
-  //update_iteration_timer();
 }
 
 void Action::state_delivered() {

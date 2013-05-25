@@ -88,9 +88,8 @@ private:
 
   Action_queue* current_queue;
   QList<Question_widget*> question_widgets;
+  QList<Action_state_widget*> action_state_widgets;
   Columns columns;
-
-  QList<Action_state_widget*> get_action_state_widgets();
 
   //Action_queue* create_queue();
   void view_or_edit_selected(bool edit);
@@ -133,6 +132,7 @@ private slots:
   void slot_focus_question();
   void action_started();
   void question_widget_destroyed(QObject* object);
+  void action_state_widget_destroyed(QObject* object);
 
   void on_action_clipboard_copy_triggered();
 

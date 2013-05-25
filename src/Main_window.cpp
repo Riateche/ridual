@@ -53,8 +53,9 @@ Main_window::~Main_window() {
     q->cancel_pending_actions();
   }
 
-  foreach(Action_state_widget* w, get_action_state_widgets()) {
+  foreach(Action_state_widget* w, action_state_widgets) {
     w->abort();
+    delete w;
   }
 
   while(!core->get_actions_manager()->get_queues().isEmpty()) {
@@ -121,11 +122,6 @@ void Main_window::init() {
   connect(ui->action_go_parent_directory, SIGNAL(triggered()),
           this, SLOT(go_parent()));
 
-  //connect(ui->left_pane,  SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
-  //connect(ui->right_pane, SIGNAL(uri_changed()), this, SLOT(refresh_path_toolbar()));
-  //connect(this, SIGNAL(active_pane_changed()),   this, SLOT(refresh_path_toolbar()));
-  //refresh_path_toolbar();
-
   connect(ui->left_pane,  SIGNAL(selection_changed()),   this, SIGNAL(selection_changed()));
   connect(ui->right_pane, SIGNAL(selection_changed()),   this, SIGNAL(selection_changed()));
   connect(this,           SIGNAL(active_pane_changed()), this, SIGNAL(selection_changed()));
@@ -162,13 +158,11 @@ void Main_window::set_active_pane(Pane *pane) {
 
 
 App_info_list Main_window::get_apps(const QString &mime_type) {
-  //qDebug() << "Main_window::get_apps";
   App_info_list r;
   GList* list = g_app_info_get_all_for_type(mime_type.toLocal8Bit());
   if (!list) return r;
   for(; list; list = list->next) {
     r << App_info(this, static_cast<GAppInfo*>(list->data));
-    //qDebug() << "found app:" << list->data;
   }
 
   QStringList was;
@@ -236,8 +230,6 @@ void Main_window::create_action(Action_data data) {
   } else {
     q = core->get_actions_manager()->create_queue();
   }
-//  Action* a = new Action(data);
-//  q->add_action(a);
   q->create_action(data);
   if (current_queue) {
     show_message(tr("Task added to the queue."), Icon::info);
@@ -255,7 +247,7 @@ Recursive_fetch_option Main_window::get_recursive_fetch_option() {
 void Main_window::add_question(Question_widget *question) {
   question_widgets.prepend(question);
   connect(question, SIGNAL(destroyed(QObject*)), this, SLOT(question_widget_destroyed(QObject*)));
-  ui->questions_layout->insertWidget(0, question);
+  ui->messages_layout->insertWidget(0, question);
 }
 
 void Main_window::switch_focus_question(Question_widget *target, int direction) {
@@ -265,16 +257,6 @@ void Main_window::switch_focus_question(Question_widget *target, int direction) 
   }
 }
 
-QList<Action_state_widget *> Main_window::get_action_state_widgets() {
-  QList<Action_state_widget *> r;
-  for(int i = 0; i < ui->questions_layout->count(); i++) {
-    QLayoutItem* item = ui->questions_layout->itemAt(i);
-    if (item->widget() && dynamic_cast<Action_state_widget*>(item->widget())) {
-      r << dynamic_cast<Action_state_widget*>(item->widget());
-    }
-  }
-  return r;
-}
 
 
 
@@ -305,8 +287,8 @@ bool Main_window::eventFilter(QObject *object, QEvent *event) {
 
 void Main_window::keyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Escape) {
-    for(int i = 0; i < ui->questions_layout->count(); i++) {
-      QWidget* w = ui->questions_layout->itemAt(i)->widget();
+    for(int i = 0; i < ui->messages_layout->count(); i++) {
+      QWidget* w = ui->messages_layout->itemAt(i)->widget();
       if (dynamic_cast<Message_widget*>(w)) {
         delete w;
         i--;
@@ -316,7 +298,7 @@ void Main_window::keyPressEvent(QKeyEvent *event) {
 }
 
 void Main_window::closeEvent(QCloseEvent *event) {
-  if (!get_action_state_widgets().isEmpty()) {
+  if (!action_state_widgets.isEmpty()) {
     if (QMessageBox::question(0, "", tr("Some tasks are still running. Do you want to interrupt them and quit?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) {
       event->ignore();
     }
@@ -365,7 +347,7 @@ void Main_window::switch_active_pane() {
 }
 
 void Main_window::show_message(QString message, Icon::Enum icon) {
-  ui->questions_layout->insertWidget(0, new Message_widget(message, icon));
+  ui->messages_layout->insertWidget(0, new Message_widget(message, icon));
 }
 
 void Main_window::show_error(QString message) {
@@ -526,8 +508,12 @@ void Main_window::slot_action_question(Question_data data) {
 }
 
 void Main_window::slot_focus_question() {
-  for(int i = 0; i < ui->questions_layout->count(); i++) {
-    QWidget* w = ui->questions_layout->itemAt(i)->widget();
+  if (!question_widgets.isEmpty()) {
+    question_widgets.first()->start_editor();
+  }
+  /*
+  for(int i = 0; i < ui->messages_layout->count(); i++) {
+    QWidget* w = ui->messages_layout->itemAt(i)->widget();
     if (w != 0) {
       Question_widget* qw = dynamic_cast<Question_widget*>(w);
       if (qw) {
@@ -535,22 +521,26 @@ void Main_window::slot_focus_question() {
         return;
       }
     }
-  }
+  }*/
 }
 
 void Main_window::action_started() {
   Action_state_widget* w = dynamic_cast<Action_state_widget*>(sender());
-  ui->questions_layout->insertWidget(0, w);
+  ui->messages_layout->insertWidget(0, w);
 
 }
 
 void Main_window::question_widget_destroyed(QObject *object) {
-  Question_widget* w = reinterpret_cast<Question_widget*>(object);
+  Question_widget* w = static_cast<Question_widget*>(object);
   int i = question_widgets.indexOf(w);
   question_widgets.removeAll(w);
   if (i >= 0 && i < question_widgets.count()) {
     question_widgets[i]->start_editor();
   }
+}
+
+void Main_window::action_state_widget_destroyed(QObject *object) {
+  action_state_widgets.removeAll(static_cast<Action_state_widget*>(object));
 }
 
 void Main_window::copy_or_cut_files_to_clipboard(bool cut) {
@@ -666,5 +656,6 @@ void Main_window::action_added(Action* a) {
   Action_state_widget* w = new Action_state_widget(a);
   connect(w, SIGNAL(show_requested()), this, SLOT(action_started()));
   connect(a, SIGNAL(error(QString)), this, SLOT(show_error(QString)));
-
+  connect(w, SIGNAL(destroyed(QObject*)), this, SLOT(action_state_widget_destroyed(QObject*)));
+  action_state_widgets << w;
 }

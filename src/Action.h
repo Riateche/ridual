@@ -102,7 +102,7 @@ private:
 
   QStack<File_system_engine::Iterator*> fs_iterators_stack;
   QStringList unprocessed_targets;
-  enum Phase { phase_preparing, phase_processing, phase_finished };
+  enum Phase { phase_queued, phase_preparing, phase_processing, phase_finished };
   Phase phase;
 
   bool paused; //! Indicates if action is currently paused. This value is setted by Action::toggle_pause slot.
