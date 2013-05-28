@@ -35,6 +35,7 @@
   - display tasks waiting in queue
 
 - stage2:
+  - fallback theme for file icons
   - if trying to execute not-executable, prompt to make file executable
   - run-time permission granting
   - undo

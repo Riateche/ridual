@@ -9,7 +9,34 @@
 #include "Actions_manager.h"
 #include "gio/Gio_file_system_engine.h"
 
+#include <QIcon>
+
+
+void detect_theme_name() {
+  const QString test_name = "inode-directory";
+  QStringList good_themes;
+  good_themes << "Humanity";
+  QString default_theme = QIcon::themeName();
+  good_themes.prepend(default_theme);
+  foreach(QString theme, good_themes) {
+    QIcon::setThemeName(theme);
+    if (QIcon::hasThemeIcon(test_name)) {
+      return;
+    }
+  }
+  QIcon::setThemeName(default_theme);
+  qDebug() << "Failed to find any theme containing file icons";
+}
+
 Core::Core() {
+  detect_theme_name();
+  //qDebug() << QIcon::themeSearchPaths();
+  //qDebug() << QIcon::themeName();
+  //QIcon::setThemeName("Humanity");
+  //QIcon::setThemeSearchPaths(QString::fromLocal8Bit(qgetenv("XDG_DATA_DIRS")).split(":"));
+  //qDebug() << QIcon::themeSearchPaths();
+
+
   qRegisterMetaType<File_info_list>("File_info_list");
   qRegisterMetaType<Error_type::Enum>("Error_type::Enum");
 
