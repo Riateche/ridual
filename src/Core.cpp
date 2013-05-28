@@ -8,7 +8,7 @@
 #include <QThread>
 #include "Actions_manager.h"
 #include "gio/Gio_file_system_engine.h"
-
+#include <QApplication>
 #include <QIcon>
 
 
@@ -38,6 +38,12 @@ void detect_theme_name() {
 }
 
 Core::Core() {
+  QApplication::setApplicationName("ridual");
+  QApplication::setOrganizationName("ridual");
+
+  QSettings settings;
+  sort_folders_before_files = settings.value("sort_folders_before_files").toBool();
+
   detect_theme_name();
   //qDebug() << QIcon::themeSearchPaths();
   //qDebug() << QIcon::themeName();
@@ -64,8 +70,6 @@ Core::Core() {
 
   actions_manager = new Actions_manager(this);
 
-  QSettings settings;
-  sort_folders_before_files = settings.value("sort_folders_before_files").toBool();
 
 
 }

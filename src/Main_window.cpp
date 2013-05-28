@@ -85,8 +85,6 @@ void Main_window::init() {
   //QLocale::Language language = QLocale::system().language();
   //qDebug() << "language: " << QLocale::languageToString(language);
 
-  QApplication::setApplicationName("ridual");
-  QApplication::setOrganizationName("ridual");
 
   QSettings s;
 
