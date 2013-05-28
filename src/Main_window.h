@@ -144,6 +144,10 @@ private slots:
 
   void action_added(Action* a);
 
+  void on_action_move_to_trash_triggered();
+
+  void on_action_move_from_trash_triggered();
+
 public slots:
   void open_current();
   void switch_active_pane();

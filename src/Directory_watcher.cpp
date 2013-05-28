@@ -22,7 +22,7 @@ void Directory_watcher::add(QString path) {
     //qDebug() << "adding";
     counter[path] = 1;
     QString real_path = fs->get_real_file_name(path);
-    if (!real_path.isEmpty() && QDir(real_path).exists()) {
+    if (!real_path.isEmpty() && QDir(real_path).exists() && QDir(real_path).isReadable()) {
       real_paths[path] = real_path;
       watcher.addPath(real_path);
     }

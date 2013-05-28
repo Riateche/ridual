@@ -149,6 +149,34 @@ bool Gio_file_system_engine::is_directory(const QString &uri) {
   return real_engine.is_directory(r_uri);
 }
 
+void Gio_file_system_engine::move_to_trash(const QString &uri) {
+  GFile* file = g_file_new_for_path(uri.toLocal8Bit());
+  GError* e = 0;
+  if (!g_file_trash(file, 0, &e)) {
+    qDebug() << "gio error: " << e->message;
+    g_error_free(e);
+    throw Exception(move_to_trash_failed, gio_error, uri);
+  }
+  g_object_unref(file);
+}
+
+QString Gio_file_system_engine::get_trash_original_path(const QString &uri) {
+  GFile* file = g_file_new_for_uri(uri.toLocal8Bit());
+  GError* e = 0;
+  GFileInfo* info = g_file_query_info(file, "trash:*", G_FILE_QUERY_INFO_NONE, 0, &e);
+  QString result;
+  if (info) {
+    char* orig_path = g_file_info_get_attribute_as_string(info, G_FILE_ATTRIBUTE_TRASH_ORIG_PATH);
+    result = QString::fromLocal8Bit(orig_path);
+    g_free(orig_path);
+    g_object_unref(info);
+  } else {
+    throw Exception(move_failed, gio_error, uri);
+  }
+  g_object_unref(file);
+  return result;
+}
+
 bool Gio_file_system_engine::Gio_fs_iterator::has_next() {
   return iterator->has_next();
 }

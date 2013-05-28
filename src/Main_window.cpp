@@ -1,6 +1,7 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
 
+#include "gio/Gio_file_system_engine.h"
 #include "File_system_engine.h"
 #include "Actions_manager.h"
 #include <QClipboard>
@@ -215,7 +216,7 @@ void Main_window::create_action(Action_data data) {
     show_message(tr("Invalid target for this operation."), Icon::error);
     return;
   }
-  if (data.type != Action_type::remove) {
+  if (data.type != Action_type::remove && data.type != Action_type::trash) {
     if (data.destination == Special_uri(Special_uri::places).uri()) {
       show_message(tr("Can't use 'Places' special location as destination."), Icon::error);
       return;
@@ -310,7 +311,7 @@ Action_data Main_window::get_auto_target_and_destination(Action_type::Enum actio
 //  foreach(File_info fi, active_pane->get_selected_files()) {
 //    data.targets << fi.uri;
 //  }
-  if (data.type != Action_type::remove) {
+  if (data.type != Action_type::remove && data.type != Action_type::trash) {
     data.destination = get_destination_pane()->get_uri();
   }
   return data;
@@ -539,6 +540,8 @@ void Main_window::question_widget_destroyed(QObject *object) {
 
 void Main_window::action_state_widget_destroyed(QObject *object) {
   action_state_widgets.removeAll(static_cast<Action_state_widget*>(object));
+  ui->left_pane->refresh();
+  ui->right_pane->refresh();
 }
 
 void Main_window::copy_or_cut_files_to_clipboard(bool cut) {
@@ -588,6 +591,7 @@ void Main_window::init_hotkeys() {
   hotkeys.add("copy",     ui->action_copy);
   hotkeys.add("move",     ui->action_move);
   hotkeys.add("remove",     ui->action_remove);
+  hotkeys.add("move_to_trash",     ui->action_move_to_trash);
   hotkeys.add("choose_queue", tr("Choose queue"), ui->action_queue_choose);
   hotkeys.add("clipboard_copy",     tr("Copy files to clipboard"),  ui->action_clipboard_copy);
   hotkeys.add("clipboard_cut",      tr("Cut files to clipboard"),  ui->action_cut);
@@ -656,4 +660,20 @@ void Main_window::action_added(Action* a) {
   connect(a, SIGNAL(error(QString)), this, SLOT(show_error(QString)));
   connect(w, SIGNAL(destroyed(QObject*)), this, SLOT(action_state_widget_destroyed(QObject*)));
   action_state_widgets << w;
+}
+
+void Main_window::on_action_move_to_trash_triggered() {
+  Action_data data = get_auto_target_and_destination(Action_type::trash);
+  create_action(data);
+}
+
+void Main_window::on_action_move_from_trash_triggered() {
+  foreach(File_info fi, active_pane->get_selected_files()) {
+    Action_data data;
+    data.type = Action_type::move;
+    data.targets << fi;
+    data.destination = Gio_file_system_engine::get_trash_original_path(fi.uri);
+    data.destination_includes_filename = true;
+    create_action(data);
+  }
 }

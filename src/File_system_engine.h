@@ -70,7 +70,8 @@ public:
     file_write_failed,
     stat_failed,
     mkdir_failed,
-    rmdir_failed
+    rmdir_failed,
+    move_to_trash_failed
   };
 
   enum error_cause {

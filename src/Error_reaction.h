@@ -16,7 +16,8 @@ namespace Error_reaction {
     continue_writing,
     overwrite,
     rename_existing,
-    rename_new
+    rename_new,
+    delete_competely
   };
 }
 Q_DECLARE_METATYPE(Error_reaction::Enum)

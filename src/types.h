@@ -12,6 +12,7 @@ namespace Action_type {
     move,
     link,
     remove,
+    trash,
     create_folder
   };
 }
@@ -30,11 +31,14 @@ enum Link_type {
 
 class Action_data {
 public:
+  Action_data() : type(Action_type::copy), recursive_fetch_option(recursive_fetch_auto),
+    link_type(link_type_soft_absolute), destination_includes_filename(false) {}
   Action_type::Enum type;
   Recursive_fetch_option recursive_fetch_option;
   Link_type link_type;
   File_info_list targets;
   QString destination;
+  bool destination_includes_filename;
 };
 
 class Action_state {
@@ -98,5 +102,8 @@ namespace Icon {
 }
 
 Q_DECLARE_METATYPE(Icon::Enum)
+
+
+
 
 #endif // TYPES_H

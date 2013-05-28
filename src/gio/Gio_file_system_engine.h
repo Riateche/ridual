@@ -26,6 +26,9 @@ public:
   bool is_file(const QString& uri);
   bool is_directory(const QString& uri);
 
+  static void move_to_trash(const QString& uri);
+  static QString get_trash_original_path(const QString& uri);
+
 private:
   Real_file_system_engine real_engine;
   Mount_manager* mount_manager;

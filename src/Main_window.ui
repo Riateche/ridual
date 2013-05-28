@@ -176,8 +176,9 @@
     <addaction name="action_move"/>
     <addaction name="action_link"/>
     <addaction name="action_rename"/>
-    <addaction name="action_remove"/>
     <addaction name="action_move_to_trash"/>
+    <addaction name="action_move_from_trash"/>
+    <addaction name="action_remove"/>
     <addaction name="separator"/>
     <addaction name="action_abort_last_created_task"/>
    </widget>
@@ -321,10 +322,13 @@
   </action>
   <action name="action_move_to_trash">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Move to trash</string>
+   </property>
+   <property name="shortcut">
+    <string>F8</string>
    </property>
   </action>
   <action name="action_refresh">
@@ -410,6 +414,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="action_move_from_trash">
+   <property name="text">
+    <string>Move from trash</string>
    </property>
   </action>
  </widget>

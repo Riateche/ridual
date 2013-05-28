@@ -412,6 +412,10 @@ void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
       menu->addAction(core->get_main_window()->get_ui()->action_execute);
     }
   }
+  if (file.uri.startsWith("trash:")) {
+    menu->addAction(core->get_main_window()->get_ui()->action_move_from_trash);
+  }
+
   if (menu->actions().count() > 0) menu->addSeparator();
 
   foreach(App_info app, apps) {

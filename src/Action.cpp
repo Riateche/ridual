@@ -12,6 +12,9 @@
 #include <fstream>
 #include <errno.h>
 #include "File_system_engine.h"
+#include "gio/Gio_file_system_engine.h"
+
+
 
 Action::Action(Action_queue *q, File_system_engine *fs, const Action_data &p_data)
 : data(p_data)
@@ -70,7 +73,7 @@ void Action::run() {
   }
 
   if (data.recursive_fetch_option == recursive_fetch_auto &&
-      data.type == Action_type::remove) {
+      (data.type == Action_type::remove || data.type == Action_type::trash) ) {
     phase = phase_processing;
   } else if (data.recursive_fetch_option == recursive_fetch_off) {
     phase = phase_processing;
@@ -93,10 +96,12 @@ void Action::run() {
 
   send_state();
   run_iterations();
-  //update_iteration_timer();
 }
 
 void Action::process_current(Error_reaction::Enum error_reaction) {
+  if (pending_operation != 0) {
+    qWarning("pending_operation must be NULL in Action::process_current");
+  }
   if (postprocess_running) {
     postprocess_directory(current_file);
     return;
@@ -108,44 +113,50 @@ void Action::process_current(Error_reaction::Enum error_reaction) {
       end_preparing();
     }
     total_count++;
-    if (data.type != Action_type::remove) {
+    if (data.type != Action_type::remove && data.type != Action_type::trash) {
       if (current_file.is_file()) { total_size += current_file.file_size; }
     }
   } else {
-    QStringList new_path_parts;
-    new_path_parts << data.destination;
-    foreach(File_system_engine::Iterator* i, fs_iterators_stack) {
-      new_path_parts << i->get_current().file_name();
-      //qDebug() << "uri in stack: " << i->get_current().uri;
-    }
-    //qDebug() << "new_path_parts: " << new_path_parts;
-    QString new_path = new_path_parts.join("/");
-    if (error_reaction == Error_reaction::overwrite) {
-      fs_engine->remove_recursively(new_path);
-    } else if (error_reaction == Error_reaction::rename_new) {
-      new_path = find_autorename_path(new_path);
-    } else if (error_reaction == Error_reaction::rename_existing) {
-      QString path_for_existing = find_autorename_path(new_path);
-      fs_engine->move(new_path, path_for_existing);
-    }
+    if (data.type == Action_type::trash) {
+      if (error_reaction == Error_reaction::delete_competely) {
+        fs_engine->remove(current_file.uri);
+      } else {
+        Gio_file_system_engine::move_to_trash(current_file.uri);
+      }
+    } else if (data.type == Action_type::remove) {
+      fs_engine->remove(current_file.uri);
+    } else if (data.type == Action_type::copy || data.type == Action_type::move) {
+      QStringList new_path_parts;
+      new_path_parts << data.destination;
+      foreach(File_system_engine::Iterator* i, fs_iterators_stack) {
+        new_path_parts << i->get_current().file_name();
+        //qDebug() << "uri in stack: " << i->get_current().uri;
+      }
+      if (data.destination_includes_filename) {
+        new_path_parts.removeAt(1);
+      }
+      //qDebug() << "new_path_parts: " << new_path_parts;
+      QString new_path = new_path_parts.join("/");
+      if (error_reaction == Error_reaction::overwrite) {
+        fs_engine->remove_recursively(new_path);
+      } else if (error_reaction == Error_reaction::rename_new) {
+        new_path = find_autorename_path(new_path);
+      } else if (error_reaction == Error_reaction::rename_existing) {
+        QString path_for_existing = find_autorename_path(new_path);
+        fs_engine->move(new_path, path_for_existing);
+      }
 
-    if (current_file.is_folder) {
-      if (data.type == Action_type::copy || data.type == Action_type::move) {
+      if (current_file.is_folder) {
         if (error_reaction != Error_reaction::merge_dir) {
           fs_engine->make_directory(new_path);
         }
-      }
-    } else {
-      if (pending_operation != 0) {
-        qWarning("pending_operation must be NULL in Action::process_one");
-      }
-      if (data.type == Action_type::copy) {
-        bool append = error_reaction == Error_reaction::continue_writing;
-        pending_operation = fs_engine->copy(current_file.uri, new_path, append);
-      } else if (data.type == Action_type::move) {
-        pending_operation = fs_engine->move(current_file.uri, new_path);
-      } else if (data.type == Action_type::remove) {
-        fs_engine->remove(current_file.uri);
+      } else {
+        if (data.type == Action_type::copy) {
+          bool append = error_reaction == Error_reaction::continue_writing;
+          pending_operation = fs_engine->copy(current_file.uri, new_path, append);
+        } else if (data.type == Action_type::move) {
+          pending_operation = fs_engine->move(current_file.uri, new_path);
+        }
       }
     }
     current_count++;
@@ -200,6 +211,8 @@ void Action::send_state() {
     state.current_action = tr("Copying %1");
   } else if (data.type == Action_type::move) {
     state.current_action = tr("Moving %1");
+  } else if (data.type == Action_type::trash) {
+    state.current_action = tr("Moving to trash %1");
   } else if (data.type == Action_type::remove) {
     state.current_action = tr("Removing %1");
   } else {
@@ -243,7 +256,9 @@ void Action::run_iterations() {
         postprocess_running = false;
       } else {
         if (current_file.is_folder) {
-          fs_iterators_stack.push(fs_engine->list(current_file.uri));
+          if (data.type != Action_type::trash) { // trash must not be recursive
+            fs_iterators_stack.push(fs_engine->list(current_file.uri));
+          }
         }
       }
 
@@ -351,6 +366,7 @@ void Action::question_answered(Error_reaction::Enum reaction) {
                reaction == Error_reaction::overwrite ||
                reaction == Error_reaction::rename_existing ||
                reaction == Error_reaction::rename_new ||
+               reaction == Error_reaction::delete_competely ||
                reaction == Error_reaction::merge_dir) {
       process_current(reaction);
     } else if (reaction == Error_reaction::ask) {

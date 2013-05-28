@@ -109,6 +109,8 @@ QString File_system_engine::Exception::get_message() {
     type_string = QObject::tr("failed to make directory"); break;
   case File_system_engine::rmdir_failed:
     type_string = QObject::tr("failed to remove directory"); break;
+  case File_system_engine::move_to_trash_failed:
+    type_string = QObject::tr("failed to move to trash"); break;
   default:
     qWarning("File_system_engine::Exception::get_message: unhandled type");
     type_string = QObject::tr("unknown error");

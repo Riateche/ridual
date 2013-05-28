@@ -10,6 +10,7 @@
 
 - stage1:
   - trash put/restore
+  - smb root in path buttons
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
   - fix behaviour: file write error -> retry -> file already exists
   - terminal support
