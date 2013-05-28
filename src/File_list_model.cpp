@@ -90,7 +90,7 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
         if (file_info.file_size >= 0) {
           return file_info.file_size; //todo: size formatting
         } else {
-          return "";
+          return QVariant();
         }
       }
       case Column::parent_uri: {
@@ -202,9 +202,9 @@ void File_list_model::set_current_index(const QModelIndex &new_index) {
 bool my_qvariant_sort(const Sorting_pair& v1, const Sorting_pair& v2) {
   QVariant::Type t1 = v1.second.type();
   QVariant::Type t2 = v2.second.type();
-  if (t1 == QVariant::Int &&
-      t2 == QVariant::Int) {
-    return v1.second.toInt() < v2.second.toInt();
+  if ( (v1.second.canConvert(QVariant::LongLong) || t1 == QVariant::Invalid) &&
+      (v2.second.canConvert(QVariant::LongLong) || t2 == QVariant::Invalid)) {
+    return v1.second.toLongLong() < v2.second.toLongLong();
   }
   if ( (t1 == QVariant::Date || t1 == QVariant::DateTime) &&
        (t2 == QVariant::Date || t2 == QVariant::DateTime) ) {
