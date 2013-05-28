@@ -29,7 +29,7 @@ Pane::Pane(QWidget *parent) :
   ui->list->setModel(file_list_model);
   ui->list->installEventFilter(this);
   ui->list->viewport()->installEventFilter(this);
-  ui->list->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  ui->list->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
 
 
   QFontMetrics font_metrics(ui->list->font());
@@ -173,6 +173,7 @@ void Pane::load_state(QSettings *s) {
   }
   ui->list->sortByColumn(s->value("sort_column").toInt(),
                          static_cast<Qt::SortOrder>(s->value("sort_order").toInt()));
+  ui->list->horizontalHeader()->restoreState(s->value("header_state").toByteArray());
   set_uri(uri);
 }
 
@@ -180,6 +181,7 @@ void Pane::save_state(QSettings *s) {
   s->setValue("path", get_uri());
   s->setValue("sort_column", file_list_model->get_sort_column());
   s->setValue("sort_order", file_list_model->get_sort_order());
+  s->setValue("header_state", ui->list->horizontalHeader()->saveState());
 }
 
 bool Pane::is_active() const {
@@ -296,6 +298,7 @@ void Pane::directory_ready(File_info_list files) {
     return;
   }
 
+  QByteArray header_state = ui->list->horizontalHeader()->saveState();
   file_list_model->set_data(files);
   if (file_list_model->rowCount() > 0) {
     ui->list->setCurrentIndex(file_list_model->index(0, 0));
@@ -335,6 +338,7 @@ void Pane::directory_ready(File_info_list files) {
 
   ui->list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
   emit selection_changed();
+  ui->list->horizontalHeader()->restoreState(header_state);
 }
 
 void Pane::directory_error(QString message) {
