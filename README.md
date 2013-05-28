@@ -74,7 +74,7 @@ Ridual can be installed from [our PPA](https://launchpad.net/%7Estrahovp/+archiv
 
 #### Arch Linux
 
-Package `ridual` is available in AUR.
+Package `ridual` is available from the [AUR](https://aur.archlinux.org/packages/ridual/).
 
 #### Building from sourses
 
