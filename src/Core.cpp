@@ -14,13 +14,22 @@
 
 void detect_theme_name() {
   const QString test_name = "inode-directory";
-  QStringList good_themes;
-  good_themes << "Humanity";
+  QStringList themes;
+  //good_themes << "Humanity";
   QString default_theme = QIcon::themeName();
-  good_themes.prepend(default_theme);
-  foreach(QString theme, good_themes) {
+  themes.prepend(default_theme);
+  foreach(QString path, QIcon::themeSearchPaths()) {
+    foreach(QString name, QDir(path).entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+      if (!themes.contains(name)) {
+        themes << name;
+      }
+    }
+  }
+  qDebug() << "Available icon themes: " << themes;
+  foreach(QString theme, themes) {
     QIcon::setThemeName(theme);
     if (QIcon::hasThemeIcon(test_name)) {
+      qDebug() << "Using file icon theme: " << theme;
       return;
     }
   }
