@@ -202,8 +202,8 @@ void File_list_model::set_current_index(const QModelIndex &new_index) {
 bool my_qvariant_sort(const Sorting_pair& v1, const Sorting_pair& v2) {
   QVariant::Type t1 = v1.second.type();
   QVariant::Type t2 = v2.second.type();
-  if ( (v1.second.canConvert(QVariant::LongLong) || t1 == QVariant::Invalid) &&
-      (v2.second.canConvert(QVariant::LongLong) || t2 == QVariant::Invalid)) {
+  if ( (t1 == QVariant::Int || t1 == QVariant::LongLong || t1 == QVariant::Invalid) &&
+      (t2 == QVariant::Int || t2 == QVariant::LongLong || t2 == QVariant::Invalid)) {
     return v1.second.toLongLong() < v2.second.toLongLong();
   }
   if ( (t1 == QVariant::Date || t1 == QVariant::DateTime) &&
