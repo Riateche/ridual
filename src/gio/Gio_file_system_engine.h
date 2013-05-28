@@ -6,6 +6,9 @@
 #include "Mount.h"
 
 class Mount_manager;
+typedef struct _GFile GFile;
+typedef struct _GFileInfo GFileInfo;
+typedef struct _GFileEnumerator GFileEnumerator;
 
 // not thread-safe
 
@@ -26,6 +29,8 @@ public:
 private:
   Real_file_system_engine real_engine;
   Mount_manager* mount_manager;
+
+  QString trash_files_path;
   //QList<Gio_mount> mounts;
 
   class Gio_fs_iterator: public Iterator {
@@ -36,6 +41,20 @@ private:
     File_info get_next_internal();
     ~Gio_fs_iterator();
 
+
+  };
+
+  class Gio_native_fs_iterator: public Iterator {
+  public:
+    Gio_native_fs_iterator() : file(0), enumerator(0), cached_item(0) {}
+    GFile* file;
+    GFileEnumerator* enumerator;
+    GFileInfo* cached_item;
+    QString uri_prefix;
+
+    bool has_next();
+    File_info get_next_internal();
+    ~Gio_native_fs_iterator();
 
   };
 

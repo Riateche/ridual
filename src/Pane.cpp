@@ -516,6 +516,17 @@ void Pane::refresh_path_toolbar() {
     headless_path = real_path.mid(home.length());
     root_found = true;
   }
+  if (!root_found && real_path.startsWith("trash:")) {
+    File_info file_info;
+    file_info.uri = "trash:///";
+    file_info.name = tr("Trash");
+    path_items << file_info;
+    headless_path = real_path.mid(6);
+    while(headless_path.startsWith("/")) {
+      headless_path = headless_path.mid(1);
+    }
+    root_found = true;
+  }
   if (!root_found && real_path.startsWith("/")) {
     File_info file_info;
     file_info.uri = "/";

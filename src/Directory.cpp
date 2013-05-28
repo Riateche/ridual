@@ -120,6 +120,8 @@ QString Directory::get_parent_uri(QString target_uri) {
 bool Directory::is_relative(QString uri) {
   return !uri.startsWith("/") &&
       !uri.startsWith("~") &&
+      !uri.startsWith("trash:") &&
+      !uri.startsWith("network:") &&
       !uri.left(10).contains("://") &&
       !uri.startsWith("places");
 }
@@ -163,6 +165,12 @@ void Directory::refresh() {
     fi = File_info();
     fi.name = tr("Home");
     fi.uri = QDir::homePath();
+    fi.is_folder = true;
+    r << fi;
+
+    fi = File_info();
+    fi.name = tr("Trash");
+    fi.uri = "trash:///";
     fi.is_folder = true;
     r << fi;
 

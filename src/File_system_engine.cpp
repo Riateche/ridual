@@ -146,6 +146,8 @@ QString File_system_engine::Exception::get_message() {
     cause_string = QObject::tr("input/output error"); break;
   case File_system_engine::directory_not_empty:
     cause_string = QObject::tr("directory is not empty"); break;
+  case File_system_engine::gio_error:
+    cause_string = QObject::tr("GIO error"); break;
   default:
     qWarning("File_system_engine::Exception::get_message: unhandled type");
     cause_string = QObject::tr("unknown cause");

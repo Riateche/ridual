@@ -9,6 +9,7 @@
 
 
 - stage1:
+  - trash put/restore
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
   - fix behaviour: file write error -> retry -> file already exists
   - terminal support
@@ -35,6 +36,7 @@
   - display tasks waiting in queue
 
 - stage2:
+  - gio monitoring for trash:///
   - fallback theme for file icons
   - if trying to execute not-executable, prompt to make file executable
   - run-time permission granting

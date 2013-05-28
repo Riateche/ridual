@@ -88,7 +88,8 @@ public:
     path_too_long,
     symbolic_links_loop,
     io_error,
-    directory_not_empty
+    directory_not_empty,
+    gio_error
   };
 
   class Exception {
