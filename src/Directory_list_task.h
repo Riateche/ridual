@@ -5,6 +5,7 @@
 #include <QRunnable>
 
 class File_system_engine;
+class Core;
 
 /*! This class provides executing of directory listing in the thread pool.
   It's used internally by Directory.
@@ -14,7 +15,7 @@ class File_system_engine;
 class Directory_list_task : public QObject, public QRunnable {
   Q_OBJECT
 public:
-  explicit Directory_list_task(QString p_uri, File_system_engine* e);
+  explicit Directory_list_task(QString p_uri, Core* core);
   ~Directory_list_task();
   void run();
   
@@ -35,7 +36,10 @@ signals:
 
 private:
   QString uri;
+  Core* core;
   File_system_engine* fs_engine;
+
+  void fetch_places();
   
 };
 

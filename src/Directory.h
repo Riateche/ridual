@@ -67,6 +67,9 @@ class Gio_mount;
   mounted FS for it, Directory will try to mount it. If mounting is successful, Directory will
   read files list and return it as usual.
 
+  This class is reentrant but not thread safe. Use it only from GUI thread.
+  Static methods are thread safe.
+
 */
 class Directory : public QObject, Core_ally {
   Q_OBJECT

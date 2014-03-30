@@ -21,7 +21,9 @@ Path_button::Path_button(Core *c, QString text, QString p_uri)
 void Path_button::contextMenuEvent(QContextMenuEvent *e) {
   if (Special_uri(uri).name() == Special_uri::places) {
     QMenu* menu = new QMenu(this);
-    menu->addAction(Special_uri(Special_uri::places).caption())->setEnabled(false);
+    QAction* action = menu->addAction(Special_uri(Special_uri::places).caption());
+    action->setCheckable(true);
+    action->setChecked(true);
     menu->exec(e->globalPos());
     return;
   }
@@ -57,7 +59,8 @@ void Path_button::directory_ready(File_info_list files) {
       }
       QAction* a = menu->addAction(caption, this, SLOT(menu_action_triggered()));
       if (i.uri == uri) {
-        a->setEnabled(false);
+        a->setCheckable(true);
+        a->setChecked(true);
       }
       a->setData(i.uri);
       menu->addAction(a);

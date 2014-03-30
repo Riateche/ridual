@@ -50,15 +50,14 @@ public:
                     \sa Action_data
 
     */
-  explicit Action(Action_queue* q, File_system_engine* fs, const Action_data& p_data);
+  explicit Action(Action_queue* q, Core* core, const Action_data& p_data);
 
   ~Action();
 
 private:
 
-
-
   Action_data data; //! Data passed to the constructor.
+  Core* core;
   File_system_engine* fs_engine;
 
   Action_queue* queue;

@@ -60,19 +60,25 @@ QVariant File_list_model::headerData(int section, Qt::Orientation orientation, i
 }
 
 QVariant File_list_model::data(const QModelIndex &index, int role) const {
-
-
   int row = index.row(), column = index.column();
   if (list.isEmpty() && row == 0) {
     if (role == Qt::DisplayRole) {
       return tr("No files to display"); //todo: show count of hidden files
     }
   }
-
   if (row < 0 || row >= list.count()) return QVariant();
+  if (column < 0 || column >= current_columns.count()) return QVariant();
   const File_info& file_info = list.at(row);
+  if (role == Qt::FontRole &&
+      current_columns[column] == Column::name) {
+    QFont font;
+    if (file_info.is_header_entry) {
+      font.setBold(true);
+    }
+    return font;
+  }
+
   if (role == Qt::DisplayRole || role == sort_role) {
-    if (column < 0 || column >= current_columns.count()) return QVariant();
     switch (current_columns[column]) {
       case Column::file_name: {
         return file_info.file_name();

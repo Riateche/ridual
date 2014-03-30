@@ -58,16 +58,6 @@ QString Directory::canonize(QString uri) {
     uri = QDir::homePath() + uri.mid(1);
   }
 
-  /*if (uri.contains("//")) {
-    if (uri.startsWith("/")) {
-      uri = "/" + uri.split("/", QString::SkipEmptyParts).join("/");
-    } else {
-      int start_index = uri.indexOf("//") + 2;
-      uri = uri.left(start_index) +
-          uri.mid(start_index).split("/", QString::SkipEmptyParts).join("/");
-    }
-  }*/
-
   if (uri.left(10).contains("://")) {
     int index = uri.indexOf("://") + 3;
     int index2 = uri.indexOf("/", index);
@@ -147,110 +137,6 @@ void Directory::refresh() {
     emit error(tr("Address is empty"));
     return;
   }
-/*  if (uri.startsWith("/")) {
-    // regular directory
-    path = uri;
-    create_task(uri);
-    return;
-  } */
-  Special_uri special_uri(uri);
-  if (special_uri.name() == Special_uri::places) {
-    //the root of our virtual directory tree
-    File_info_list r;
-    File_info fi;
-    fi.name = tr("Filesystem root");
-    fi.uri = "/";
-    fi.is_folder = true;
-    r << fi;
-    fi = File_info();
-    fi.name = tr("Home");
-    fi.uri = QDir::homePath();
-    fi.is_folder = true;
-    r << fi;
-
-    fi = File_info();
-    fi.name = tr("Trash");
-    fi.uri = "trash:///";
-    fi.is_folder = true;
-    r << fi;
-
-    File_info_list mounts;
-    foreach (Gio_mount m, core->get_mount_manager()->get_mounts()) {
-      File_info i;
-      i.name = m.name;
-      i.uri = m.default_location;
-      i.is_folder = true;
-      mounts << i;
-    }
-    if (!mounts.isEmpty()) {
-      File_info fi;
-      fi.name = QString("* ") + tr("Mounted filesystems");
-      r << fi;
-      r << mounts;
-    }
-    File_info_list volumes;
-    int id = 0;
-    foreach (Gio_volume* v, core->get_mount_manager()->get_volumes()) {
-      //we must show only unmounted volumes because
-      //mounted volumes have been listed as gio::Mount's
-      if (!v->mounted) {
-        File_info i;
-        i.name = v->name + tr(" (unmounted)");
-        i.is_folder = true;
-        i.uri = QString("places/mounts/%1").arg(id); //use number of volume in list as id
-        volumes << i;
-      }
-      id++;
-    }
-    if (!volumes.isEmpty()) {
-      File_info fi;
-      fi.name = QString("* ") + tr("Unmounted volumes");
-      r << fi;
-      r << volumes;
-    }
-
-    QStringList uris;
-    foreach(File_info fi, r) {
-      fi.uri = canonize(fi.uri);
-      uris << fi.uri;
-    }
-
-    File_info_list bookmarks;
-    foreach(File_info fi, core->get_bookmarks()->get_all()) {
-      fi.uri = canonize(fi.uri);
-      if (!uris.contains(fi.uri)) {
-        uris << fi.uri;
-        bookmarks << fi;
-      }
-    }
-    if (!bookmarks.isEmpty()) {
-      File_info fi;
-      fi.name = QString("* ") + tr("Bookmarks");
-      r << fi;
-      r << bookmarks;
-    }
-
-    File_info_list user_dirs;
-    foreach(File_info fi, core->get_user_dirs()->get_all()) {
-      fi.uri = canonize(fi.uri);
-      if (!uris.contains(fi.uri)) {
-        uris << fi.uri;
-        user_dirs << fi;
-      }
-    }
-    if (!user_dirs.isEmpty()) {
-      File_info fi;
-      fi.name = QString("* ") + tr("Standard places");
-      r << fi;
-      r << user_dirs;
-    }
-
-    r.columns << Column::name << Column::uri;
-    r.disable_sort = true;
-    emit ready(r);
-    return;
-  }
-
   if (Special_uri(uri).name() == Special_uri::mounts) { //mounting of unmounted volume was requested
     //uri is something like "places/mounts/42"
     int id = uri.split("/").last().toInt();
@@ -273,8 +159,12 @@ void Directory::refresh() {
 void Directory::task_ready(File_info_list r) {
   //QString uri_prefix = uri.endsWith("/")? uri: (uri + "/");
   for(int i = 0; i < r.count(); i++) {
-    //r[i].uri = uri_prefix + QFileInfo(r[i].path).fileName();
-    r[i].icon = get_file_icon(r[i].mime_type);
+    if (!r[i].is_header_entry) {
+      r[i].icon = get_file_icon(r[i].mime_type);
+      if (r[i].icon.isNull()) {
+        r[i].icon = get_file_icon("text/plain");
+      }
+    }
   }
   emit ready(r);
 }
@@ -308,23 +198,19 @@ void Directory::gio_mounter_finished(bool success) {
 }
 
 void Directory::create_task(QString uri) {
-  Directory_list_task* task = new Directory_list_task(uri, core->get_file_system_engine());
+  Directory_list_task* task = new Directory_list_task(uri, core);
   task->setAutoDelete(true);
   connect(task, SIGNAL(ready(File_info_list)), this, SLOT(task_ready(File_info_list)));
   connect(task, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
   connect(task, SIGNAL(location_not_found()), this, SLOT(location_not_found()));
-  //connect(task, SIGNAL(error(QString)), this, SLOT(test(QString)));
-  //main_window->add_task(task);
 
   QThreadPool::globalInstance()->start(task);
 
-
-  if (!watcher_created) {
-    //Directory_watch_task* task2 = new Directory_watch_task(path);
-    //connect(task2, SIGNAL(changed()), this, SLOT(watcher_event()));
-    //main_window->add_task(task2);
-    emit watch(uri);
-    watcher_created = true;
+  if (Special_uri(uri).name() != Special_uri::places) {
+    if (!watcher_created) {
+      emit watch(uri);
+      watcher_created = true;
+    }
   }
 }
 

@@ -22,7 +22,7 @@ public:
   QIcon icon;
   bool is_folder;
   bool is_executable;
-  bool is_file() const { return !is_folder; }
+  bool is_file() const { return !is_folder; }  
   qint64 file_size; // in bytes; -1 if folder or unknown
 
   QString file_name() const;
@@ -33,6 +33,8 @@ public:
   QString mime_type; //, mime_description;
   QString owner, group;
   QFile::Permissions permissions;
+
+  bool is_header_entry; // header entry for "places" listing
 };
 
 /*!

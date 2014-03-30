@@ -31,7 +31,7 @@ Action_queue::~Action_queue() {
 }
 
 void Action_queue::create_action(Action_data data) {
-  Action* a = new Action(this, core->get_file_system_engine(), data);
+  Action* a = new Action(this, core, data);
   connect(a, SIGNAL(finished()), this, SLOT(action_finished()));
   actions << a;
   emit action_added(a);

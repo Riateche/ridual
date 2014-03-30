@@ -15,9 +15,10 @@
 
 
 
-Action::Action(Action_queue *q, File_system_engine *fs, const Action_data &p_data)
+Action::Action(Action_queue *q, Core *p_core, const Action_data &p_data)
 : data(p_data)
-, fs_engine(fs)
+, core(p_core)
+, fs_engine(p_core->get_file_system_engine())
 , queue(q)
 {
   phase = phase_queued;
@@ -31,41 +32,27 @@ Action::Action(Action_queue *q, File_system_engine *fs, const Action_data &p_dat
   blocked = false;
   postprocess_running = false;
 
-  //state_delivery_in_process = false;
   pending_operation = 0;
 
   qRegisterMetaType<Action_state>("Action_state");
   qRegisterMetaType<Question_data>("Question_data");
-  /*connect(&iteration_timer, SIGNAL(timeout()), this, SLOT(run_iteration()));
-  iteration_timer.setInterval(0);
-  iteration_timer.setSingleShot(true); */
-
-  //fs_engine->moveToThread(queue);
   if (queue) {
     moveToThread(queue);
   }
 }
 
 Action::~Action() {
-  //delete fs_engine;
+
 }
 
 void Action::ask_question(Question_data data) {
   qDebug() << "ask_question: " << data.get_message();
-  //error_reaction = Error_reaction::undefined;
-  //data.action = this;
   emit question(data);
   blocked = true;
-  //update_iteration_timer();
   send_state();
 }
 
 void Action::run() {
-  //if (!fs_engine) {
-  //  qFatal("no fs engine for action");
-  //  return;
-  //}
-  //fs_engine->moveToThread(thread()); //dangerous! need to test
   emit started();
   if (data.destination.endsWith("/")) {
     data.destination = data.destination.left(data.destination.length() - 1);
