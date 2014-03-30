@@ -58,8 +58,10 @@ void Action::run() {
     data.destination = data.destination.left(data.destination.length() - 1);
   }
 
-  if (data.recursive_fetch_option == recursive_fetch_auto &&
-      (data.type == Action_type::remove || data.type == Action_type::trash) ) {
+  if ((data.recursive_fetch_option == recursive_fetch_auto &&
+       data.type == Action_type::remove) ||
+      data.type == Action_type::trash ||
+      data.type == Action_type::make_directory) {
     phase = phase_processing;
   } else if (data.recursive_fetch_option == recursive_fetch_off) {
     phase = phase_processing;
@@ -69,14 +71,16 @@ void Action::run() {
 
   fs_iterators_stack.push(new File_system_engine::Simple_iterator(data.targets));
 
-  foreach(File_info fi, data.targets) {
-    QStringList path_parts = fi.uri.split("/");
-    QStringList destination_parts = data.destination.split("/");
-    if (destination_parts.mid(0, path_parts.count()) == path_parts) {
-      emit error(tr("Cannot copy directory '%1' inside itself.").arg(fi.uri));
-      phase = phase_finished;
-      emit finished();
-      return;
+  if (!data.destination.isEmpty()) {
+    foreach(File_info fi, data.targets) {
+      QStringList path_parts = fi.uri.split("/");
+      QStringList destination_parts = data.destination.split("/");
+      if (destination_parts.mid(0, path_parts.count()) == path_parts) {
+        emit error(tr("Cannot copy directory '%1' inside itself.").arg(fi.uri));
+        phase = phase_finished;
+        emit finished();
+        return;
+      }
     }
   }
 
@@ -109,6 +113,8 @@ void Action::process_current(Error_reaction::Enum error_reaction) {
       } else {
         Gio_file_system_engine::move_to_trash(current_file.uri);
       }
+    } else if (data.type == Action_type::make_directory) {
+      fs_engine->make_directory(current_file.uri);
     } else if (data.type == Action_type::remove) {
       fs_engine->remove(current_file.uri);
     } else if (data.type == Action_type::copy || data.type == Action_type::move) {
@@ -201,6 +207,8 @@ void Action::send_state() {
     state.current_action = tr("Moving to trash %1");
   } else if (data.type == Action_type::remove) {
     state.current_action = tr("Removing %1");
+  } else if (data.type == Action_type::make_directory) {
+    state.current_action = tr("Creating folder %1");
   } else {
     qWarning("unhandled action type in Action::construct_processing_state");
   }
@@ -234,7 +242,6 @@ void Action::run_iterations() {
     if (signal_timer.elapsed() > signal_interval) {
       send_state();
     }
-
     try {
 
       //3a. Finalize processing after previous item is successfully processed or skipped
@@ -256,7 +263,6 @@ void Action::run_iterations() {
         // 1. Find the next item and set `current_file` and `postprocess_running`
         if (fs_iterators_stack.top()->has_next()) {
           current_file = fs_iterators_stack.top()->get_next();
-          //current_file = fi;
         } else {
           delete fs_iterators_stack.top();
           fs_iterators_stack.pop();
@@ -266,7 +272,6 @@ void Action::run_iterations() {
             } else if (phase == phase_processing) {
               phase = phase_finished;
               emit finished();
-              //update_iteration_timer();
             } else {
               qWarning("unexpected value of phase");
             }

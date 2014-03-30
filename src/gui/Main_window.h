@@ -149,6 +149,8 @@ private slots:
 
   void on_action_move_from_trash_triggered();
 
+  void on_action_create_folder_triggered();
+
 public slots:
   void open_current();
   void switch_active_pane();

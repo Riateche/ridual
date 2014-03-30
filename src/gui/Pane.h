@@ -50,6 +50,8 @@ public:
     */
   File_info get_current_file();
 
+  File_info_list get_all_files();
+
   //! Set focus to this pane's file list.
   void setFocus();
 

@@ -30,7 +30,8 @@ class File_list_model : public QAbstractTableModel, public Core_ally {
   Q_OBJECT
 public:
   File_list_model(Core* c);
-  void set_data(File_info_list list);
+  void set_files(File_info_list list);
+  const File_info_list& get_files() const { return unsorted_list; }
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const;

@@ -1,6 +1,6 @@
 #include "Main_window.h"
 #include "ui_Main_window.h"
-
+#include <QInputDialog>
 #include "gio/Gio_file_system_engine.h"
 #include "File_system_engine.h"
 #include "Actions_manager.h"
@@ -299,10 +299,9 @@ Action_data Main_window::get_auto_target_and_destination(Action_type::Enum actio
   Action_data data;
   data.type = action_type;
   data.targets = active_pane->get_selected_files();
-//  foreach(File_info fi, active_pane->get_selected_files()) {
-//    data.targets << fi.uri;
-//  }
-  if (data.type != Action_type::remove && data.type != Action_type::trash) {
+
+  if (data.type != Action_type::remove &&
+      data.type != Action_type::trash) {
     data.destination = get_destination_pane()->get_uri();
   }
   return data;
@@ -582,6 +581,8 @@ void Main_window::init_hotkeys() {
   hotkeys.add("move",     ui->action_move);
   hotkeys.add("remove",     ui->action_remove);
   hotkeys.add("move_to_trash",     ui->action_move_to_trash);
+  hotkeys.add("create_folder", tr("Create folder"), ui->action_create_folder);
+
   hotkeys.add("choose_queue", tr("Choose queue"), ui->action_queue_choose);
   hotkeys.add("clipboard_copy",     tr("Copy files to clipboard"),  ui->action_clipboard_copy);
   hotkeys.add("clipboard_cut",      tr("Cut files to clipboard"),  ui->action_cut);
@@ -664,6 +665,35 @@ void Main_window::on_action_move_from_trash_triggered() {
     data.targets << fi;
     data.destination = Gio_file_system_engine::get_trash_original_path(fi.uri);
     data.destination_includes_filename = true;
+    create_action(data);
+  }
+}
+
+void Main_window::on_action_create_folder_triggered() {
+  bool ok = false;
+  QString default_name = tr("New folder");
+  File_info_list existing_files = active_pane->get_all_files();
+  for(int i = 1; i < 10000 / existing_files.count(); i++) {
+    QString candidate = i == 1 ? tr("New folder") : tr("New folder %1").arg(i);
+    bool found = false;
+    foreach(File_info fi, existing_files) {
+      if (fi.file_name() == candidate) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      default_name = candidate;
+      break;
+    }
+  }
+  QString name = QInputDialog::getText(this, tr("Create folder"), tr("Enter new folder name:"), QLineEdit::Normal, default_name, &ok);
+  if (ok && !name.isEmpty()) {
+    Action_data data;
+    data.type = Action_type::make_directory;
+    File_info info;
+    info.uri = active_pane->get_uri() + "/" + name;
+    data.targets << info;
     create_action(data);
   }
 }

@@ -228,6 +228,10 @@ File_info Pane::get_current_file() {
   return file_list_model->get_file_info(ui->list->currentIndex());
 }
 
+File_info_list Pane::get_all_files() {
+  return file_list_model->get_files();
+}
+
 void Pane::setFocus() {
   ui->list->setFocus();
 }
@@ -244,6 +248,8 @@ void Pane::focus_address_line() {
 }
 
 void Pane::refresh() {
+  ui->loaded_indicator->hide();
+  ui->loading_indicator->show();
   directory->refresh();
 }
 
@@ -304,7 +310,7 @@ void Pane::directory_ready(File_info_list files) {
   }
 
   QByteArray header_state = ui->list->horizontalHeader()->saveState();
-  file_list_model->set_data(files);
+  file_list_model->set_files(files);
   if (file_list_model->rowCount() > 0) {
     ui->list->setCurrentIndex(file_list_model->index(0, 0));
   }

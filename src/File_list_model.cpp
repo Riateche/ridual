@@ -13,7 +13,7 @@ File_list_model::File_list_model(Core *c) : Core_ally(c) {
   sort_column = -1;
 }
 
-void File_list_model::set_data(File_info_list p_list) {
+void File_list_model::set_files(File_info_list p_list) {
   emit layoutAboutToBeChanged();
   unsorted_list = p_list;
   list = p_list;

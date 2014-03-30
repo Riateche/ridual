@@ -131,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>623</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_file">
@@ -179,6 +179,7 @@
     <addaction name="action_move_to_trash"/>
     <addaction name="action_move_from_trash"/>
     <addaction name="action_remove"/>
+    <addaction name="action_create_folder"/>
     <addaction name="separator"/>
     <addaction name="action_abort_last_created_task"/>
    </widget>
@@ -419,6 +420,14 @@
   <action name="action_move_from_trash">
    <property name="text">
     <string>Move from trash</string>
+   </property>
+  </action>
+  <action name="action_create_folder">
+   <property name="text">
+    <string>Create folder</string>
+   </property>
+   <property name="shortcut">
+    <string>F7</string>
    </property>
   </action>
  </widget>

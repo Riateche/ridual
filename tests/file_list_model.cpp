@@ -30,17 +30,17 @@ TEST(File_list_model, columns) {
   columns1 << Column::uri << Column::mime_type;
   model.set_columns(columns1);
   File_info_list list;
-  model.set_data(list);
+  model.set_files(list);
   EXPECT_EQ(columns1, model.get_current_columns());
 
   list.columns << Column::name << Column::type_description;
   list.disable_sort = true;
-  model.set_data(list);
+  model.set_files(list);
   EXPECT_NE(columns1, model.get_current_columns());
   EXPECT_EQ(list.columns, model.get_current_columns());
 
   list.columns.clear();
-  model.set_data(list);
+  model.set_files(list);
   EXPECT_EQ(columns1, model.get_current_columns());
 
 }
@@ -51,18 +51,18 @@ TEST(File_list_model, cell_count) {
   File_list_model model(&core);
   File_info_list list;
   list << File_info() << File_info() << File_info();
-  model.set_data(list);
+  model.set_files(list);
   EXPECT_EQ(3, model.rowCount());
   EXPECT_EQ(model.get_current_columns().count(), model.columnCount());
 
   list.columns << Column::name << Column::extension;
   list.disable_sort = true;
-  model.set_data(list);
+  model.set_files(list);
   EXPECT_EQ(3, model.rowCount());
   EXPECT_EQ(2, model.columnCount());
 
   list.clear();
-  model.set_data(list);
+  model.set_files(list);
   EXPECT_EQ(1, model.rowCount());
   EXPECT_EQ(1, model.columnCount());
 
@@ -86,7 +86,7 @@ TEST(File_list_model, index_for_uri) {
   list << fi;
   fi.uri = "/boot";
   list << fi;
-  model.set_data(list);
+  model.set_files(list);
 
   EXPECT_EQ(0, model.index(0, 0).row()) << "Failed to create QModelIndex.";
   EXPECT_EQ(2, model.index_for_uri("/etc").row()) << "Wrong result of index_for_uri.";
@@ -104,7 +104,7 @@ TEST(File_list_model, current_line_header) {
   model.set_columns(columns);
   File_info_list list;
   list << File_info() << File_info() << File_info();
-  model.set_data(list);
+  model.set_files(list);
 
   model.set_current_index(model.index(1, 0));
   EXPECT_TRUE(model.headerData(0, Qt::Vertical, Qt::DisplayRole) != ">");

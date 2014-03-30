@@ -23,8 +23,8 @@
   - fast filter file list by typing mask
   - navigation history; hotkeys; quick search in history
   - back/forward
-  - F7 - create folder
   - Shift+F4 - create file
+  - select destination after copying; select created folder; etc.
   - F2 - rename
   - F8 - move to trash: http://developer.gnome.org/gio/2.29/ch27.html#id531086
   - sound on messages

@@ -13,7 +13,7 @@ namespace Action_type {
     link,
     remove,
     trash,
-    create_folder
+    make_directory
   };
 }
 
@@ -39,6 +39,7 @@ public:
   File_info_list targets;
   QString destination;
   bool destination_includes_filename;
+
 };
 
 class Action_state {
