@@ -84,9 +84,7 @@ You can also clone repository to get the latest source but it can be broken or u
 
 Install build dependencies (package names are given as in Ubuntu): 
 
-- `libglib2.0-dev`
-- `libgtk2.0-dev` 
-- `libqt4-dev` 
+- `libglib2.0-dev libgtk2.0-dev libqt4-dev`
  
 Then run the following commands in the folder containing the source code:
 

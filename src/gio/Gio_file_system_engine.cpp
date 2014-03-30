@@ -35,9 +35,14 @@ File_system_engine::Iterator *Gio_file_system_engine::list(const QString &uri) {
     if (!enumerator) {
       QString message = QString::fromLocal8Bit(error->message);
       qDebug() << "error: " << message;
+      qDebug() << "error code:" << error->code;
+      error_cause cause = gio_error;
+      if (error->code == G_IO_ERROR_NOT_MOUNTED) {
+        cause = not_found;
+      }
       g_error_free(error);
       //todo: error message reporting
-      throw File_system_engine::Exception(directory_list_failed, gio_error, uri);
+      throw File_system_engine::Exception(directory_list_failed, cause, uri);
     }
     Gio_native_fs_iterator* i = new Gio_native_fs_iterator();
     i->file = file;

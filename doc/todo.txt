@@ -1,8 +1,6 @@
 
 - bugs:
   - fail with filenames in wrong encoding
-  - check smb root in previous OS versions
-  - (fixed?) cdup in smb mount folder fails (smb root isn't mapped to real fs)
   - deny closing main window when tasks are executing
   - need to use shared pointers for Action and Action_queue
   - GAppInfo should be freed somewhere
@@ -10,7 +8,6 @@
 
 - stage1:
   - trash put/restore
-  - (fixed?) smb root in path buttons
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
   - fix behaviour: file write error -> retry -> file already exists
   - terminal support
