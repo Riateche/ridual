@@ -7,7 +7,6 @@
 #include <QApplication>
 #include <QStack>
 #include <QDirIterator>
-#include <QFSFileEngine>
 #include "Core.h"
 #include <fstream>
 #include <errno.h>

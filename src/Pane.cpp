@@ -29,7 +29,12 @@ Pane::Pane(QWidget *parent) :
   ui->list->setModel(file_list_model);
   ui->list->installEventFilter(this);
   ui->list->viewport()->installEventFilter(this);
+
+#if QT_VERSION >= 0x050000
+  ui->list->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+#else
   ui->list->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+#endif
 
 
   QFontMetrics font_metrics(ui->list->font());

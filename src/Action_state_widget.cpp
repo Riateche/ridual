@@ -31,7 +31,12 @@ void Action_state_widget::abort() {
 
 void Action_state_widget::state_changed(Action_state state) {
   QString html = state.current_action;
-  html = Qt::escape(html).replace("/", "/&#8203;");
+#if QT_VERSION >= 0x050000
+  html = html.toHtmlEscaped();
+#else
+  html = Qt::escape(html);
+#endif
+  html = html.replace("/", "/&#8203;");
   ui->message->setText(html);
 
   QStringList texts; texts << state.current_progress_text << state.total_progress_text;

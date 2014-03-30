@@ -18,7 +18,6 @@
 #include <QDesktopServices>
 #include <QThreadPool>
 #include <QKeyEvent>
-#include <QSystemLocale>
 #include <QDebug>
 #include <QShortcut>
 #include "File_info.h"
@@ -70,7 +69,9 @@ Main_window::~Main_window() {
 void Main_window::init() {
   setAttribute(Qt::WA_DeleteOnClose);
 
+#if QT_VERSION < 0x050000
   QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
+#endif
 
   QThreadPool::globalInstance()->setMaxThreadCount(5);
 
@@ -551,7 +552,7 @@ void Main_window::copy_or_cut_files_to_clipboard(bool cut) {
     if (uri.startsWith("/")) {
       uri = "file://" + uri;
     }
-    list << QString::fromAscii(QUrl::toPercentEncoding(uri, ":/"));
+    list << QString::fromLatin1(QUrl::toPercentEncoding(uri, ":/"));
   }
   QClipboard* clipboard = QApplication::clipboard();
   QMimeData* d = new QMimeData();
@@ -625,7 +626,7 @@ void Main_window::on_action_paste_triggered() {
   File_info_list normal_list;
   foreach(QString s, list) {
     File_info info;
-    info.uri = Directory::canonize(QUrl::fromPercentEncoding(s.toAscii()));
+    info.uri = Directory::canonize(QUrl::fromPercentEncoding(s.toLatin1()));
     //todo: request info from fs and fill `info` variable properly
     normal_list << info;
   }

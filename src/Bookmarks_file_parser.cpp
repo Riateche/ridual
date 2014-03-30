@@ -35,18 +35,14 @@ void Bookmarks_file_parser::read() {
     stream.setCodec("UTF-8");
     while(!stream.atEnd()) {
       QString s = stream.readLine().trimmed();
-      //qDebug() << "line: " << s;
       if (s.isEmpty()) continue;
       File_info f;
       int i = s.indexOf(' ');
-      //QString uri;
       if (i >= 0) {
-        //uri = s.left(i).toAscii();
-        f.uri = QUrl::fromPercentEncoding(s.left(i).toAscii());
+        f.uri = QUrl::fromPercentEncoding(s.left(i).toLatin1());
         f.name = s.mid(i + 1);
       } else {
-        //uri = s;
-        f.uri = QUrl::fromPercentEncoding(s.toAscii());
+        f.uri = QUrl::fromPercentEncoding(s.toLatin1());
         QStringList parts = f.uri.split("/");
         if (parts.last().isEmpty()) {
           f.name = f.uri;

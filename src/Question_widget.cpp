@@ -23,7 +23,12 @@ Question_widget::~Question_widget() {
 }
 
 void Question_widget::set_message(const QString &message) {
-  QString s = Qt::escape(message).replace("/", "/&#8203;");
+#if QT_VERSION >= 0x050000
+  QString s = message.toHtmlEscaped();
+#else
+  QString s = Qt::escape(message);
+#endif
+  s = s.replace("/", "/&#8203;");
   ui->message->setText(s);
 }
 

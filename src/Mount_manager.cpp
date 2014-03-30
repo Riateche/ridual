@@ -18,9 +18,10 @@ Mount_manager::~Mount_manager() {
 }
 
 void Mount_manager::init_connects() {
-  int argc = QApplication::argc();
-  char** argv = QApplication::argv();
-  gtk_init(&argc, &argv);
+  //int argc = QApplication::argc();
+  //char** argv = QApplication::argv();
+  //gtk_init(&argc, &argv);
+  gtk_init(0, 0);
   volume_monitor = g_volume_monitor_get();
   connects << g_signal_connect(volume_monitor, "volume-added",
                    G_CALLBACK(gio_callback), this);
