@@ -252,20 +252,30 @@ void Main_window::switch_focus_question(Question_widget *target, int direction) 
 
 void Main_window::view_or_edit_selected(bool edit) {
   File_info_list list = active_pane->get_selected_files();
-  //File_system_engine* fs_engine = core->get_file_system_engine();
+  view_or_edit_files(list, edit);
+}
+
+void Main_window::view_or_edit_files(const File_info_list &list, bool edit) {
+  QString settings_key = edit? "edit_command": "view_command";
+  QString command_pattern = settings.value(settings_key, "gedit %U").toString();
   foreach(File_info f, list) {
-    QProcess* p = new QProcess(this);
-    p->setWorkingDirectory(Directory::get_parent_uri(core->get_file_system_engine()->get_real_file_name(f.uri)));
-    QString command = settings.value(edit? "edit_command": "view_command", "gedit %U").toString();
+    QProcess* p = new QProcess();
+    QString real_filename = core->get_file_system_engine()->get_real_file_name(f.uri);
+    p->setWorkingDirectory(Directory::get_parent_uri(real_filename));
+    QString command = command_pattern;
     command = command.replace("%U", QString("\"%1\"").arg(f.uri));
-    command = command.replace("%F", QString("\"%1\"").arg(core->get_file_system_engine()->get_real_file_name(f.uri)));
+    command = command.replace("%F", QString("\"%1\"").arg(real_filename));
     //todo: correct shell escaping
+    connect(p, SIGNAL(error(QProcess::ProcessError)),
+            this, SLOT(process_error(QProcess::ProcessError)));
+    connect(p, SIGNAL(error(QProcess::ProcessError)),
+            p, SLOT(deleteLater()));
+    connect(p, SIGNAL(finished(int)),
+            p, SLOT(deleteLater()));
     p->start(command);
     //todo: catch errors
     //todo: run in tasks thread
   }
-  //delete fs_engine;
-
 }
 
 
@@ -574,14 +584,15 @@ void Main_window::init_hotkeys() {
   hotkeys.add("go_parent_directory", tr("Go to parent directory"), ui->action_go_parent_directory);
   hotkeys.add("go_root",             tr("Go to filesystem root"),  ui->action_go_root);
   hotkeys.add("go_places",           tr("Go to places"),           ui->action_go_places);
-  hotkeys.add("execute",  ui->action_execute);
-  hotkeys.add("view",     ui->action_view);
-  hotkeys.add("edit",     ui->action_edit);
-  hotkeys.add("copy",     ui->action_copy);
-  hotkeys.add("move",     ui->action_move);
-  hotkeys.add("remove",     ui->action_remove);
-  hotkeys.add("move_to_trash",     ui->action_move_to_trash);
-  hotkeys.add("create_folder", tr("Create folder"), ui->action_create_folder);
+  hotkeys.add("execute",        ui->action_execute);
+  hotkeys.add("view",           ui->action_view);
+  hotkeys.add("edit",           ui->action_edit);
+  hotkeys.add("copy",           ui->action_copy);
+  hotkeys.add("move",           ui->action_move);
+  hotkeys.add("remove",         ui->action_remove);
+  hotkeys.add("move_to_trash",  ui->action_move_to_trash);
+  hotkeys.add("create_folder",  ui->action_create_folder);
+  hotkeys.add("edit_new_file",  ui->action_edit_new_file);
 
   hotkeys.add("choose_queue", tr("Choose queue"), ui->action_queue_choose);
   hotkeys.add("clipboard_copy",     tr("Copy files to clipboard"),  ui->action_clipboard_copy);
@@ -671,10 +682,29 @@ void Main_window::on_action_move_from_trash_triggered() {
 
 void Main_window::on_action_create_folder_triggered() {
   bool ok = false;
-  QString default_name = tr("New folder");
+  QString default_name = get_free_file_name(tr("New folder"));
+  QString name = QInputDialog::getText(this, tr("Create folder"),
+                                       tr("Enter new folder name:"), QLineEdit::Normal,
+                                       default_name, &ok);
+  if (ok && !name.isEmpty()) {
+    Action_data data;
+    data.type = Action_type::make_directory;
+    File_info info;
+    info.uri = active_pane->get_uri() + "/" + name;
+    data.targets << info;
+    create_action(data);
+  }
+}
+
+QString Main_window::get_free_file_name(QString prefix) {
+  QString default_name = prefix;
   File_info_list existing_files = active_pane->get_all_files();
-  for(int i = 1; i < 10000 / existing_files.count(); i++) {
-    QString candidate = i == 1 ? tr("New folder") : tr("New folder %1").arg(i);
+  int attempts_count = 10000;
+  if (!existing_files.isEmpty()) {
+    attempts_count /= existing_files.count();
+  }
+  for(int i = 1; i < attempts_count; i++) {
+    QString candidate = i == 1 ? prefix : tr("%1 %2").arg(prefix).arg(i);
     bool found = false;
     foreach(File_info fi, existing_files) {
       if (fi.file_name() == candidate) {
@@ -687,13 +717,25 @@ void Main_window::on_action_create_folder_triggered() {
       break;
     }
   }
-  QString name = QInputDialog::getText(this, tr("Create folder"), tr("Enter new folder name:"), QLineEdit::Normal, default_name, &ok);
+  return default_name;
+}
+
+void Main_window::on_action_edit_new_file_triggered() {
+  bool ok = false;
+  QString default_name = get_free_file_name(tr("New file"));
+  QString name = QInputDialog::getText(this, tr("Edit new file"),
+                                       tr("Enter new file name:"), QLineEdit::Normal,
+                                       default_name, &ok);
   if (ok && !name.isEmpty()) {
-    Action_data data;
-    data.type = Action_type::make_directory;
-    File_info info;
-    info.uri = active_pane->get_uri() + "/" + name;
-    data.targets << info;
-    create_action(data);
+    File_info fi;
+    fi.uri = active_pane->get_uri() + "/" + name;
+    File_info_list file_list;
+    file_list << fi;
+    view_or_edit_files(file_list, true);
+
   }
+}
+
+void Main_window::process_error(QProcess::ProcessError error) {
+  show_message(tr("Failed to start process"), Icon::error);
 }

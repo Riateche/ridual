@@ -7,7 +7,8 @@
 
 
 - stage1:
-  - trash put/restore
+  - view trash (filenames, previous location, deleting date)
+  - prompt before deleting (Shift+F8)
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
   - fix behaviour: file write error -> retry -> file already exists
   - terminal support
@@ -23,15 +24,14 @@
   - fast filter file list by typing mask
   - navigation history; hotkeys; quick search in history
   - back/forward
-  - Shift+F4 - create file
   - select destination after copying; select created folder; etc.
   - F2 - rename
-  - F8 - move to trash: http://developer.gnome.org/gio/2.29/ch27.html#id531086
   - sound on messages
   - If some files was skipped or overwritten without propmt, the message about this must
   appear after the task is completed
   - pause and abort every task with keyboard
   - display tasks waiting in queue
+  - basic Windows support
 
 - stage2:
   - gio monitoring for trash:///

@@ -1,6 +1,7 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+#include <QProcess>
 #include <QMainWindow>
 #include <QTimer>
 #include "hotkeys/Hotkeys.h"
@@ -92,8 +93,8 @@ private:
   QList<Action_state_widget*> action_state_widgets;
   Columns columns;
 
-  //Action_queue* create_queue();
   void view_or_edit_selected(bool edit);
+  void view_or_edit_files(const File_info_list& list, bool edit);
   void send_answer(int index);
   bool eventFilter(QObject *object, QEvent *event);
 
@@ -105,6 +106,8 @@ private:
 
 
   void init_hotkeys();
+  QString get_free_file_name(QString prefix);
+
 
 
 private slots:
@@ -150,6 +153,9 @@ private slots:
   void on_action_move_from_trash_triggered();
 
   void on_action_create_folder_triggered();
+
+  void on_action_edit_new_file_triggered();
+  void process_error(QProcess::ProcessError error);
 
 public slots:
   void open_current();

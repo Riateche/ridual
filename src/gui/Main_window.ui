@@ -141,6 +141,7 @@
     <addaction name="action_execute"/>
     <addaction name="action_view"/>
     <addaction name="action_edit"/>
+    <addaction name="action_edit_new_file"/>
    </widget>
    <widget class="QMenu" name="menu_settings">
     <property name="title">
@@ -419,7 +420,7 @@
   </action>
   <action name="action_move_from_trash">
    <property name="text">
-    <string>Move from trash</string>
+    <string>Restore from trash</string>
    </property>
   </action>
   <action name="action_create_folder">
@@ -428,6 +429,14 @@
    </property>
    <property name="shortcut">
     <string>F7</string>
+   </property>
+  </action>
+  <action name="action_edit_new_file">
+   <property name="text">
+    <string>Edit new file</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F4</string>
    </property>
   </action>
  </widget>
