@@ -2,7 +2,8 @@
 - bugs:
   - fail with filenames in wrong encoding
   - can't see smb root (shares list)
-  - cdup in smb mount folder fails (smb root isn't mapped to real fs)
+  - check smb root in previous OS versions
+  - [cdup in smb mount folder fails (smb root isn't mapped to real fs)]
   - deny closing main window when tasks are executing
   - need to use shared pointers for Action and Action_queue
 

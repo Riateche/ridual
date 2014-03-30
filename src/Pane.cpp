@@ -501,13 +501,31 @@ void Pane::refresh_path_toolbar() {
     }
   }
 
+  bool samba_roots_supported = true;
+
   foreach(Gio_mount mount, core->get_mount_manager()->get_mounts()) {
     QString uri_prefix = mount.uri;
     if (!uri_prefix.isEmpty() && real_path.startsWith(uri_prefix)) {
       File_info file_info;
       file_info.uri = uri_prefix;
       file_info.name = mount.name;
-      path_items << file_info;
+      bool ok = false;
+      if (samba_roots_supported && file_info.uri.startsWith("smb://")) {
+        int schema_length = QString("smb://").length();
+        int domain_end_index = file_info.uri.indexOf("/", schema_length);
+        QStringList uri_parts = file_info.uri.split("/");
+        if (domain_end_index > 0 && uri_parts.count() > 3) {
+          ok = true;
+          file_info.name = file_info.uri.split("/")[3];
+          File_info root_file_info;
+          root_file_info.uri = file_info.uri.left(domain_end_index + 1); // including last '/'
+          root_file_info.name = file_info.uri.split("/")[2];
+          path_items << root_file_info << file_info;
+        }
+      }
+      if (!ok) {
+        path_items << file_info;
+      }
       if (!uri_prefix.endsWith("/")) {
         uri_prefix += "/";
       }

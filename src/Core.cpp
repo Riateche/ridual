@@ -57,10 +57,13 @@ Core::Core() {
 
   main_window = 0;
 
-  bookmarks = new Bookmarks_file_parser(QDir::home().absoluteFilePath(".gtk-bookmarks"),
-                                        Bookmarks_file_parser::format_gtk);
-  user_dirs = new Bookmarks_file_parser(QDir::home().absoluteFilePath(".config/user-dirs.dirs"),
-                                        Bookmarks_file_parser::format_xdg);
+  QStringList bookmarks_paths, user_dirs_paths;
+  bookmarks_paths << QDir::home().absoluteFilePath(".gtk-bookmarks");
+  bookmarks_paths << QDir::home().absoluteFilePath(".config/gtk-3.0/bookmarks");
+  user_dirs_paths << QDir::home().absoluteFilePath(".config/user-dirs.dirs");
+
+  bookmarks = new Bookmarks_file_parser(bookmarks_paths, Bookmarks_file_parser::format_gtk);
+  user_dirs = new Bookmarks_file_parser(user_dirs_paths, Bookmarks_file_parser::format_xdg);
   mount_manager = new Mount_manager(this);
   fs_engine = new Gio_file_system_engine(mount_manager);
   watcher = new Directory_watcher(this);

@@ -17,14 +17,14 @@ public:
     format_xdg  //! Format of ~/.config/user-dirs.dirs
   };
 
-  explicit Bookmarks_file_parser(QString file_path, Format _format, QObject *parent = 0);
+  explicit Bookmarks_file_parser(const QStringList& file_paths, Format _format, QObject *parent = 0);
   inline File_info_list get_all() { return list; }
   
 signals:
   void changed();
 
 private:
-  QString filename;
+  QStringList file_paths;
   Format format;
   QFileSystemWatcher watcher;
   File_info_list list;

@@ -59,7 +59,9 @@ void Mount_manager::fetch() {
     g_object_unref(mount);
   }
   g_free(list);
-  emit mounts_changed(mounts);
+  QList<Gio_mount> mounts_copy = mounts;
+  locker.unlock();
+  emit mounts_changed(mounts_copy);
 }
 
 void Mount_manager::gio_callback(GVolumeMonitor*, GDrive*, Mount_manager* _this) {

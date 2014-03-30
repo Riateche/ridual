@@ -98,7 +98,7 @@ QString Directory::get_parent_uri(QString target_uri) {
   QRegExp network_root("^[^\\:]*\\://[^/]*/$");
   if (network_root.indexIn(target_uri) == 0) {
     //we are in network root such as "ftp://user@host/"
-    return Special_uri(Special_uri::mounts).uri();
+    return Special_uri(Special_uri::places).uri();
   }
   if (target_uri == "/" || Special_uri(target_uri).name() == Special_uri::places) {
     return Special_uri(Special_uri::places).uri();
