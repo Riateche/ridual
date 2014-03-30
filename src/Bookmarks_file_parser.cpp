@@ -29,6 +29,7 @@ Bookmarks_file_parser::Bookmarks_file_parser(const QStringList &_file_paths,
 }
 
 void Bookmarks_file_parser::read() {
+  QMutexLocker locker(&mutex);
   list.clear();
   foreach(QString filename, file_paths) {
     QFile file(filename);
@@ -104,6 +105,7 @@ void Bookmarks_file_parser::read() {
     watcher.removePath(filename);
     watcher.addPath(filename);
   }
+  locker.unlock();
   emit changed();
 }
 

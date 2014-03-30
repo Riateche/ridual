@@ -37,20 +37,11 @@ void detect_theme_name() {
   qDebug() << "Failed to find any theme containing file icons";
 }
 
-Core::Core() {
+Core::Core(bool init_gui) {
   QApplication::setApplicationName("ridual");
   QApplication::setOrganizationName("ridual");
 
-  QSettings settings;
-  sort_folders_before_files = settings.value("sort_folders_before_files").toBool();
-
   detect_theme_name();
-  //qDebug() << QIcon::themeSearchPaths();
-  //qDebug() << QIcon::themeName();
-  //QIcon::setThemeName("Humanity");
-  //QIcon::setThemeSearchPaths(QString::fromLocal8Bit(qgetenv("XDG_DATA_DIRS")).split(":"));
-  //qDebug() << QIcon::themeSearchPaths();
-
 
   qRegisterMetaType<File_info_list>("File_info_list");
   qRegisterMetaType<Error_type::Enum>("Error_type::Enum");
@@ -73,27 +64,16 @@ Core::Core() {
 
   actions_manager = new Actions_manager(this);
 
-
-
+  if (init_gui) {
+    main_window = new Main_window(this);
+    main_window->init();
+  }
 }
 
 Core::~Core() {
   watcher_thread->quit();
   watcher_thread->wait();
 
-}
-
-void Core::init_gui() {
-  main_window = new Main_window(this);
-  main_window->init();
-}
-
-void Core::set_sort_folders_before_files(bool v) {
-  if (v == sort_folders_before_files) return;
-  sort_folders_before_files = v;
-  QSettings s;
-  s.setValue("sort_folders_before_files", v);
-  emit sort_folders_before_files_changed();
 }
 
 File_system_engine *Core::get_file_system_engine() {

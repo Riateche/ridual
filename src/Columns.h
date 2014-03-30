@@ -33,11 +33,18 @@ namespace Column {
 /*! This class provides several convinient methods for operating with lists of columns.   */
 class Columns: public QList<Column::Enum> {
 public:
+  //! Get full list of supported columns
   static Columns get_all();
+
+  //! Get default columns set
   static Columns get_default();
   QVariant serialize();
   static Columns deserialize(QVariant data);
+
+  //! Column name used for displaying
   static QString name(Column::Enum column);
+
+  //! String representation for debug purposes
   QString to_string() const;
 
 

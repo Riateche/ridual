@@ -32,9 +32,6 @@ QList<Error_reaction::Enum> get_error_reactions(Question_data data, bool is_inte
   r << Error_reaction::abort;
   r << Error_reaction::skip;
 
-  //if (data.error_type == Error_type::destination_inside_source) {
-      // nothing?
-  //} else
   if (data.error_type == Error_type::file_system_error) {
     r.prepend(is_interactive? Error_reaction::retry: Error_reaction::ask);
     File_system_engine::error_cause cause = data.fs_exception.get_cause();

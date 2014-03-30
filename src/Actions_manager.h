@@ -13,6 +13,8 @@ class Mount_manager;
   This class manages action queues. It also provides signals for
   actions' and queues' creating and destroying tracking.
 
+  All operations with Actions_manager must be executed from GUI thread.
+
   */
 class Actions_manager : public QObject, public Core_ally {
   Q_OBJECT

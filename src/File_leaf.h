@@ -3,6 +3,7 @@
 
 #include <QString>
 
+/*
 class File_leaf {
 public:
   File_leaf(const QString& _name, bool is_folder, const QString& _parent_path);
@@ -21,5 +22,6 @@ private:
 
   QString get_path(bool absolute) const;
 };
+*/
 
 #endif // FILE_LEAF_H

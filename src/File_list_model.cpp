@@ -8,7 +8,7 @@
 #include "File_system_engine.h"
 
 File_list_model::File_list_model(Core *c) : Core_ally(c) {
-  connect(core, SIGNAL(sort_folders_before_files_changed()),
+  connect(core, SIGNAL(settings_changed()),
           this, SLOT(sort_folders_before_files_changed()));
   sort_column = -1;
 }
@@ -223,7 +223,7 @@ void File_list_model::sort(int column, Qt::SortOrder order) {
   emit layoutAboutToBeChanged();
   if (column == -1) {
     list = unsorted_list;
-    if (core->get_sort_folders_before_files()) {
+    if (settings.value("sort_folders_before_files", true).toBool()) {
       File_info_list folders, files;
       foreach(File_info fi, list) {
         (fi.is_folder ? folders:files) << fi;
@@ -236,7 +236,7 @@ void File_list_model::sort(int column, Qt::SortOrder order) {
     for(int row = 0; row < list.count(); row++) {
       r << qMakePair(list[row], data(index(row, column), sort_role));
     }
-    if (core->get_sort_folders_before_files()) {
+    if (settings.value("sort_folders_before_files", true).toBool()) {
       QList<Sorting_pair> folders, files;
       foreach(Sorting_pair pair, r) {
         (pair.first.is_folder ? folders : files) << pair;

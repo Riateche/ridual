@@ -8,13 +8,17 @@
 #include <QVariant>
 #include "Columns.h"
 
+/*!
+ * General representation of a file entry.
+ *
+ * Objects of this class are passed by value.
+ */
 class File_info {
 public:
   File_info();
 
   QString name; //! Displayed name (for special locations only)
   QString uri; //! item uri (required)
-  //QString path; //! Real path in file system
   QIcon icon;
   bool is_folder;
   bool is_executable;
@@ -25,19 +29,24 @@ public:
   QString extension() const;
   QString basename() const;
 
-  //QString extension, full_name;
   QDateTime date_created, date_modified, date_accessed;
   QString mime_type; //, mime_description;
   QString owner, group;
   QFile::Permissions permissions;
 };
 
+/*!
+ * List of files with representation hints.
+ *
+ * Objects of this class are passed by value.
+ */
 class File_info_list: public QList<File_info> {
 public:
   File_info_list() : disable_sort(false) {}
+  //! If not empty, instructs that these columns should be displayed.
   Columns columns;
+  //! If true, items should not be sorted for display.
   bool disable_sort;
-  //QStringList paths();
 };
 
 Q_DECLARE_METATYPE(File_info)

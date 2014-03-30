@@ -5,11 +5,11 @@
 #include <QTimer>
 #include "hotkeys/Hotkeys.h"
 #include "File_info.h"
-#include "Task.h"
 #include "App_info.h"
 #include "Action.h"
 #include <QPushButton>
 #include "Core_ally.h"
+#include <QSettings>
 
 namespace Ui {
   class Main_window;
@@ -85,6 +85,7 @@ private:
   QTimer save_settings_timer;
   Pane* active_pane;
   Hotkeys hotkeys;
+  QSettings settings;
 
   Action_queue* current_queue;
   QList<Question_widget*> question_widgets;

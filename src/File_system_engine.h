@@ -5,6 +5,23 @@
 
 #define FS_ENGINE_BUFFER_SIZE 65535
 
+/*!
+ * File system engine abstraction. Features:
+ *
+ * - Operates with URIs.
+ * - Uses its own Exception class for errors handling with informative messages.
+ * - Multiple engines can be used (see `is_responsible_for`).
+ *   However using multiple engines in one operation (e.g. copy) is not supported yet.
+ * - Directory listing is done using iterators without populating full list.
+ * - API for running non-atomic operations in steps (allowing to pause, stop it and get
+ *   current progress value).
+ *
+ * Implementations of this class must be thread safe. Iterator and Operation
+ * classes are not thread safe.
+ *
+ * Implemented by Real_file_system_engine and Gio_file_system_engine.
+ *
+ */
 class File_system_engine : public QObject {
   Q_OBJECT
 public:

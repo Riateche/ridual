@@ -14,14 +14,15 @@ class File_system_engine;
    This is the 'God object'. It creates objects of the most important core classes and
    provides pointers to them. It also manages some application settings.
 
+   This class is thread safe (no sync mechanizms are needed).
+
 
   */
 class Core : public QObject {
   Q_OBJECT
 public:
-  explicit Core();
+  explicit Core(bool init_gui = false);
   ~Core();
-  void init_gui();
 
   inline Main_window* get_main_window() { return main_window; }
   inline Bookmarks_file_parser* get_bookmarks() { return bookmarks; }
@@ -30,15 +31,12 @@ public:
   inline Directory_watcher* get_directory_watcher() { return watcher; }
   inline Actions_manager* get_actions_manager() { return actions_manager; }
 
-  inline bool get_sort_folders_before_files() { return sort_folders_before_files; }
-  void set_sort_folders_before_files(bool v);
-
   File_system_engine* get_file_system_engine();
 
+  void emit_settings_changed() { emit settings_changed(); }
+
 signals:
-  void sort_folders_before_files_changed();
-  
-private slots:
+  void settings_changed();
 
 private:
   Main_window* main_window;
@@ -49,9 +47,6 @@ private:
   QThread* watcher_thread;
   Actions_manager* actions_manager;
   File_system_engine* fs_engine;
-
-  bool sort_folders_before_files;
-
 
 };
 

@@ -4,10 +4,17 @@
 #include <QObject>
 #include <QFileSystemWatcher>
 #include "File_info.h"
+#include <QMutexLocker>
 
 /*!
-  This object is responsible for parsing of ~/.gtk-bookmarks and ~/.config/user-dirs.dirs files
-  These files contains GTK bookmarks and user directories (common places) of Gnome environment.
+  This object is responsible for parsing of ~/.gtk-bookmarks and
+  ~/.config/user-dirs.dirs files.
+
+  These files contains GTK bookmarks and user directories (common places) of
+  Gnome environment.
+
+  This class is thread safe.
+
   */
 class Bookmarks_file_parser : public QObject {
   Q_OBJECT
@@ -17,10 +24,19 @@ public:
     format_xdg  //! Format of ~/.config/user-dirs.dirs
   };
 
+  /*!
+   * Create an object that parses data from file_paths using specified format.
+   */
   explicit Bookmarks_file_parser(const QStringList& file_paths, Format _format, QObject *parent = 0);
-  inline File_info_list get_all() { return list; }
+
+  //! Get all bookmarks
+  inline File_info_list get_all() { QMutexLocker locker(&mutex); return list; }
   
 signals:
+  /*!
+   * This signal is emitted when bookmarks data is updated, i.e. when the object
+   * is constructed and when data source files are changed.
+   */
   void changed();
 
 private:
@@ -28,6 +44,7 @@ private:
   Format format;
   QFileSystemWatcher watcher;
   File_info_list list;
+  QMutex mutex;
 
 private slots:
   void read();

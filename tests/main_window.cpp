@@ -5,8 +5,7 @@
 #include "Core.h"
 
 TEST(Main_window, active_pane) {
-  Core core;
-  core.init_gui();
+  Core core(true);
   Main_window* mw = core.get_main_window();
   EXPECT_TRUE(mw->get_active_pane() == mw->get_ui()->left_pane ||
               mw->get_active_pane() == mw->get_ui()->right_pane);

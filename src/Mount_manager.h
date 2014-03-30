@@ -12,6 +12,8 @@ typedef struct _GDrive GDrive;
 
 /*! This class is responsible for fetching list of mounts and volumnes
   and updating it on changes.
+
+  This class is thread safe.
   */
 class Mount_manager : public QObject {
   Q_OBJECT
@@ -19,8 +21,14 @@ public:
   explicit Mount_manager(QObject *parent = 0);
   ~Mount_manager();
 
-  inline QList<Gio_mount> get_mounts() const { QMutexLocker locker(&mounts_mutex); return mounts; }
-  inline QList<Gio_volume*> get_volumes() const { return volumes; }
+  inline QList<Gio_mount> get_mounts() const {
+    QMutexLocker locker(&mounts_mutex);
+    return mounts;
+  }
+  inline QList<Gio_volume*> get_volumes() const {
+    QMutexLocker locker(&mounts_mutex);
+    return volumes;
+  }
 
   
 signals:

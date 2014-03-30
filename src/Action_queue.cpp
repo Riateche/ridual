@@ -26,12 +26,6 @@ void Action_queue::action_finished() {
 
 }
 
-/*
-QList<Action *> Action_queue::get_actions() {
-  QMutexLocker locker(&access_mutex);
-  return actions;
-}*/
-
 Action_queue::~Action_queue() {
   qDebug() << "~Action_queue";
 }
@@ -39,7 +33,6 @@ Action_queue::~Action_queue() {
 void Action_queue::create_action(Action_data data) {
   Action* a = new Action(this, core->get_file_system_engine(), data);
   connect(a, SIGNAL(finished()), this, SLOT(action_finished()));
-  //QMutexLocker locker(&access_mutex);
   actions << a;
   emit action_added(a);
   if (!isRunning()) {

@@ -44,7 +44,6 @@ private:
   explicit Action_queue(Core* c, int p_id);
   friend class Actions_manager;
   QList<Action*> actions;
-  QMutex access_mutex;
   int id;
 
 private slots:

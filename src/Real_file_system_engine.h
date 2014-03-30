@@ -9,6 +9,9 @@
  * The Real_file_system_engine class provides access to basic filesystem functions
  * with exception-based error reporting. Now this class supports only Linux, but
  * other OS support may be added here.
+ *
+ * This class is thread safe but Iterator and Operation are not.
+ *
  */
 
 class Real_file_system_engine: public File_system_engine {

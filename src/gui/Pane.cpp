@@ -487,10 +487,8 @@ void Pane::refresh_path_toolbar() {
   QString real_path = get_uri();
   QString headless_path;
   bool root_found = false;
-  QList<Special_uri> special_uris;
-  special_uris << Special_uri(Special_uri::mounts) <<
-                  Special_uri(Special_uri::bookmarks) <<
-                  Special_uri(Special_uri::userdirs);
+  /*QList<Special_uri> special_uris;
+  special_uris << Special_uri(Special_uri::mounts);
   foreach(Special_uri u, special_uris) {
     if (real_path.startsWith(u.uri())) {
       File_info f;
@@ -499,7 +497,7 @@ void Pane::refresh_path_toolbar() {
       path_items << f;
       break;
     }
-  }
+  }*/
 
   bool samba_roots_supported = true;
 

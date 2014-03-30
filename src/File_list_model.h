@@ -8,9 +8,24 @@
 #include "Columns.h"
 #include <QCache>
 #include "Core_ally.h"
+#include <QSettings>
 
 typedef QPair<File_info, QVariant> Sorting_pair;
 
+/*!
+ * Model used for displaying file lists in views. It's responsible for:
+ *
+ * - data formatting
+ * - columns displaying
+ * - sorting
+ *
+ * Currently it also uses current model index information to display
+ * cursor in vertical header (though that's against the Model-View rules).
+ *
+ * This class is not thread safe. It's used only with Qt view widgets, so
+ * it can be used from the GUI thread only.
+ *
+ */
 class File_list_model : public QAbstractTableModel, public Core_ally {
   Q_OBJECT
 public:
@@ -53,6 +68,7 @@ private:
   QModelIndex current_index;
   Columns columns;
   Columns current_columns;
+  QSettings settings;
 
 
   static QHash<QString, QString> mime_descriptions;

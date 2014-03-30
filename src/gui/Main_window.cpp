@@ -84,32 +84,24 @@ void Main_window::init() {
 
   ui->current_queue_notice->hide();
 
-  //QLocale::Language language = QLocale::system().language();
-  //qDebug() << "language: " << QLocale::languageToString(language);
-
-
-  QSettings s;
-
-  QVariant v = s.value("columns");
+  QVariant v = settings.value("columns");
   columns = v.isValid()? Columns::deserialize(v): Columns::get_default();
   emit columns_changed(columns);
 
-  s.beginGroup("left_pane");
-  ui->left_pane->load_state(&s);
-  s.endGroup();
-  s.beginGroup("right_pane");
-  ui->right_pane->load_state(&s);
-  s.endGroup();
+  settings.beginGroup("left_pane");
+  ui->left_pane->load_state(&settings);
+  settings.endGroup();
+  settings.beginGroup("right_pane");
+  ui->right_pane->load_state(&settings);
+  settings.endGroup();
 
 
-  int option = s.value("recursive_fetch_option", static_cast<int>(recursive_fetch_auto)).toInt();
+  int option = settings.value("recursive_fetch_option", static_cast<int>(recursive_fetch_auto)).toInt();
   switch(static_cast<Recursive_fetch_option>(option)) {
     case recursive_fetch_on: ui->action_recursive_fetch_on->setChecked(true); break;
     case recursive_fetch_off: ui->action_recursive_fetch_off->setChecked(true); break;
     case recursive_fetch_auto: ui->action_recursive_fetch_auto->setChecked(true); break;
   }
-
-
 
   save_settings_timer.setInterval(10000); //ms
   connect(&save_settings_timer, SIGNAL(timeout()), this, SLOT(save_settings()));
@@ -127,16 +119,14 @@ void Main_window::init() {
   connect(this,           SIGNAL(active_pane_changed()), this, SIGNAL(selection_changed()));
   connect(this, SIGNAL(selection_changed()), this, SLOT(slot_selection_changed()));
 
-
-  if (s.value("main_window/state").isValid()) {
-    restoreState(s.value("main_window/state").toByteArray());
-    restoreGeometry(s.value("main_window/geometry").toByteArray());
-    ui->panes_splitter->restoreState(s.value("panes_spliter_state").toByteArray());
+  if (settings.value("main_window/state").isValid()) {
+    restoreState(settings.value("main_window/state").toByteArray());
+    restoreGeometry(settings.value("main_window/geometry").toByteArray());
+    ui->panes_splitter->restoreState(settings.value("panes_spliter_state").toByteArray());
     show();
   } else {
     show();
     setWindowState(Qt::WindowMaximized);
-    qDebug() << width() / 2;
     ui->panes_splitter->setSizes(QList<int>() << width() / 2 << width() / 2);
   }
 
@@ -266,7 +256,7 @@ void Main_window::view_or_edit_selected(bool edit) {
   foreach(File_info f, list) {
     QProcess* p = new QProcess(this);
     p->setWorkingDirectory(Directory::get_parent_uri(core->get_file_system_engine()->get_real_file_name(f.uri)));
-    QString command = QSettings().value(edit? "edit_command": "view_command", "gedit %U").toString();
+    QString command = settings.value(edit? "edit_command": "view_command", "gedit %U").toString();
     command = command.replace("%U", QString("\"%1\"").arg(f.uri));
     command = command.replace("%F", QString("\"%1\"").arg(core->get_file_system_engine()->get_real_file_name(f.uri)));
     //todo: correct shell escaping
@@ -355,17 +345,16 @@ void Main_window::show_error(QString message) {
 }
 
 void Main_window::save_settings() {
-  QSettings s;
-  s.beginGroup("left_pane");
-  ui->left_pane->save_state(&s);
-  s.endGroup();
-  s.beginGroup("right_pane");
-  ui->right_pane->save_state(&s);
-  s.endGroup();
-  s.setValue("main_window/state", saveState());
-  s.setValue("main_window/geometry", saveGeometry());
-  s.setValue("recursive_fetch_option", static_cast<int>(get_recursive_fetch_option()));
-  s.setValue("panes_spliter_state", ui->panes_splitter->saveState());
+  settings.beginGroup("left_pane");
+  ui->left_pane->save_state(&settings);
+  settings.endGroup();
+  settings.beginGroup("right_pane");
+  ui->right_pane->save_state(&settings);
+  settings.endGroup();
+  settings.setValue("main_window/state", saveState());
+  settings.setValue("main_window/geometry", saveGeometry());
+  settings.setValue("recursive_fetch_option", static_cast<int>(get_recursive_fetch_option()));
+  settings.setValue("panes_spliter_state", ui->panes_splitter->saveState());
 }
 
 

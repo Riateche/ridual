@@ -10,6 +10,12 @@ class Main_window;
 
 /*! This class extracts information about an application from GAppInfo object
   and provides a way to launch it.
+
+  Objects are passed by value. Used Main_window object must not be deleted during
+  life time of App_info objects.
+
+  todo: GAppInfo shoule be deleted somewhere; check copying
+
   */
 class App_info {
 public:

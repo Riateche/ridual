@@ -10,9 +10,12 @@ class File_system_engine;
 
 /*! This class provides ability to watch for directories changes through
   signals and slots. There is only one Directory_watcher object in the app.
+  It lives in its own separate thread.
   Invoke add() and remove() slots to enable and disable watching of specified
   URI's. Any time any of the watched directories changed, directory_changed() signal
   is emitted. Check 'uri' parameter to know if it is the direcory you need.
+
+  Don't use this class directly from other threads. Use signal-slot interaction only.
 
   */
 class Directory_watcher : public QObject, public Core_ally {
