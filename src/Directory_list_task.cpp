@@ -30,6 +30,10 @@ void Directory_list_task::run() {
     }
     File_system_engine::Iterator* iterator = fs_engine->list(uri);
     File_info_list list;
+    if (uri == "trash:///") {
+      list.columns << Column::name << Column::size << Column::type_description
+                   << Column::date_deleted << Column::original_location;
+    }
     while(iterator->has_next()) {
       list << iterator->get_next();
       //todo: send by 100-file chunks

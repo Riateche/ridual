@@ -141,8 +141,18 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
           return file_info.date_accessed.toString(Qt::SystemLocaleShortDate);
         }
       }
+      case Column::date_deleted: {
+        if (role == sort_role) {
+          return file_info.date_deleted;
+        } else {
+          return file_info.date_deleted.toString(Qt::SystemLocaleShortDate);
+        }
+      }
       case Column::mime_type: {
         return file_info.mime_type;
+      }
+      case Column::original_location: {
+        return file_info.original_location;
       }
       case Column::type_description: {
         return get_mime_description(file_info.mime_type);

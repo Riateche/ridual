@@ -30,6 +30,9 @@ public:
   QString basename() const;
 
   QDateTime date_created, date_modified, date_accessed;
+
+  QDateTime date_deleted; // for trash only
+  QString original_location; // for trash only
   QString mime_type; //, mime_description;
   QString owner, group;
   QFile::Permissions permissions;

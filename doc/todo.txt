@@ -6,7 +6,6 @@
   - clipboard - copy real file paths, copy URIs
   - view trash (filenames, previous location, deleting date)
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
-  - fix behaviour: file write error -> retry -> file already exists
   - terminal support
   - auto answering system
     - when user changes task settings, it must affect current question (if any)

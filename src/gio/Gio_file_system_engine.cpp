@@ -31,14 +31,29 @@ File_system_engine::Iterator *Gio_file_system_engine::list(const QString &uri) {
   if (use_native) {
     GFile* file = g_file_new_for_uri(uri.toLocal8Bit());
     GError* error = 0;
-    GFileEnumerator* enumerator = g_file_enumerate_children(file, "standard::*,owner::user", G_FILE_QUERY_INFO_NONE, 0, &error);
+    GFileEnumerator* enumerator = g_file_enumerate_children(file, "standard::*,trash::*,owner::user", G_FILE_QUERY_INFO_NONE, 0, &error);
     if (!enumerator) {
       QString message = QString::fromLocal8Bit(error->message);
       qDebug() << "error: " << message;
       qDebug() << "error code:" << error->code;
       error_cause cause = gio_error;
-      if (error->code == G_IO_ERROR_NOT_MOUNTED) {
+      if (error->code == G_IO_ERROR_NOT_MOUNTED ||
+          error->code == G_IO_ERROR_NOT_FOUND) {
         cause = not_found;
+      } else if (error->code == G_IO_ERROR_PERMISSION_DENIED) {
+        cause = permission_denied;
+      } else if (error->code == G_IO_ERROR_EXISTS) {
+        cause = file_already_exists;
+      } else if (error->code == G_IO_ERROR_NO_SPACE) {
+        cause = filesystem_full;
+      } else if (error->code == G_IO_ERROR_READ_ONLY) {
+        cause = readonly_filesystem;
+      } else if (error->code == G_IO_ERROR_BUSY) {
+        cause = busy;
+      } else if (error->code == G_IO_ERROR_INVALID_FILENAME) {
+        cause = invalid_path;
+      } else if (error->code == G_IO_ERROR_FILENAME_TOO_LONG) {
+        cause = path_too_long;
       }
       g_error_free(error);
       //todo: error message reporting
@@ -48,6 +63,9 @@ File_system_engine::Iterator *Gio_file_system_engine::list(const QString &uri) {
     i->file = file;
     i->enumerator = enumerator;
     i->uri_prefix = uri.endsWith("/")? uri: (uri + "/");
+    if (uri == "trash:///") {
+      i->trash_mode = true;
+    }
     return i;
   } else {
     QString r_uri = get_real_file_name(uri);
@@ -110,10 +128,6 @@ void Gio_file_system_engine::make_directory(const QString &uri) {
   }
   real_engine.make_directory(r_uri);
 }
-
-//void Gio_file_system_engine::mounts_changed(QList<Gio_mount> new_mounts) {
-//  mounts = new_mounts;
-//}
 
 QString Gio_file_system_engine::get_real_file_name(const QString &uri) {
   if (uri.startsWith("/")) return uri;
@@ -225,16 +239,39 @@ File_info Gio_file_system_engine::Gio_native_fs_iterator::get_next_internal() {
   }
   GFileType type = g_file_info_get_file_type(info);
   File_info result;
-  if (type == G_FILE_TYPE_MOUNTABLE) {
-    char* uri = g_file_info_get_attribute_as_string(info, G_FILE_ATTRIBUTE_STANDARD_TARGET_URI);
-    result.uri = Directory::canonize(QUrl::fromPercentEncoding(QByteArray(uri)));
-    g_free(uri);
+  if (type == G_FILE_TYPE_MOUNTABLE || trash_mode) {
+    const char* uri = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_STANDARD_TARGET_URI);
+    if (uri) {
+      result.uri = Directory::canonize(QUrl::fromPercentEncoding(QByteArray(uri)));
+    }
   } else {
-    const char* name = g_file_info_get_name(info); //  g_file_info_get_attribute_byte_string(info, G_FILE_ATTRIBUTE_STANDARD_NAME);
-    result.uri = uri_prefix + QString::fromLocal8Bit(name);
+    const char* name = g_file_info_get_name(info);
+    result.uri = uri_prefix + QString::fromUtf8(name);
   }
   result.is_folder = type == G_FILE_TYPE_MOUNTABLE || type == G_FILE_TYPE_DIRECTORY;
-  result.mime_type = QString::fromLocal8Bit(g_file_info_get_content_type(info));
+  result.mime_type = QString::fromUtf8(g_file_info_get_content_type(info));
+  if (result.is_file()) {
+    result.file_size = g_file_info_get_size(info);
+  }
+  if (trash_mode) {
+    GDateTime* deletion_date = g_file_info_get_deletion_date(info);
+    if (deletion_date) {
+      result.date_deleted.setTime_t(g_date_time_to_unix(deletion_date));
+      g_date_time_unref(deletion_date);
+    }
+    const char* original_location = g_file_info_get_attribute_byte_string(info, G_FILE_ATTRIBUTE_TRASH_ORIG_PATH);
+    if (original_location) {
+      result.original_location = QString::fromUtf8(original_location);
+    }
+    const char* display_name = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME);
+    if (display_name) {
+      result.name = QString::fromUtf8(display_name);
+    }
+    if (result.name.isEmpty()) {
+      result.name = result.file_name();
+    }
+
+  }
   g_object_unref(info);
   return result;
 }

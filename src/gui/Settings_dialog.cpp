@@ -47,7 +47,7 @@ void Settings_dialog::fill_columns(bool reset) {
   ui->visible_columns->clear();
   ui->hidden_columns->clear();
   Columns columns = reset? Columns::get_default(): core->get_main_window()->get_columns();
-  foreach(Column::Enum c, Columns::get_all()) {
+  foreach(Column::Enum c, Columns::get_all_regular()) {
     QListWidgetItem* item = new QListWidgetItem(Columns::name(c));
     item->setData(Qt::UserRole, static_cast<int>(c));
     (columns.contains(c) ? ui->visible_columns: ui->hidden_columns)->addItem(item);

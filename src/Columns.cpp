@@ -1,7 +1,7 @@
 #include "Columns.h"
 #include <QStringList>
 
-Columns Columns::get_all() {
+Columns Columns::get_all_regular() {
   Columns r;
   r    << Column::file_name;
   r    << Column::basename;
@@ -65,6 +65,8 @@ QString Columns::name(Column::Enum r) {
   //if (r == Column::group_full_name)     return QObject::tr("Group name");
   if (r == Column::permissions)         return QObject::tr("Permissions");
   if (r == Column::octal_permissions)   return QObject::tr("Octal permissions");
+  if (r == Column::date_deleted)        return QObject::tr("Date deleted");
+  if (r == Column::original_location)   return QObject::tr("Original location");
   return QObject::tr("Invalid column");
 }
 

@@ -26,15 +26,20 @@ namespace Column {
     owner,
     group,
     permissions,
-    octal_permissions
+    octal_permissions,
+    date_deleted,
+    original_location
   };
 }
 
 /*! This class provides several convinient methods for operating with lists of columns.   */
 class Columns: public QList<Column::Enum> {
 public:
-  //! Get full list of supported columns
-  static Columns get_all();
+  /*! Get full list of columns available for regular folders
+   * (special locations like "places", "trash:///" can have
+   * columns that aren't listed here).
+   */
+  static Columns get_all_regular();
 
   //! Get default columns set
   static Columns get_default();
