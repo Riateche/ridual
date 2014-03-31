@@ -12,7 +12,7 @@ QString error_reaction_to_string(Error_reaction::Enum reaction) {
   case Error_reaction::rename_existing: return QObject::tr("Rename existing");
   case Error_reaction::continue_writing: return QObject::tr("Continue writing");
   case Error_reaction::rename_new: return QObject::tr("Rename new");
-  case Error_reaction::delete_competely: return QObject::tr("Delete completely");
+  case Error_reaction::delete_permanently: return QObject::tr("Delete permanently");
   default:
     qWarning("Error_reaction::to_string failed");
     return QObject::tr("Unknown");
@@ -24,7 +24,7 @@ QList<Error_reaction::Enum> get_error_reactions(Question_data data, bool is_inte
   QList<Error_reaction::Enum> r;
   if (data.error_type == Error_type::file_system_error &&
       type == File_system_engine::move_to_trash_failed) {
-    r << Error_reaction::delete_competely;
+    r << Error_reaction::delete_permanently;
     r << Error_reaction::abort;
     if (!is_interactive) { r << Error_reaction::ask; }
     return r;

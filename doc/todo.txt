@@ -1,12 +1,10 @@
 
 - bugs:
   - fail with filenames in wrong encoding
-  - need to use shared pointers for Action and Action_queue
-
 
 - stage1:
+  - clipboard - copy real file paths, copy URIs
   - view trash (filenames, previous location, deleting date)
-  - prompt before deleting (Shift+F8)
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
   - fix behaviour: file write error -> retry -> file already exists
   - terminal support

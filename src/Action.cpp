@@ -46,6 +46,10 @@ Action::~Action() {
 }
 
 void Action::ask_question(Question_data data) {
+  if (data.fs_exception.get_cause() != File_system_engine::filesystem_full) {
+    delete pending_operation;
+    pending_operation = 0;
+  }
   qDebug() << "ask_question: " << data.get_message();
   emit question(data);
   blocked = true;
@@ -108,7 +112,7 @@ void Action::process_current(Error_reaction::Enum error_reaction) {
     }
   } else {
     if (data.type == Action_type::trash) {
-      if (error_reaction == Error_reaction::delete_competely) {
+      if (error_reaction == Error_reaction::delete_permanently) {
         fs_engine->remove(current_file.uri);
       } else {
         Gio_file_system_engine::move_to_trash(current_file.uri);
@@ -116,7 +120,9 @@ void Action::process_current(Error_reaction::Enum error_reaction) {
     } else if (data.type == Action_type::make_directory) {
       fs_engine->make_directory(current_file.uri);
     } else if (data.type == Action_type::remove) {
-      fs_engine->remove(current_file.uri);
+      if (current_file.is_file()) { // folders are removed in postprocess_directory()
+        fs_engine->remove(current_file.uri);
+      }
     } else if (data.type == Action_type::copy || data.type == Action_type::move) {
       QStringList new_path_parts;
       new_path_parts << data.destination;
@@ -239,10 +245,10 @@ void Action::send_state() {
 
 void Action::run_iterations() {
   while(!(paused || blocked || phase == phase_finished)) {
-    if (signal_timer.elapsed() > signal_interval) {
-      send_state();
-    }
     try {
+      if (signal_timer.elapsed() > signal_interval) {
+        send_state();
+      }
 
       //3a. Finalize processing after previous item is successfully processed or skipped
       if (postprocess_running) {
@@ -357,7 +363,7 @@ void Action::question_answered(Error_reaction::Enum reaction) {
                reaction == Error_reaction::overwrite ||
                reaction == Error_reaction::rename_existing ||
                reaction == Error_reaction::rename_new ||
-               reaction == Error_reaction::delete_competely ||
+               reaction == Error_reaction::delete_permanently ||
                reaction == Error_reaction::merge_dir) {
       process_current(reaction);
     } else if (reaction == Error_reaction::ask) {

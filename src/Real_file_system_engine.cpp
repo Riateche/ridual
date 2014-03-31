@@ -52,10 +52,6 @@ File_system_engine::Operation *Real_file_system_engine::copy(const QString &sour
     throw Exception(cant_open_file_for_read, get_cause_from_errno(), source);
   }
 
-  if (QFile(destination).exists()) {
-    throw Exception(copy_failed, file_already_exists, destination);
-  }
-
   qint64 append_current_size = 0;
   std::ios_base::openmode mode = std::ifstream::out | std::ifstream::binary;
   if (append_mode) {
@@ -248,7 +244,13 @@ File_info Real_file_system_engine::Real_fs_iterator::get_next_internal() {
 }
 
 double Real_file_system_engine::Copy_operation::get_progress() {
-  return 1.0 * file1.tellg() / file_size;
+  double current_pos = 0;
+  try {
+    current_pos = file1.tellg();
+  } catch (std::ios_base::failure e) {
+    qDebug() << "Real_file_system_engine::Copy_operation::get_progress: exception: " << e.what();
+  }
+  return 1.0 * current_pos / file_size;
 }
 
 void Real_file_system_engine::Copy_operation::run_iteration() {

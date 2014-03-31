@@ -56,7 +56,6 @@ Pane::Pane(QWidget *parent) :
 
   QCompleter* completer = new QCompleter();
   completer->setCompletionMode(QCompleter::PopupCompletion);
-  //completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
   completer->setModel(&uri_completion_model);
   completer->setCompletionRole(Qt::UserRole);
   completer->setCaseSensitivity(Qt::CaseInsensitive);
@@ -99,11 +98,8 @@ void Pane::set_uri(QString new_directory) {
   ui->loaded_indicator->hide();
   ui->loading_indicator->show();
   pending_directory->refresh();
-  //ui->address->setText(directory);
 
   ready = false;  
-  //QTimer* timer = new QTimer();
-  //timer->singleShot(300, this, SLOT(show_loading_indicator()));
 }
 
 bool Pane::eventFilter(QObject *object, QEvent *event) {
@@ -115,7 +111,6 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
   nav_keys << Qt::Key_Down << Qt::Key_Up << Qt::Key_Left << Qt::Key_Right <<
               Qt::Key_Space <<
               Qt::Key_PageDown << Qt::Key_PageUp << Qt::Key_Home << Qt::Key_End;
-  //qDebug() << event;
   if (object == ui->list) {
     if (event->type() == QEvent::KeyPress) {
       QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event);
@@ -124,13 +119,6 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
       if (nav_keys.contains(key_event->key()) && key_event->modifiers() == Qt::NoModifier) {
         key_event->setModifiers(Qt::ControlModifier);
       }
-      /*if (key_event->key() == Qt::Key_Left || key_event->key() == Qt::Key_Right) {
-        if (key_event->modifiers() == Qt::NoModifier) {
-          int dx = key_event->key() == Qt::Key_Left? -50: 50;
-          ui->list->horizontalScrollBar()->setValue(ui->list->horizontalScrollBar()->value() + dx);
-          return true;
-        }
-      }*/
       if (key_event->key() == Qt::Key_Return && key_event->modifiers() == Qt::NoModifier) {
         core->get_main_window()->open_current();
         return true;
@@ -154,15 +142,6 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
       }
     }
   }
-  /*if (object == ui->list->viewport()) {
-    QMouseEvent* e = dynamic_cast<QMouseEvent*>(event);
-    if (e && e->buttons() == Qt::LeftButton) {
-       ui->list->selectionModel()->setCurrentIndex(file_list_model.index(
-                                                     ui->list->indexAt(e->pos()).row(), 0),
-                                                     QItemSelectionModel::NoUpdate);
-       return true;
-     }
-  }*/
   return false;
 }
 
@@ -237,7 +216,7 @@ void Pane::setFocus() {
 }
 
 void Pane::go_parent() {
-  qDebug() << "index: " << file_list_model->index(0, 0);
+  if (!directory) { return; }
   set_uri(directory->get_parent_uri());
 }
 
@@ -248,6 +227,7 @@ void Pane::focus_address_line() {
 }
 
 void Pane::refresh() {
+  if (!directory) { return; }
   ui->loaded_indicator->hide();
   ui->loading_indicator->show();
   directory->refresh();
@@ -318,12 +298,6 @@ void Pane::directory_ready(File_info_list files) {
   ui->loading_indicator->hide();
   ui->loaded_indicator->show();
 
-  /*ui->list->setSortingEnabled(!files.disable_sort);
-  if (files.disable_sort) {
-    //proxy_model->sort(-1);
-  } else {
-  }*/
-
   if (old_state_stored) {
     QModelIndex index = file_list_model->index_for_uri(old_current_uri);
     if (index.isValid()) {
@@ -337,8 +311,6 @@ void Pane::directory_ready(File_info_list files) {
       }
     }
 
-//    ui->list->setCurrentIndex(proxy_model->index(old_current_row, old_current_column));
-//    ui->list->selectionModel()->select(old_selection, QItemSelectionModel::SelectCurrent);
     ui->list->horizontalScrollBar()->setValue(old_scroll_pos.x());
     ui->list->verticalScrollBar()->setValue(old_scroll_pos.y());
   }
@@ -394,10 +366,6 @@ void Pane::completion_directory_ready(File_info_list files) {
   foreach(File_info fi, files) {
     if (fi.is_folder) {
       QString filename = fi.file_name();
-/*      QString completion_value = last_completion_uri;
-      if ( !completion_value.isEmpty() &&
-           !completion_value.endsWith("/")) completion_value += "/";
-      completion_value += filename; */
       QStandardItem* item = new QStandardItem(filename);
       item->setData(uri + filename, Qt::UserRole);
       uri_completion_model.appendRow(item);
@@ -468,13 +436,13 @@ void Pane::on_address_textEdited(const QString&) {
   QString uri = ui->address->text();
   bool parent_mode = !uri.endsWith("/");
   if (Directory::is_relative(uri)) {
+    if (!directory) { return; }
     uri = directory->get_uri() + "/" + uri;
   }
   if (parent_mode) {
     uri = Directory::get_parent_uri(uri);
   }
   if (last_completion_uri == uri) {
-//  if (completion_directory && completion_directory->get_uri() == uri) {
     qDebug() << "keep old completion_directory";
   } else {
     qDebug() << "create new completion_directory";
@@ -493,17 +461,6 @@ void Pane::refresh_path_toolbar() {
   QString real_path = get_uri();
   QString headless_path;
   bool root_found = false;
-  /*QList<Special_uri> special_uris;
-  special_uris << Special_uri(Special_uri::mounts);
-  foreach(Special_uri u, special_uris) {
-    if (real_path.startsWith(u.uri())) {
-      File_info f;
-      f.uri = u.uri();
-      f.name = u.caption();
-      path_items << f;
-      break;
-    }
-  }*/
 
   bool samba_roots_supported = true;
 

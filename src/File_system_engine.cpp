@@ -65,6 +65,8 @@ File_system_engine::error_cause File_system_engine::get_cause_from_errno() {
 }
 
 File_system_engine::Exception::Exception() {
+  type = unknown_error;
+  cause = unknown_cause;
 
 }
 

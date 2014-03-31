@@ -332,8 +332,24 @@ void Main_window::on_action_about_triggered() {
 }
 
 void Main_window::on_action_remove_triggered() {
+  QString text = tr("Are you sure you want to delete selected files?") + "\n\n";
   Action_data data = get_auto_target_and_destination(Action_type::remove);
-  create_action(data);
+  int count = 0;
+  foreach(File_info fi, data.targets) {
+    if (count > 3) {
+      text += "...";
+      break;
+    }
+    text += fi.uri + "\n";
+    count++;
+  }
+
+  if (QMessageBox::question(this, tr("Delete files?"),
+                            text,
+                            QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+    Action_data data = get_auto_target_and_destination(Action_type::remove);
+    create_action(data);
+  }
 }
 
 void Main_window::on_action_move_triggered() {
