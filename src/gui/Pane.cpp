@@ -430,7 +430,7 @@ void Pane::on_list_customContextMenuRequested(const QPoint &pos) {
   if (menu->actions().count() > 0) menu->addSeparator();
 
   foreach(App_info app, apps) {
-    QAction* a = menu->addAction(tr("Open with %1 (%2)").arg(app.name()).arg(app.command()), this, SLOT(action_launch_triggered()));
+    QAction* a = menu->addAction(tr("Open with %1 (%2)").arg(app->name()).arg(app->command()), this, SLOT(action_launch_triggered()));
     QVariantList data;
     data << QVariant::fromValue(app) << QVariant::fromValue(file);
     a->setData(data);
@@ -453,7 +453,7 @@ void Pane::action_launch_triggered() {
   }
   App_info app = data[0].value<App_info>();
   File_info file = data[1].value<File_info>();
-  app.launch(core->get_file_system_engine()->get_real_file_name(file.uri));
+  app->launch(core->get_file_system_engine()->get_real_file_name(file.uri));
 }
 
 void Pane::update_model_current_index() {

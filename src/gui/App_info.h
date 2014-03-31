@@ -5,6 +5,7 @@
 
 #include <QList>
 #include <QVariant>
+#include <QSharedPointer>
 
 class Main_window;
 
@@ -17,16 +18,16 @@ class Main_window;
   todo: GAppInfo shoule be deleted somewhere; check copying
 
   */
-class App_info {
+class App_info_data {
 public:
-  App_info(Main_window* mw = 0, GAppInfo* obj = 0);
+  App_info_data(Main_window* mw = 0, GAppInfo* obj = 0);
+  ~App_info_data();
   QString name();
   QString command() const;
-  bool operator==(const App_info& other);
+  //bool operator==(const App_info& other);
 
   void launch(QStringList filenames);
   void launch(QString filename);
-
   void launch_uris(QStringList filenames); //not recommended
 
 private:
@@ -34,6 +35,7 @@ private:
   GAppInfo* object;
 };
 
+typedef QSharedPointer<App_info_data> App_info;
 Q_DECLARE_METATYPE(App_info)
 
 class App_info_list: public QList<App_info> {

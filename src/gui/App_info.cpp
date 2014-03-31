@@ -5,11 +5,15 @@
 
 
 
-App_info::App_info(Main_window* mw, GAppInfo* obj): main_window(mw), object(obj) {
+App_info_data::App_info_data(Main_window* mw, GAppInfo* obj): main_window(mw), object(obj) {
 
 }
 
-QString App_info::name() {
+App_info_data::~App_info_data() {
+  g_object_unref(object);
+}
+
+QString App_info_data::name() {
   if (!object) {
     qWarning("unitialized App_info used");
     return QString();
@@ -18,7 +22,7 @@ QString App_info::name() {
   return QString::fromLocal8Bit(b);
 }
 
-QString App_info::command() const {
+QString App_info_data::command() const {
   if (!object) {
     qWarning("unitialized App_info used");
     return QString();
@@ -27,17 +31,17 @@ QString App_info::command() const {
   return QString::fromLocal8Bit(b);
 }
 
-bool App_info::operator ==(const App_info &other) {
+/*bool App_info::operator ==(const App_info &other) {
   if (other.object == object) return true;
   if (other.command() == command()) return true;
   return false;
-}
+}*/
 
-void App_info::launch(QString filename) {
+void App_info_data::launch(QString filename) {
   launch( QStringList() << filename );
 }
 
-void App_info::launch_uris(QStringList filenames) {
+void App_info_data::launch_uris(QStringList filenames) {
   GList* list = 0;
   GError* error = 0;
   foreach(QString filename, filenames) {
@@ -46,12 +50,12 @@ void App_info::launch_uris(QStringList filenames) {
   g_app_info_launch_uris(object, list, 0, &error);
   g_list_free(list);
   if (error) {
-    g_error_free(error);
     main_window->show_error(QObject::tr("Failed to launch an application: %1").arg(error->message));
+    g_error_free(error);
   }
 }
 
-void App_info::launch(QStringList filenames) {
+void App_info_data::launch(QStringList filenames) {
   GList* list = 0;
   GError* error = 0;
   foreach(QString filename, filenames) {

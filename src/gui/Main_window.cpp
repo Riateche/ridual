@@ -152,13 +152,13 @@ App_info_list Main_window::get_apps(const QString &mime_type) {
   GList* list = g_app_info_get_all_for_type(mime_type.toLocal8Bit());
   if (!list) return r;
   for(; list; list = list->next) {
-    r << App_info(this, static_cast<GAppInfo*>(list->data));
+    r << App_info(new App_info_data(this, static_cast<GAppInfo*>(list->data)));
   }
 
   QStringList was;
   for(int i = 0; i < r.count(); i++) {
 
-    QString command = r[i].command();
+    QString command = r[i]->command();
     if (was.contains(command)) {
       r.removeAt(i);
       i--;
@@ -168,13 +168,13 @@ App_info_list Main_window::get_apps(const QString &mime_type) {
   }
 
   GAppInfo* default_app = g_app_info_get_default_for_type(mime_type.toLocal8Bit(), 0);
-  r.default_app = App_info(this, default_app);
+  r.default_app = App_info(new App_info_data(this, default_app));
   return r;
 }
 
 App_info Main_window::get_default_app(const QString &mime_type) {
   GAppInfo* default_app = g_app_info_get_default_for_type(mime_type.toLocal8Bit(), 0);
-  return App_info(this, default_app);
+  return App_info(new App_info_data(this, default_app));
 }
 
 Pane *Main_window::get_destination_pane() {
@@ -396,7 +396,7 @@ void Main_window::open_current() {
     }
   }
   foreach (QString mime_type, types.keys()) {
-    get_default_app(mime_type).launch(types[mime_type]);
+    get_default_app(mime_type)->launch(types[mime_type]);
   }
 }
 
@@ -737,5 +737,11 @@ void Main_window::on_action_edit_new_file_triggered() {
 }
 
 void Main_window::process_error(QProcess::ProcessError error) {
-  show_message(tr("Failed to start process"), Icon::error);
+  if (error == QProcess::FailedToStart) {
+    show_message(tr("Failed to start process."), Icon::error);
+  } else if (error == QProcess::Crashed) {
+    show_message(tr("Started process has crashed."), Icon::error);
+  } else {
+    show_message(tr("Unknown process error."), Icon::error);
+  }
 }

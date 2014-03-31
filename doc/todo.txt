@@ -1,9 +1,7 @@
 
 - bugs:
   - fail with filenames in wrong encoding
-  - deny closing main window when tasks are executing
   - need to use shared pointers for Action and Action_queue
-  - GAppInfo should be freed somewhere
 
 
 - stage1:
