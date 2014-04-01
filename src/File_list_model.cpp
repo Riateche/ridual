@@ -299,10 +299,11 @@ void File_list_model::emit_row_changed(int row) {
 
 QString File_list_model::format_octal_permissions(QFile::Permissions permissions) {
   if (permissions == -1) return QString();
+  qDebug() << "format" << static_cast<int>(permissions);
   int r = 0;
-  if (permissions & QFile::ReadOwner)   r += 0400;
-  if (permissions & QFile::WriteOwner)  r += 0200;
-  if (permissions & QFile::ExeOwner)    r += 0100;
+  if (permissions & QFile::ReadUser)   r += 0400;
+  if (permissions & QFile::WriteUser)  r += 0200;
+  if (permissions & QFile::ExeUser)    r += 0100;
   if (permissions & QFile::ReadGroup)   r += 0040;
   if (permissions & QFile::WriteGroup)  r += 0020;
   if (permissions & QFile::ExeGroup)    r += 0010;
@@ -310,6 +311,7 @@ QString File_list_model::format_octal_permissions(QFile::Permissions permissions
   if (permissions & QFile::WriteOther)  r += 0002;
   if (permissions & QFile::ExeOther)    r += 0001;
   return QString("%1").arg(r, 3, 8, QLatin1Char('0'));
+  //return QString("%1").arg(static_cast<int>(permissions), 3, 8, QLatin1Char('0')).right(3);
 }
 
 QString File_list_model::format_string_permissions(QFile::Permissions permissions) {

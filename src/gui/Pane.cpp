@@ -81,7 +81,7 @@ Pane::~Pane() {
 void Pane::set_uri(QString new_directory) {
   //refresh_path_toolbar();  maybe it's important
   if (directory && new_directory == directory->get_uri()) {
-    directory->refresh();
+    refresh();
     return;
   }
   if (pending_directory) delete pending_directory;
@@ -272,8 +272,6 @@ void Pane::directory_ready(File_info_list files) {
     directory = pending_directory;
     emit uri_changed();
     pending_directory = 0;
-    ui->loading_indicator->hide();
-    ui->loaded_indicator->show();
     ui->address->setText(directory->get_uri());
     refresh_path_toolbar();
   } else if (sender() == directory) {

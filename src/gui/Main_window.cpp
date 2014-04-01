@@ -479,7 +479,7 @@ void Main_window::on_action_go_root_triggered() {
 }
 
 void Main_window::on_action_refresh_triggered(){
-  active_pane->set_uri(active_pane->get_uri());
+  active_pane->refresh();
 }
 
 void Main_window::on_action_execute_triggered() {

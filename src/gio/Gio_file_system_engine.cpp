@@ -16,8 +16,8 @@ Gio_file_system_engine::Gio_file_system_engine(Mount_manager *m)
 }
 
 File_system_engine::Iterator *Gio_file_system_engine::list(const QString &uri) {
-  if (real_engine.is_responsible_for(uri)) return real_engine.list(uri);
-  bool use_native = false;
+  //if (real_engine.is_responsible_for(uri)) return real_engine.list(uri);
+  /*bool use_native = false;
   if (uri.startsWith("trash:") || uri.startsWith("network:")) {
     use_native = true;
   }
@@ -28,46 +28,53 @@ File_system_engine::Iterator *Gio_file_system_engine::list(const QString &uri) {
     }
   }
 
-  if (use_native) {
-    GFile* file = g_file_new_for_uri(uri.toLocal8Bit());
-    GError* error = 0;
-    GFileEnumerator* enumerator = g_file_enumerate_children(file, "standard::*,trash::*,owner::user", G_FILE_QUERY_INFO_NONE, 0, &error);
-    if (!enumerator) {
-      QString message = QString::fromLocal8Bit(error->message);
-      qDebug() << "error: " << message;
-      qDebug() << "error code:" << error->code;
-      error_cause cause = gio_error;
-      if (error->code == G_IO_ERROR_NOT_MOUNTED ||
-          error->code == G_IO_ERROR_NOT_FOUND) {
-        cause = not_found;
-      } else if (error->code == G_IO_ERROR_PERMISSION_DENIED) {
-        cause = permission_denied;
-      } else if (error->code == G_IO_ERROR_EXISTS) {
-        cause = file_already_exists;
-      } else if (error->code == G_IO_ERROR_NO_SPACE) {
-        cause = filesystem_full;
-      } else if (error->code == G_IO_ERROR_READ_ONLY) {
-        cause = readonly_filesystem;
-      } else if (error->code == G_IO_ERROR_BUSY) {
-        cause = busy;
-      } else if (error->code == G_IO_ERROR_INVALID_FILENAME) {
-        cause = invalid_path;
-      } else if (error->code == G_IO_ERROR_FILENAME_TOO_LONG) {
-        cause = path_too_long;
-      }
-      g_error_free(error);
-      //todo: error message reporting
-      throw File_system_engine::Exception(directory_list_failed, cause, uri);
-    }
-    Gio_native_fs_iterator* i = new Gio_native_fs_iterator();
-    i->file = file;
-    i->enumerator = enumerator;
-    i->uri_prefix = uri.endsWith("/")? uri: (uri + "/");
-    if (uri == "trash:///") {
-      i->trash_mode = true;
-    }
-    return i;
+  use_native = true; // DEBUG!
+
+  if (use_native) { */
+  GFile* file;
+  if (uri.startsWith("/")) {
+    file = g_file_new_for_path(uri.toLocal8Bit());
   } else {
+    file = g_file_new_for_uri(uri.toLocal8Bit());
+  }
+  GError* error = 0;
+  GFileEnumerator* enumerator = g_file_enumerate_children(file, "standard::*,trash::*,owner::*,time::*,unix::mode,access::*", G_FILE_QUERY_INFO_NONE, 0, &error);
+  if (!enumerator) {
+    QString message = QString::fromLocal8Bit(error->message);
+    qDebug() << "error: " << message;
+    qDebug() << "error code:" << error->code;
+    error_cause cause = gio_error;
+    if (error->code == G_IO_ERROR_NOT_MOUNTED ||
+        error->code == G_IO_ERROR_NOT_FOUND) {
+      cause = not_found;
+    } else if (error->code == G_IO_ERROR_PERMISSION_DENIED) {
+      cause = permission_denied;
+    } else if (error->code == G_IO_ERROR_EXISTS) {
+      cause = file_already_exists;
+    } else if (error->code == G_IO_ERROR_NO_SPACE) {
+      cause = filesystem_full;
+    } else if (error->code == G_IO_ERROR_READ_ONLY) {
+      cause = readonly_filesystem;
+    } else if (error->code == G_IO_ERROR_BUSY) {
+      cause = busy;
+    } else if (error->code == G_IO_ERROR_INVALID_FILENAME) {
+      cause = invalid_path;
+    } else if (error->code == G_IO_ERROR_FILENAME_TOO_LONG) {
+      cause = path_too_long;
+    }
+    g_error_free(error);
+    //todo: error message reporting
+    throw File_system_engine::Exception(directory_list_failed, cause, uri);
+  }
+  Gio_native_fs_iterator* i = new Gio_native_fs_iterator();
+  i->file = file;
+  i->enumerator = enumerator;
+  i->uri_prefix = uri.endsWith("/")? uri: (uri + "/");
+  if (uri == "trash:///") {
+    i->trash_mode = true;
+  }
+  return i;
+  /*} else {
     QString r_uri = get_real_file_name(uri);
     if (r_uri.isEmpty()) {
       throw Exception(directory_list_failed, not_found, uri);
@@ -78,7 +85,7 @@ File_system_engine::Iterator *Gio_file_system_engine::list(const QString &uri) {
     i->iterator = real_iterator;
     i->uri_prefix = uri.endsWith("/")? uri: (uri + "/");
     return i;
-  }
+  }*/
 }
 
 File_system_engine::Operation *Gio_file_system_engine::copy(const QString &source, const QString &destination, bool append_mode) {
@@ -248,10 +255,44 @@ File_info Gio_file_system_engine::Gio_native_fs_iterator::get_next_internal() {
     const char* name = g_file_info_get_name(info);
     result.uri = uri_prefix + QString::fromUtf8(name);
   }
+  const char* owner = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_OWNER_USER);
+  result.owner = QString::fromUtf8(owner);
+  const char* group = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_OWNER_GROUP);
+  result.group = QString::fromUtf8(group);
+  quint32 permissions = g_file_info_get_attribute_uint32(info, G_FILE_ATTRIBUTE_UNIX_MODE);
+  result.permissions = 0;
+  if (permissions & 0400) result.permissions |= QFile::ReadUser  | QFile::ReadOwner;
+  if (permissions & 0200) result.permissions |= QFile::WriteUser | QFile::WriteOwner;
+  if (permissions & 0100) result.permissions |= QFile::ExeUser   | QFile::ExeOwner;
+
+  if (permissions & 0040) result.permissions |= QFile::ReadGroup;
+  if (permissions & 0020) result.permissions |= QFile::WriteGroup;
+  if (permissions & 0010) result.permissions |= QFile::ExeGroup;
+
+  if (permissions & 0004) result.permissions |= QFile::ReadOther;
+  if (permissions & 0002) result.permissions |= QFile::WriteOther;
+  if (permissions & 0001) result.permissions |= QFile::ExeOther;
+
   result.is_folder = type == G_FILE_TYPE_MOUNTABLE || type == G_FILE_TYPE_DIRECTORY;
   result.mime_type = QString::fromUtf8(g_file_info_get_content_type(info));
+  result.is_executable = g_file_info_get_attribute_boolean(info, G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE);
   if (result.is_file()) {
     result.file_size = g_file_info_get_size(info);
+  }
+  result.date_modified.setMSecsSinceEpoch(
+        g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_MODIFIED) * 1000);
+  result.date_accessed.setMSecsSinceEpoch(
+        g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_ACCESS) * 1000);
+  result.date_created.setMSecsSinceEpoch(
+        g_file_info_get_attribute_uint64(info, G_FILE_ATTRIBUTE_TIME_CREATED) * 1000);
+  if (result.date_modified.toMSecsSinceEpoch() == 0) {
+    result.date_modified = QDateTime();
+  }
+  if (result.date_accessed.toMSecsSinceEpoch() == 0) {
+    result.date_accessed = QDateTime();
+  }
+  if (result.date_created.toMSecsSinceEpoch() == 0) {
+    result.date_created = QDateTime();
   }
   if (trash_mode) {
     GDateTime* deletion_date = g_file_info_get_deletion_date(info);

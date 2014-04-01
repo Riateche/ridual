@@ -1,12 +1,14 @@
 
 - bugs:
-  - fail with filenames in wrong encoding
+  - autocomplete for URI "places/..." creates invalid URIs (places/drivelabel, etc)
+  - column headers state sometimes is wrong on restart or columns set editing
+  - vertical align in tables is not perfect
+  - automatic fixed row heights in tables
 
-- stage1:
-  - clipboard - copy real file paths, copy URIs
-  - view trash (filenames, previous location, deleting date)
+- top priority:
+  - very slow listing on sftp (consider switching to native GIO directory listing)
+  - open in other program typed by user
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
-  - terminal support
   - auto answering system
     - when user changes task settings, it must affect current question (if any)
     - popup dialog for editing task auto-answering settings:
@@ -16,26 +18,40 @@
       * new tasks in the future
     - if the rule is enabled for new tasks, warning should be displayed
       at main window until this rule is removed (like "task will be placed in queue")
-  - fast filter file list by typing mask
-  - navigation history; hotkeys; quick search in history
-  - back/forward
   - select destination after copying; select created folder; etc.
   - F2 - rename
   - sound on messages
   - If some files was skipped or overwritten without propmt, the message about this must
   appear after the task is completed
-  - pause and abort every task with keyboard
   - display tasks waiting in queue
-  - basic Windows support
+  - button to hide a warning
 
-- stage2:
+- important:
+  - display free space on current volume
+  - check for free space before operations
+  - fast filter file list by typing mask
+  - tabs
+  - only one copy per user
+  - system integration: show folder, show file
+  - navigation history; hotkeys; quick search in history
+  - back/forward
+  - unmount, eject, safely remove
+
+- bonuses:
+  - clipboard - copy real file paths, copy URIs
+  - embedded terminal (open in tab in the other panel)
+  - pause and abort every task with keyboard
+
+
+- perspective:
+  - basic Windows support
   - gio monitoring for trash:///
   - fallback theme for file icons
   - if trying to execute not-executable, prompt to make file executable
   - run-time permission granting
   - undo
   - file search
-  - display count of selected items, total space used by them, free space on current volume
+  - display count of selected items, total space used by them
   - select all, unselect all, invert selection, select/unselect by regexp
   - extract archive to destination, extract here, browse into archive
   - set max copy speed
@@ -52,10 +68,8 @@
   - Shift+F5, Shift+F6 - modify paths before copying
   - Option to stop currently running recursive fetch
   - edit bookmarks
-  - check for free space before operations
   - warning about too many (>3) queues
   - Option "Follow symlinks"
-  - unmount, eject, safely remove
   - hotkeys for 2nd, 3rd associated apps
   - unix drives list
   - separate tab for all (current and pending) tasks; long description of each task here
@@ -88,7 +102,6 @@
   - Thunar
 
 - habraideas:
-  - tabs
   - option to enable ".." item
   - plugins
     - for file preview
