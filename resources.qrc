@@ -11,5 +11,6 @@
         <file>resources/images/play.png</file>
         <file>resources/images/stop.png</file>
         <file>resources/images/loaded.png</file>
+        <file>resources/images/icon.png</file>
     </qresource>
 </RCC>

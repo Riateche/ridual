@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Ridual</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>://resources/images/icon.png</normaloff>://resources/images/icon.png</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
