@@ -1,10 +1,8 @@
 
 - bugs:
-  - autocomplete for URI "places/..." creates invalid URIs (places/drivelabel, etc)
-
+  - none
 
 - top priority:
-  - very slow listing on sftp (consider switching to native GIO directory listing)
   - open in other program typed by user
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
   - auto answering system
@@ -42,7 +40,10 @@
 
 
 - perspective:
-  - basic Windows support
+  - uri completion:
+    - place popup in appropriate X position
+    - don't show popup when there is only one suggestion and it's the same as address text
+    - suggestion for "places" children (?)
   - gio monitoring for trash:///
   - fallback theme for file icons
   - if trying to execute not-executable, prompt to make file executable
