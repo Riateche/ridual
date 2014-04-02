@@ -6,6 +6,7 @@
 #include "qt_gtk.h"
 #include "Core.h"
 #include "File_system_engine.h"
+#include <qmath.h>
 
 File_list_model::File_list_model(Core *c) : Core_ally(c) {
   connect(core, SIGNAL(settings_changed()),
@@ -77,6 +78,13 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
     }
     return font;
   }
+  if (role == Qt::TextAlignmentRole) {
+    if (current_columns[column] == Column::size) {
+      return static_cast<int>(Qt::AlignVCenter) | static_cast<int>(Qt::AlignRight);
+    } else {
+      return static_cast<int>(Qt::AlignVCenter) | static_cast<int>(Qt::AlignLeft);
+    }
+  }
 
   if (role == Qt::DisplayRole || role == sort_role) {
     switch (current_columns[column]) {
@@ -93,10 +101,21 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
         return file_info.extension();
       }
       case Column::size: {
-        if (file_info.file_size >= 0) {
-          return file_info.file_size; //todo: size formatting
+        if (role == sort_role) {
+          return file_info.file_size;
         } else {
-          return QVariant();
+          if (file_info.file_size < 0) {
+            return QVariant();
+          } else {
+            double base = 1024.0;
+            QStringList units;
+            units << tr("B") << tr("KiB") << tr("MiB") << tr("GiB") << tr("TiB");
+            for(int i = 0; i < units.count(); i++) {
+              if (file_info.file_size < qPow(base, i + 1) || i == units.count() - 1) {
+                return QString("%1 %2").arg(file_info.file_size / qPow(base, i), 0, 'f', 1).arg(units[i]);
+              }
+            }
+          }
         }
       }
       case Column::parent_uri: {

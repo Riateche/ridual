@@ -260,18 +260,22 @@ File_info Gio_file_system_engine::Gio_native_fs_iterator::get_next_internal() {
   const char* group = g_file_info_get_attribute_string(info, G_FILE_ATTRIBUTE_OWNER_GROUP);
   result.group = QString::fromUtf8(group);
   quint32 permissions = g_file_info_get_attribute_uint32(info, G_FILE_ATTRIBUTE_UNIX_MODE);
-  result.permissions = 0;
-  if (permissions & 0400) result.permissions |= QFile::ReadUser  | QFile::ReadOwner;
-  if (permissions & 0200) result.permissions |= QFile::WriteUser | QFile::WriteOwner;
-  if (permissions & 0100) result.permissions |= QFile::ExeUser   | QFile::ExeOwner;
+  if (permissions == 0) {
+    result.permissions = static_cast<QFile::Permissions>(-1);
+  } else {
+    result.permissions = 0;
+    if (permissions & 0400) result.permissions |= QFile::ReadUser  | QFile::ReadOwner;
+    if (permissions & 0200) result.permissions |= QFile::WriteUser | QFile::WriteOwner;
+    if (permissions & 0100) result.permissions |= QFile::ExeUser   | QFile::ExeOwner;
 
-  if (permissions & 0040) result.permissions |= QFile::ReadGroup;
-  if (permissions & 0020) result.permissions |= QFile::WriteGroup;
-  if (permissions & 0010) result.permissions |= QFile::ExeGroup;
+    if (permissions & 0040) result.permissions |= QFile::ReadGroup;
+    if (permissions & 0020) result.permissions |= QFile::WriteGroup;
+    if (permissions & 0010) result.permissions |= QFile::ExeGroup;
 
-  if (permissions & 0004) result.permissions |= QFile::ReadOther;
-  if (permissions & 0002) result.permissions |= QFile::WriteOther;
-  if (permissions & 0001) result.permissions |= QFile::ExeOther;
+    if (permissions & 0004) result.permissions |= QFile::ReadOther;
+    if (permissions & 0002) result.permissions |= QFile::WriteOther;
+    if (permissions & 0001) result.permissions |= QFile::ExeOther;
+  }
 
   result.is_folder = type == G_FILE_TYPE_MOUNTABLE || type == G_FILE_TYPE_DIRECTORY;
   result.mime_type = QString::fromUtf8(g_file_info_get_content_type(info));

@@ -1,9 +1,7 @@
 
 - bugs:
   - autocomplete for URI "places/..." creates invalid URIs (places/drivelabel, etc)
-  - column headers state sometimes is wrong on restart or columns set editing
-  - vertical align in tables is not perfect
-  - automatic fixed row heights in tables
+
 
 - top priority:
   - very slow listing on sftp (consider switching to native GIO directory listing)

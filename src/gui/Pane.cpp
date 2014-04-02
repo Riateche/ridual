@@ -30,13 +30,6 @@ Pane::Pane(QWidget *parent) :
   ui->list->installEventFilter(this);
   ui->list->viewport()->installEventFilter(this);
 
-#if QT_VERSION >= 0x050000
-  ui->list->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-#else
-  ui->list->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
-#endif
-
-
   QFontMetrics font_metrics(ui->list->font());
   ui->list->verticalHeader()->setFixedWidth(10 + font_metrics.width(">"));
 
@@ -68,6 +61,9 @@ Pane::Pane(QWidget *parent) :
           core->get_main_window(), SLOT(open_current()));
   connect(core->get_main_window(), SIGNAL(columns_changed(Columns)),
           file_list_model, SLOT(set_columns(Columns)));
+
+  connect(ui->list->verticalScrollBar(), SIGNAL(valueChanged(int)),
+          this, SLOT(vertical_scroll_bar_moved()));
 
   refresh_path_toolbar();
 }
@@ -115,6 +111,16 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
     if (event->type() == QEvent::KeyPress) {
       QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event);
       Q_ASSERT(key_event != 0);
+      if (key_event->key() == Qt::Key_Left && key_event->modifiers() == Qt::NoModifier) {
+        ui->list->horizontalScrollBar()->setValue(ui->list->horizontalScrollBar()->value() -
+                                                  ui->list->horizontalScrollBar()->singleStep());
+        return true;
+      }
+      if (key_event->key() == Qt::Key_Right && key_event->modifiers() == Qt::NoModifier) {
+        ui->list->horizontalScrollBar()->setValue(ui->list->horizontalScrollBar()->value() +
+                                                  ui->list->horizontalScrollBar()->singleStep());
+        return true;
+      }
       if (!key_event) return false;
       if (nav_keys.contains(key_event->key()) && key_event->modifiers() == Qt::NoModifier) {
         key_event->setModifiers(Qt::ControlModifier);
@@ -158,6 +164,15 @@ void Pane::load_state(QSettings *s) {
   ui->list->sortByColumn(s->value("sort_column").toInt(),
                          static_cast<Qt::SortOrder>(s->value("sort_order").toInt()));
   ui->list->horizontalHeader()->restoreState(s->value("header_state").toByteArray());
+
+#if QT_VERSION >= 0x050000
+  ui->list->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  ui->list->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+#else
+  ui->list->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  ui->list->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+#endif
+
   set_uri(uri);
 }
 
@@ -287,7 +302,7 @@ void Pane::directory_ready(File_info_list files) {
     return;
   }
 
-  QByteArray header_state = ui->list->horizontalHeader()->saveState();
+  //QByteArray header_state = ui->list->horizontalHeader()->saveState();
   file_list_model->set_files(files);
   if (file_list_model->rowCount() > 0) {
     ui->list->setCurrentIndex(file_list_model->index(0, 0));
@@ -317,9 +332,9 @@ void Pane::directory_ready(File_info_list files) {
                               QItemSelectionModel::NoUpdate);
   }
 
-  ui->list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+  //ui->list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
   emit selection_changed();
-  ui->list->horizontalHeader()->restoreState(header_state);
+  //ui->list->horizontalHeader()->restoreState(header_state);
 }
 
 void Pane::directory_error(QString message) {
@@ -451,6 +466,11 @@ void Pane::on_address_textEdited(const QString&) {
     connect(completion_directory, SIGNAL(ready(File_info_list)), this, SLOT(completion_directory_ready(File_info_list)));
     completion_directory->refresh();
   }
+}
+
+void Pane::vertical_scroll_bar_moved() {
+  ui->list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+
 }
 
 
