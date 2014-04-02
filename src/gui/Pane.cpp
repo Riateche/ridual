@@ -378,9 +378,9 @@ void Pane::completion_directory_ready(File_info_list files) {
   uri_completion_model.clear();
   foreach(File_info fi, files) {
     if (fi.is_folder) {
-      QString filename = fi.file_name();
+      QString filename = fi.name.isEmpty() ? fi.file_name() : fi.name;
       QStandardItem* item = new QStandardItem(filename);
-      item->setData(uri + filename, Qt::UserRole);
+      item->setData(uri + fi.file_name(), Qt::UserRole);
       uri_completion_model.appendRow(item);
     }
   }
@@ -458,13 +458,16 @@ void Pane::on_address_textEdited(const QString&) {
   if (last_completion_uri == uri) {
     qDebug() << "keep old completion_directory";
   } else {
-    qDebug() << "create new completion_directory";
-    last_completion_uri = uri;
+    delete completion_directory;
+    completion_directory = 0;
     uri_completion_model.clear();
-    if (completion_directory) delete completion_directory;
-    completion_directory = new Directory(core, uri);
-    connect(completion_directory, SIGNAL(ready(File_info_list)), this, SLOT(completion_directory_ready(File_info_list)));
-    completion_directory->refresh();
+    if (!uri.startsWith(Special_uri(Special_uri::places).uri())) {
+      qDebug() << "create new completion_directory";
+      last_completion_uri = uri;
+      completion_directory = new Directory(core, uri);
+      connect(completion_directory, SIGNAL(ready(File_info_list)), this, SLOT(completion_directory_ready(File_info_list)));
+      completion_directory->refresh();
+    }
   }
 }
 
