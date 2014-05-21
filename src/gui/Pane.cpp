@@ -332,7 +332,7 @@ void Pane::directory_ready(File_info_list files) {
                               QItemSelectionModel::NoUpdate);
   }
 
-  //ui->list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+  ui->list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
   emit selection_changed();
   //ui->list->horizontalHeader()->restoreState(header_state);
 }
@@ -473,7 +473,6 @@ void Pane::on_address_textEdited(const QString&) {
 
 void Pane::vertical_scroll_bar_moved() {
   ui->list->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-
 }
 
 

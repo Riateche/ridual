@@ -1,8 +1,16 @@
 
 - bugs:
-  - none
+  - if cursor is not at selection item, ignore selection
+  - single mouse click shouldn't select clicked item, only set cursor position
+  - left/right buttons should set cursor to other columns
+  - space causes toggling selection incorrectly if only one cell is selected instead of the whole row
+  - merge folder while copying: strange error messages
+  - hotkeys on non-english encoding in address field
+  - unchecking path button should not be possible
 
 - top priority:
+  - folder context menu: open in system FM, open in terminal
+  - access to current directory's context menu
   - open in other program typed by user
   - ask question "delete incomplete file?" after interrupting a task or skipping a file
   - auto answering system
@@ -14,13 +22,14 @@
       * new tasks in the future
     - if the rule is enabled for new tasks, warning should be displayed
       at main window until this rule is removed (like "task will be placed in queue")
+    - If some files was skipped or overwritten without propmt, the message about this must
+    appear after the task is completed
   - select destination after copying; select created folder; etc.
   - F2 - rename
   - sound on messages
-  - If some files was skipped or overwritten without propmt, the message about this must
-  appear after the task is completed
   - display tasks waiting in queue
   - button to hide a warning
+  - show/hide hidden files
 
 - important:
   - display free space on current volume
@@ -32,6 +41,11 @@
   - navigation history; hotkeys; quick search in history
   - back/forward
   - unmount, eject, safely remove
+  - drag and drop
+    - from ridual to other programs or itself
+    - to pane
+    - to folder in pane
+    - url to address field
 
 - bonuses:
   - clipboard - copy real file paths, copy URIs

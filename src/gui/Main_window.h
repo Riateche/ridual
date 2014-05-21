@@ -104,11 +104,8 @@ private:
   Action_data get_auto_target_and_destination(Action_type::Enum action_type);
   void copy_or_cut_files_to_clipboard(bool cut);
 
-
   void init_hotkeys();
   QString get_free_file_name(QString prefix);
-
-
 
 private slots:
   void on_action_hotkeys_triggered();
