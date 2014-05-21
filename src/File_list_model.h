@@ -9,6 +9,7 @@
 #include <QCache>
 #include "Core_ally.h"
 #include <QSettings>
+#include "types.h"
 
 typedef QPair<File_info, QVariant> Sorting_pair;
 
@@ -39,6 +40,7 @@ public:
   QVariant data(const QModelIndex &index, int role) const;
   Qt::ItemFlags flags(const QModelIndex &index) const;
   QModelIndex index_for_uri(QString uri);
+  bool setData(const QModelIndex &index, const QVariant &value, int role);
 
   File_info get_file_info(const QModelIndex &index);
 
@@ -56,7 +58,7 @@ public:
   inline int get_sort_column() { return sort_column; }
   inline Qt::SortOrder get_sort_order() { return sort_order; }
 
-  inline Columns get_current_columns() { return current_columns; } //for testing
+  inline Columns get_current_columns() { return current_columns; }
 
 public slots:
   void set_columns(const Columns& new_columns);
@@ -82,6 +84,8 @@ private:
   void emit_row_changed(int row);
   inline void resort() { sort(sort_column, sort_order); }
 
+signals:
+  void action_requested(Action_data action_data);
 
 };
 

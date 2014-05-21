@@ -1,3 +1,8 @@
+- rename:
+  - rename using fields other that file_name
+  - prevent opening item when ending file name editing with Enter
+  - select file name or base name in open editor (configurable)
+
 
 - bugs:
   - if cursor is not at selection item, ignore selection

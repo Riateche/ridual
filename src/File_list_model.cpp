@@ -86,7 +86,7 @@ QVariant File_list_model::data(const QModelIndex &index, int role) const {
     }
   }
 
-  if (role == Qt::DisplayRole || role == sort_role) {
+  if (role == Qt::DisplayRole || role == Qt::EditRole || role == sort_role) {
     switch (current_columns[column]) {
       case Column::file_name: {
         return file_info.file_name();
@@ -197,9 +197,13 @@ Qt::ItemFlags File_list_model::flags(const QModelIndex &index) const {
   if (list.isEmpty() && index.row() == 0) {
     return 0; //not selectable, not enabled, not editable
   }
-  if (index.row() < 0 || index.row() >= list.count()) return 0;
-  return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-
+  if (index.row() < 0 || index.row() >= list.count() ||
+      index.column() < 0 || index.column() >= current_columns.count()) { return 0; }
+  Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+  if (current_columns[index.column()] == Column::file_name) {
+    flags |= Qt::ItemIsEditable;
+  }
+  return flags;
 }
 
 QModelIndex File_list_model::index_for_uri(QString uri) {
@@ -208,6 +212,21 @@ QModelIndex File_list_model::index_for_uri(QString uri) {
     if (list[i].uri == uri) return index(i, 0);
   }
   return QModelIndex();
+}
+
+bool File_list_model::setData(const QModelIndex &index, const QVariant &value, int role) {
+  if (index.row() < 0 || index.row() >= list.count() ||
+      index.column() < 0 || index.column() >= current_columns.count()) { return false; }
+  Column::Enum column = current_columns[index.column()];
+  if (column != Column::file_name) { return false; }
+  if (value.toString().isEmpty()) { return false; }
+  Action_data action_data;
+  action_data.type = Action_type::move;
+  action_data.targets << list[index.row()];
+  action_data.destination = Directory::get_parent_uri(action_data.targets[0].uri) + "/" + value.toString();
+  action_data.destination_includes_filename = true;
+  emit action_requested(action_data);
+  return true;
 }
 
 File_info File_list_model::get_file_info(const QModelIndex &index) {

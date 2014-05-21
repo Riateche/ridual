@@ -135,8 +135,11 @@
      <x>0</x>
      <y>0</y>
      <width>623</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>false</bool>
    </property>
    <widget class="QMenu" name="menu_file">
     <property name="title">
@@ -309,10 +312,13 @@
   </action>
   <action name="action_rename">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Rename</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
    </property>
   </action>
   <action name="action_remove">

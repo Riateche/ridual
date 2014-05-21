@@ -605,6 +605,7 @@ void Main_window::init_hotkeys() {
   hotkeys.add("edit",           ui->action_edit);
   hotkeys.add("copy",           ui->action_copy);
   hotkeys.add("move",           ui->action_move);
+  hotkeys.add("rename",         ui->action_rename);
   hotkeys.add("remove",         ui->action_remove);
   hotkeys.add("move_to_trash",  ui->action_move_to_trash);
   hotkeys.add("create_folder",  ui->action_create_folder);
@@ -760,4 +761,8 @@ void Main_window::process_error(QProcess::ProcessError error) {
   } else {
     show_message(tr("Unknown process error."), Icon::error);
   }
+}
+
+void Main_window::on_action_rename_triggered() {
+  active_pane->start_renaming();
 }

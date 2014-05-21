@@ -55,6 +55,8 @@ public:
   //! Set focus to this pane's file list.
   void setFocus();
 
+  void start_renaming();
+
 signals:
   void uri_changed();
   void selection_changed();

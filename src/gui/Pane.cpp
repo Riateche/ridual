@@ -22,6 +22,8 @@ Pane::Pane(QWidget *parent) :
 {
 
   file_list_model = new File_list_model(core);
+  connect(file_list_model, SIGNAL(action_requested(Action_data)),
+          core->get_main_window(), SLOT(create_action(Action_data)));
   directory = 0;
   pending_directory = 0;
   completion_directory = 0;
@@ -228,6 +230,19 @@ File_info_list Pane::get_all_files() {
 
 void Pane::setFocus() {
   ui->list->setFocus();
+}
+
+void Pane::start_renaming() {
+  int row = ui->list->currentIndex().row();
+  if (row < 0) { return; }
+  Columns columns = file_list_model->get_current_columns();
+  for(int column = 0; column < columns.count(); column++) {
+    if (columns[column] == Column::file_name) {
+      ui->list->edit(file_list_model->index(row, column));
+      break;
+    }
+  }
+  //todo: allow editing of columns: basename, full_path, uri (and maybe others)
 }
 
 void Pane::go_parent() {

@@ -56,18 +56,6 @@ public:
 
   void set_current_queue(Action_queue *queue);
 
-  /*! Create new action based on passed data. Several values in data are replaced
-    accordingly to current application state:
-    - recursive_fetch_option
-    - targets
-    - destination
-    This fields should not be filled before calling this function.
-
-    Created task is placed in the current queue (new queue is created if necessary).
-    The action might be launched before or after this function is finished,
-    depending on current queue state.
-    */
-  void create_action(Action_data data);
 
   Recursive_fetch_option get_recursive_fetch_option();
 
@@ -154,11 +142,21 @@ private slots:
   void on_action_edit_new_file_triggered();
   void process_error(QProcess::ProcessError error);
 
+  void on_action_rename_triggered();
+
 public slots:
   void open_current();
   void switch_active_pane();
   void show_message(QString message, Icon::Enum icon);
   void show_error(QString message);
+
+  /*! Create new action based on passed data.
+
+    Created task is placed in the current queue (new queue is created if necessary).
+    The action might be launched before or after this function is finished,
+    depending on current queue state.
+    */
+  void create_action(Action_data data);
 
 signals:
   void active_pane_changed();
