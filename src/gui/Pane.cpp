@@ -113,7 +113,7 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
     if (event->type() == QEvent::KeyPress) {
       QKeyEvent* key_event = dynamic_cast<QKeyEvent*>(event);
       Q_ASSERT(key_event != 0);
-      if (key_event->key() == Qt::Key_Left && key_event->modifiers() == Qt::NoModifier) {
+      /*if (key_event->key() == Qt::Key_Left && key_event->modifiers() == Qt::NoModifier) {
         ui->list->horizontalScrollBar()->setValue(ui->list->horizontalScrollBar()->value() -
                                                   ui->list->horizontalScrollBar()->singleStep());
         return true;
@@ -122,7 +122,7 @@ bool Pane::eventFilter(QObject *object, QEvent *event) {
         ui->list->horizontalScrollBar()->setValue(ui->list->horizontalScrollBar()->value() +
                                                   ui->list->horizontalScrollBar()->singleStep());
         return true;
-      }
+      }*/
       if (!key_event) return false;
       if (nav_keys.contains(key_event->key()) && key_event->modifiers() == Qt::NoModifier) {
         key_event->setModifiers(Qt::ControlModifier);

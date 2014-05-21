@@ -7,13 +7,13 @@
 - bugs:
   - if cursor is not at selection item, ignore selection
   - single mouse click shouldn't select clicked item, only set cursor position
-  - left/right buttons should set cursor to other columns
   - space causes toggling selection incorrectly if only one cell is selected instead of the whole row
   - merge folder while copying: strange error messages
   - hotkeys on non-english encoding in address field
   - unchecking path button should not be possible
 
 - top priority:
+  - hide/show hidden files (also in path buttons context menu)
   - folder context menu: open in system FM, open in terminal
   - access to current directory's context menu
   - open in other program typed by user
@@ -30,11 +30,9 @@
     - If some files was skipped or overwritten without propmt, the message about this must
     appear after the task is completed
   - select destination after copying; select created folder; etc.
-  - F2 - rename
-  - sound on messages
+  - sound and window attention on messages
   - display tasks waiting in queue
   - button to hide a warning
-  - show/hide hidden files
 
 - important:
   - display free space on current volume
